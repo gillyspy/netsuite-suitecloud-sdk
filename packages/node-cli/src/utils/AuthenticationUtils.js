@@ -7,7 +7,7 @@
 const FileUtils = require('./FileUtils');
 const NodeTranslationService = require('../services/NodeTranslationService');
 const { ERRORS, UTILS } = require('../services/TranslationKeys');
-const { FILES } = require('../ApplicationConstants');
+const { FILES, COMMAND_AUTHENTICATE_CI_REUSE } = require('../ApplicationConstants');
 const { ActionResult } = require('../services/actionresult/ActionResult');
 const AuthenticateActionResult = require('../services/actionresult/AuthenticateActionResult');
 const { executeWithSpinner } = require('../ui/CliSpinner');
@@ -33,7 +33,7 @@ const COMMANDS = {
 		},
 		MODES: {
 			OAUTH: 'OAUTH',
-			REUSE: 'REUSE',
+			REUSE: COMMAND_AUTHENTICATE_CI_REUSE,
 			CLIENT_CREDENTIALS: 'CLIENT_CREDENTIALS'
 		},
 	},
@@ -175,6 +175,25 @@ async function authenticateCi(params, sdkPath, projectFolder, executionEnvironme
 		.build();
 }
 
+async function selectAuthenticationCI(authId, sdkPath, projectFolder) {
+	//Validate authId exists into the CI file
+	const authIDActionResult = await getAuthIds(sdkPath);
+	if (!authIDActionResult.isSuccess()) {
+		throw authIDActionResult.errorMessages;
+	}
+	const authIDs = Object.keys(authIDActionResult.data);
+
+	if (authIDs.includes(authId)) {
+		setDefaultAuthentication(projectFolder, authId);
+		return AuthenticateActionResult.Builder.success()
+			.withMode(COMMANDS.AUTHENTICATE.MODES.REUSE)
+			.withAuthId(authId)
+			.build();
+	} else {
+		throw NodeTranslationService.getMessage(ERRORS.NOT_EXISTING_AUTH_ID, authId);
+	}
+}
+
 /**
  * 
  * @param {String} authid 
@@ -214,4 +233,4 @@ async function refreshAuthorization(authid, sdkPath, executionEnvironmentContext
 	return new SdkOperationResult(result);
 }
 
-module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, checkIfReauthorizationIsNeeded, refreshAuthorization };
+module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, selectAuthenticationCI, checkIfReauthorizationIsNeeded, refreshAuthorization};

@@ -5,11 +5,13 @@
 'use strict';
 
 const BaseAction = require('../../base/BaseAction');
-const { authenticateCi } = require('../../../utils/AuthenticationUtils');
+const { authenticateCi, selectAuthenticationCI } = require('../../../utils/AuthenticationUtils');
 const { DOMAIN: { PRODUCTION: { GENERIC_NETSUITE_DOMAIN } } } = require('../../../ApplicationConstants');
 const ProjectInfoService = require('../../../services/ProjectInfoService');
 const { validateMachineToMachineAuthIsAllowed } = require('../../../services/ExecutionContextService');
+const AccountSetupCiValidation = require('./AccountSetupCiValidation');
 
+const SELECT_PARAM = 'select';
 const COMMAND = {
 	OPTIONS: {
 		ACCOUNT: 'account',
@@ -23,7 +25,7 @@ const COMMAND = {
 };
 
 module.exports = class AccountSetupCiAction extends BaseAction {
-	
+
 	constructor(options) {
 		super(options);
 		this._projectInfoService = new ProjectInfoService(this._projectFolder);
@@ -31,10 +33,14 @@ module.exports = class AccountSetupCiAction extends BaseAction {
 
 	preExecute(params) {
 		this._projectInfoService.checkWorkingDirectoryContainsValidProject(this._commandMetadata.name);
-		
+
 		if (params[COMMAND.OPTIONS.ACCOUNT]) {
 			params[COMMAND.OPTIONS.ACCOUNT] = params[COMMAND.OPTIONS.ACCOUNT].toUpperCase();
 		}
+
+		const validator = new AccountSetupCiValidation(this._commandMetadata, this._runInInteractiveMode);
+		validator.validateAuthID(params[COMMAND.OPTIONS.AUTHID]);
+		validator.validateActionParametersByMode(params);
 		return params;
 	}
 
@@ -43,6 +49,15 @@ module.exports = class AccountSetupCiAction extends BaseAction {
 			delete params[COMMAND.OPTIONS.DOMAIN];
 		}
 		validateMachineToMachineAuthIsAllowed();
-		return await authenticateCi(params, this._sdkPath, this._executionPath, this._executionEnvironmentContext);
+		if (this._isDefaultMode(params)) {
+			return await authenticateCi(params, this._sdkPath, this._executionPath, this._executionEnvironmentContext);
+		} else {
+			return await selectAuthenticationCI(params[COMMAND.OPTIONS.AUTHID], this._sdkPath, this._projectFolder);
+		}
 	}
-};
+
+	_isDefaultMode(params) {
+		return (params[SELECT_PARAM] === null || params[SELECT_PARAM] === undefined);
+	}
+}
+
