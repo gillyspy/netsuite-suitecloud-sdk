@@ -6,7 +6,11 @@
 
 const FileUtils = require('./FileUtils');
 const NodeTranslationService = require('../services/NodeTranslationService');
-const { ERRORS, UTILS } = require('../services/TranslationKeys');
+const {
+	ERRORS,
+	UTILS,
+	COMMAND_SETUPACCOUNTCI: { ERRORS: { NOT_EXISTING_AUTH_ID } },
+} = require('../services/TranslationKeys');
 const { FILES, COMMAND_AUTHENTICATE_CI_REUSE } = require('../ApplicationConstants');
 const { ActionResult } = require('../services/actionresult/ActionResult');
 const AuthenticateActionResult = require('../services/actionresult/AuthenticateActionResult');
@@ -33,7 +37,7 @@ const COMMANDS = {
 		},
 		MODES: {
 			OAUTH: 'OAUTH',
-			REUSE: COMMAND_AUTHENTICATE_CI_REUSE,
+			REUSE: 'REUSE',
 			CLIENT_CREDENTIALS: 'CLIENT_CREDENTIALS'
 		},
 	},
@@ -190,7 +194,7 @@ async function selectAuthenticationCI(authId, sdkPath, projectFolder) {
 			.withAuthId(authId)
 			.build();
 	} else {
-		throw NodeTranslationService.getMessage(ERRORS.NOT_EXISTING_AUTH_ID, authId);
+		throw NodeTranslationService.getMessage(NOT_EXISTING_AUTH_ID, authId);
 	}
 }
 

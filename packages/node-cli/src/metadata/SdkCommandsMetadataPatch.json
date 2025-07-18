@@ -33,6 +33,28 @@
 			},
 			"url": {
 				"disableInIntegrationMode": true
+			},
+			"account": {
+				"mandatory": false
+			},
+			"authid": {
+				"mandatory": false
+			},
+			"certificateid": {
+				"mandatory": false
+			},
+			"privatekeypath": {
+				"mandatory": false
+			},
+			"select": {
+				"name": "select",
+				"option": "select",
+				"description": "Updates the default authid using --authid parameter. Usage --select --authid <authId>",
+				"mandatory": false,
+				"type": "SINGLE",
+				"usage": "",
+				"defaultOption": false,
+				"disableInIntegrationMode": false
 			}
 		}
 	},

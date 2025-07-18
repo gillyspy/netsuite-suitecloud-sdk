@@ -6,58 +6,55 @@
 
 const BaseAction = require('../../base/BaseAction');
 const { authenticateCi, selectAuthenticationCI } = require('../../../utils/AuthenticationUtils');
-const { DOMAIN: { PRODUCTION: { GENERIC_NETSUITE_DOMAIN } } } = require('../../../ApplicationConstants');
+const {
+	DOMAIN: { PRODUCTION: { GENERIC_NETSUITE_DOMAIN } },
+	ACCOUNT_SETUP_CI: { COMMAND: { OPTIONS } },
+} = require('../../../ApplicationConstants');
 const ProjectInfoService = require('../../../services/ProjectInfoService');
 const { validateMachineToMachineAuthIsAllowed } = require('../../../services/ExecutionContextService');
 const AccountSetupCiValidation = require('./AccountSetupCiValidation');
 
-const SELECT_PARAM = 'select';
-const COMMAND = {
-	OPTIONS: {
-		ACCOUNT: 'account',
-		AUTHID: 'authid',
-		CERTIFCATEID: 'certificateid',
-		PRIVATEKEYPATH: 'privatekeypath',
-		DOMAIN: 'domain'
 
-	},
-	SDK_COMMAND: 'authenticateci',
-};
 
 module.exports = class AccountSetupCiAction extends BaseAction {
 
 	constructor(options) {
 		super(options);
 		this._projectInfoService = new ProjectInfoService(this._projectFolder);
+		this._validator = new AccountSetupCiValidation(this._commandMetadata, this._runInInteractiveMode);
 	}
 
 	preExecute(params) {
 		this._projectInfoService.checkWorkingDirectoryContainsValidProject(this._commandMetadata.name);
 
-		if (params[COMMAND.OPTIONS.ACCOUNT]) {
-			params[COMMAND.OPTIONS.ACCOUNT] = params[COMMAND.OPTIONS.ACCOUNT].toUpperCase();
+		if (params[OPTIONS.ACCOUNT]) {
+			params[OPTIONS.ACCOUNT] = params[OPTIONS.ACCOUNT].toUpperCase();
 		}
 
-		const validator = new AccountSetupCiValidation(this._commandMetadata, this._runInInteractiveMode);
-		validator.validateAuthID(params[COMMAND.OPTIONS.AUTHID]);
-		validator.validateActionParametersByMode(params);
 		return params;
 	}
 
 	async execute(params) {
-		if (params[COMMAND.OPTIONS.DOMAIN] === GENERIC_NETSUITE_DOMAIN) {
-			delete params[COMMAND.OPTIONS.DOMAIN];
+		if (params[OPTIONS.DOMAIN] === GENERIC_NETSUITE_DOMAIN) {
+			delete params[OPTIONS.DOMAIN];
 		}
+
 		validateMachineToMachineAuthIsAllowed();
-		if (this._isDefaultMode(params)) {
+		this._validator.validateActionParametersByMode(params);
+		this._validator.validateAuthID(this._getAuthId(params));
+
+		if (this._isSetupMode(params)) {
 			return await authenticateCi(params, this._sdkPath, this._executionPath, this._executionEnvironmentContext);
 		} else {
-			return await selectAuthenticationCI(params[COMMAND.OPTIONS.AUTHID], this._sdkPath, this._projectFolder);
+			return await selectAuthenticationCI(this._getAuthId(params), this._sdkPath, this._projectFolder);
 		}
 	}
 
-	_isDefaultMode(params) {
-		return (params[SELECT_PARAM] === null || params[SELECT_PARAM] === undefined);
+	_isSetupMode(params) {
+		return (!params[OPTIONS.SELECT]);
+	}
+
+	_getAuthId(params) {
+		return this._isSetupMode(params) ? params[OPTIONS.AUTHID] : params[OPTIONS.SELECT];
 	}
 }
-
