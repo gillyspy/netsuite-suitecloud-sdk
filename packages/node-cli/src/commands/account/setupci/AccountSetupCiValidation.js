@@ -22,7 +22,7 @@ class AccountSetupCiValidation {
 		this._runInInteractiveMode = runInInteractiveMode;
 	}
 
-	validateAuthID(authId) {
+	validateAuthIDFormat(authId) {
 		const validateResult = showValidationResults(
 			authId,
 			validateFieldIsNotEmpty,
@@ -54,15 +54,18 @@ class AccountSetupCiValidation {
 	}
 	_validateActionParametersSetupMode(params) {
 		const validationErrors = [];
-		//all the params are set as not mandatory in the configuration since the setup mode account:setup:ci mode configuration it is shared with the account:setup:ci  --select mode
-		//where these parameters are not used. The validation of the mandatory setup mode parameters is done here instead of being done in an automatic way by the library
+		//All the parameters are set as non-mandatory in the configuration because the setup mode [account:setup:ci] mode
+		//is shared with the [account:setup:ci] select mode where these parameters are not used.
+		//The validation of the mandatory setup mode parameters is done here instead of being done here, instead
+		//of being handled automatically by the library
 		for (const optionId in this._getOptions()) {
-			if (OPTIONAL_IN_SETUP_MODE.includes(optionId) || optionId === OPTIONS.SELECT || this._getOptions()[optionId].disableInIntegrationMode) {
+			//Exclude optional parameters from the validation, select should not be included either.
+			if (OPTIONAL_IN_SETUP_MODE.includes(optionId) ||  optionId === OPTIONS.SELECT || this._getOptions()[optionId].disableInIntegrationMode) {
 				continue;
 			}
 
-			const aliasId = this._getOptions()[optionId].alias;
-			if (this._getOptions().hasOwnProperty(optionId) && (!this._isOptionPresent(optionId, aliasId, params))) {
+			//Validate all the (mandatory) parameters are present
+			if (this._getOptions().hasOwnProperty(optionId) && (!this._isOptionPresent(optionId, params))) {
 				validationErrors.push(NodeTranslationService.getMessage(ERRORS.IS_MANDATORY_SETUP_MODE, this._getOptions()[optionId].name));
 			}
 		}
@@ -72,21 +75,23 @@ class AccountSetupCiValidation {
 	_validateActionParametersSelectMode(params) {
 
 		const validationErrors = [];
-		//Other parameters which are not select and auth_id are not allowed
+		//Loop through all [account:setup:ci] parameters except select. If any of them are present, show the message
+		//<param> is not allowed in setup mode. Any other parameter will show the generic unknown option message.
 		for (const optionId in this._getOptions()) {
-			const aliasId = this._getOptions()[optionId].alias;
+			if (optionId === OPTIONS.SELECT) continue;
+
 			if (this._getOptions().hasOwnProperty(optionId) &&
-				optionId !== OPTIONS.SELECT &&
-				this._isOptionPresent(optionId, aliasId, params)) {
-				validationErrors.push(NodeTranslationService.getMessage(ERRORS.IS_NOT_ALLOWED_SELECT_MODE, this._getOptions()[optionId].name))
+				//the parameter is present in the current command line
+				this._isOptionPresent(optionId, params)) {
+				validationErrors.push(NodeTranslationService.getMessage(ERRORS.IS_NOT_ALLOWED_SELECT_MODE, this._getOptions()[optionId].name));
 			}
 		}
 		return validationErrors;
 	}
 
 
-	_isOptionPresent(optionId, aliasId, args) {
-		return args[optionId] || args[aliasId];
+	_isOptionPresent(optionId, args) {
+		return args[optionId];
 	}
 
 	_getOptions() {

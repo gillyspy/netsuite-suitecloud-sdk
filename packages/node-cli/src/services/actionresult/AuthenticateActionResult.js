@@ -5,7 +5,7 @@
 'use strict';
 const assert = require('assert');
 const { ActionResult, ActionResultBuilder, STATUS } = require('./ActionResult');
-const { ACCOUNT_SETUP_CI: { ACTION_RESULT: { MODES: { REUSE } } } } = require('../../ApplicationConstants');
+
 class AuthenticateActionResult extends ActionResult {
 	constructor(parameters) {
 		super(parameters);
@@ -20,9 +20,7 @@ class AuthenticateActionResult extends ActionResult {
 		if (parameters.status === STATUS.SUCCESS) {
 			assert(parameters.mode, 'mode is required when ActionResult is a success.');
 			assert(parameters.authId, 'authId is required when ActionResult is a success.');
-			if (parameters.mode !== REUSE) {
-				assert(parameters.accountInfo, 'accountInfo is required when ActionResult is a success.');
-			}
+			assert(parameters.accountInfo, 'accountInfo is required when ActionResult is a success.');
 		} else {
 			assert(parameters.errorMessages, 'errorMessages is required when ActionResult is an error.');
 			assert(Array.isArray(parameters.errorMessages), 'errorMessages argument must be an array');

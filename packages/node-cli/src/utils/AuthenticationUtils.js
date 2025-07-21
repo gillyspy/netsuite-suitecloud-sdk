@@ -11,7 +11,7 @@ const {
 	UTILS,
 	COMMAND_SETUPACCOUNTCI: { ERRORS: { NOT_EXISTING_AUTH_ID } },
 } = require('../services/TranslationKeys');
-const { FILES, COMMAND_AUTHENTICATE_CI_REUSE } = require('../ApplicationConstants');
+const { FILES} = require('../ApplicationConstants');
 const { ActionResult } = require('../services/actionresult/ActionResult');
 const AuthenticateActionResult = require('../services/actionresult/AuthenticateActionResult');
 const { executeWithSpinner } = require('../ui/CliSpinner');
@@ -192,6 +192,7 @@ async function selectAuthenticationCI(authId, sdkPath, projectFolder) {
 		return AuthenticateActionResult.Builder.success()
 			.withMode(COMMANDS.AUTHENTICATE.MODES.REUSE)
 			.withAuthId(authId)
+			.withAccountInfo(authIDActionResult.data[authId].accountInfo)
 			.build();
 	} else {
 		throw NodeTranslationService.getMessage(NOT_EXISTING_AUTH_ID, authId);

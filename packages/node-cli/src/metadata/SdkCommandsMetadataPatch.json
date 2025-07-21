@@ -49,7 +49,7 @@
 			"select": {
 				"name": "select",
 				"option": "select",
-				"description": "Updates the default authid using --authid parameter. Usage --select --authid <authId>",
+				"description": "Selects the default auth ID for the SuiteCloud project. Usage --select <authId>",
 				"mandatory": false,
 				"type": "SINGLE",
 				"usage": "",
