@@ -6,15 +6,11 @@
 
 const BaseAction = require('../../base/BaseAction');
 const { authenticateCi, selectAuthenticationCI } = require('../../../utils/AuthenticationUtils');
-const {
-	DOMAIN: { PRODUCTION: { GENERIC_NETSUITE_DOMAIN } },
-	ACCOUNT_SETUP_CI: { COMMAND: { OPTIONS } },
-} = require('../../../ApplicationConstants');
+const { DOMAIN: { PRODUCTION: { GENERIC_NETSUITE_DOMAIN } } } = require('../../../ApplicationConstants');
+const { ACCOUNT_SETUP_CI: { COMMAND: { OPTIONS } } } = require('./AccountSetupCiConstants');
 const ProjectInfoService = require('../../../services/ProjectInfoService');
 const { validateMachineToMachineAuthIsAllowed } = require('../../../services/ExecutionContextService');
 const AccountSetupCiValidation = require('./AccountSetupCiValidation');
-
-
 
 module.exports = class AccountSetupCiAction extends BaseAction {
 

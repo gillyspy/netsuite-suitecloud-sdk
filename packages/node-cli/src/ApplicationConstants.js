@@ -68,23 +68,5 @@ module.exports = {
 		SUITECLOUD_CI: 'SUITECLOUD_CI',
 		SUITECLOUD_CI_PASSKEY: 'SUITECLOUD_CI_PASSKEY',
 		SUITECLOUD_FALLBACK_PASSKEY: 'SUITECLOUD_FALLBACK_PASSKEY'
-	},
-
-	ACCOUNT_SETUP_CI: {
-		COMMAND: {
-			OPTIONS: {
-				ACCOUNT: 'account',
-				AUTHID: 'authid',
-				CERTIFCATEID: 'certificateid',
-				PRIVATEKEYPATH: 'privatekeypath',
-				DOMAIN: 'domain',
-				SELECT: 'select',
-			},
-			SDK_COMMAND: 'authenticateci',
-			OPTIONAL_IN_SETUP_MODE: ['domain'],
-		},
-		ACTION_RESULT: {
-			MODES: { REUSE: 'REUSE' },
-		},
-	},
+	}
 };
