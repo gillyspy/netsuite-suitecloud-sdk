@@ -15,8 +15,7 @@ module.exports = {
 				SELECT: 'select'
 			},
 			SDK_COMMAND: 'authenticateci',
-			MANDATORY_PARAMS_FOR_SETUP_MODE: ['account', 'authid', 'certificateid', 'privatekeypath'],
-			MANDATORY_FOR_SELECT_MODE: ['select'],
+			MANDATORY_PARAMS_FOR_SETUP_MODE: ['account', 'authid', 'certificateid', 'privatekeypath']
 		},
 		ACTION_RESULT: {
 			MODES: { SELECT: 'REUSE' },

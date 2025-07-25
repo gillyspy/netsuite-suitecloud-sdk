@@ -61,17 +61,14 @@ class AccountSetupCiValidation {
 	 * The validation of the mandatory setup mode parameters is done here, instead
 	 * of being handled automatically by the library
 	 * @param params
-	 * @returns {*[]}
+	 * @returns empty list if the validation is correct, otherwise it returns the list of errors with the missing mandatory
+	 * fields
 	 * @private
 	 */
 	_validateActionParametersSetupMode(params) {
-		const validationErrors = [];
-		const metadataOptions = this._commandMetadata.options;
-
-		MANDATORY_PARAMS_FOR_SETUP_MODE.filter(item => !params[item]).forEach((missingParam) =>
-			validationErrors.push(NodeTranslationService.getMessage(ERRORS.IS_MANDATORY_SETUP_MODE, metadataOptions[missingParam].name)));
-
-		return validationErrors;
+		return MANDATORY_PARAMS_FOR_SETUP_MODE
+			.filter(mandatoryOption => !params[mandatoryOption])
+			.map(missingParam => NodeTranslationService.getMessage(ERRORS.IS_MANDATORY_SETUP_MODE, missingParam));
 	}
 
 	/**
@@ -79,18 +76,14 @@ class AccountSetupCiValidation {
 	 * is shared with the [account:setup:ci] setup mode where these parameters are not used.
 	 * in select mode all the parameters except select are not allowed.
 	 * @param params
-	 * @returns {*[]}
+	 * @returns empty list if the validation is correct, otherwise it returns the list of not allowed parameters errors
 	 * @private
 	 */
 	_validateActionParametersSelectMode(params) {
-		const validationErrors = [];
-		const metadataOptions = this._commandMetadata.options;
-
-		Object.values(OPTIONS).filter(item => params[item] && item !== OPTIONS.SELECT).forEach((notAllowedParam) =>
-			validationErrors.push(NodeTranslationService.getMessage(ERRORS.IS_MANDATORY_SETUP_MODE, metadataOptions[notAllowedParam].name)));
-		return validationErrors;
+		return Object.keys(params)
+			.filter(paramKey => paramKey !== OPTIONS.SELECT)
+			.map(notAllowedParam => NodeTranslationService.getMessage(ERRORS.IS_NOT_ALLOWED_SELECT_MODE, notAllowedParam));
 	}
-
 
 	_isSetupMode(params) {
 		return (!params[OPTIONS.SELECT]);
