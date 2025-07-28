@@ -31,7 +31,7 @@ To read the 2025.1 NetSuite's release notes and documentation, check the followi
 
 
 ## Contributing
-This project is not accepting external contributions at this time. For bugs or enhancement requests, please file a GitHub issue unless it’s security related. When filing a bug remember that the better written the bug is, the more likely it is to be fixed. If you think you’ve found a security vulnerability, do not raise a GitHub issue and follow the instructions in our [security policy](./SECURITY.md).
+This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
 
 
 ## Security
@@ -39,7 +39,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 
 ## License
-Copyright (c) 2022, 2023, 2024, 2025 Oracle and/or its affiliates The Universal Permissive License (UPL), Version 1.0.
+Copyright (c) 2019, 2023 Oracle and/or its affiliates The Universal Permissive License (UPL), Version 1.0.
 
 By installing SuiteCloud CLI for Node.js, you are accepting the installation of the SuiteCloud SDK dependency under the [Oracle Free Use Terms and Conditions](https://www.oracle.com/downloads/licenses/oracle-free-license.html) license.
 
