@@ -9,7 +9,8 @@ const {
 	COMMAND_SETUPACCOUNTCI: { OUTPUT: { SELECT_DEFAULT_ACCOUNT, NEW_OAUTH } },
 	UTILS,
 } = require('../../../services/TranslationKeys');
-const { ACCOUNT_SETUP_CI: { ACTION_RESULT: { MODES :{ SELECT} } } } = require('./AccountSetupCiConstants');
+
+const { COMMANDS: { AUTHENTICATE: { MODES: { REUSE } } } } = require('../../../utils/AuthenticationUtils');
 
 module.exports = class AccountSetupCiOutputHandler extends BaseOutputHandler {
 	constructor(options) {
@@ -18,7 +19,8 @@ module.exports = class AccountSetupCiOutputHandler extends BaseOutputHandler {
 
 	parse(actionResult) {
 
-		if (actionResult.mode === SELECT) {
+		//if (actionResult.mode === SELECT) {
+		if (actionResult.mode === REUSE) {
 			//SELECT mode
 			this._log.result(NodeTranslationService.getMessage(
 				SELECT_DEFAULT_ACCOUNT,

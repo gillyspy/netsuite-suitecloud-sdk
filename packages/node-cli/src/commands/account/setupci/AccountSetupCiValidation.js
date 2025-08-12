@@ -56,11 +56,11 @@ class AccountSetupCiValidation {
 	}
 
 	/**
-	 * All the parameters are set as non-mandatory in the configuration because the setup mode [account:setup:ci] mode
-	 * is shared with the [account:setup:ci] select mode where these parameters are not used.
-	 * The validation of the mandatory setup mode parameters is done here, instead
-	 * of being handled automatically by the library
-	 * @param params
+	 * Since account:setup:ci in standard setup mode and account:setup:ci --select are handled by the same default
+	 * parameter validations, all the parameters are configured as not mandatory.
+	 * The validation of the mandatory parameters for account:setup:ci standard setup mode is done here.
+	 * This method makes sure all the mandatory params for the standard mode are present
+	 * @param params input parameters
 	 * @returns empty list if the validation is correct, otherwise it returns the list of errors with the missing mandatory
 	 * fields
 	 * @private
@@ -72,11 +72,13 @@ class AccountSetupCiValidation {
 	}
 
 	/**
-	 * All the parameters are set as non-mandatory in the configuration because the select mode [account:setup:ci] mode
-	 * is shared with the [account:setup:ci] setup mode where these parameters are not used.
-	 * in select mode all the parameters except select are not allowed.
-	 * @param params
-	 * @returns empty list if the validation is correct, otherwise it returns the list of not allowed parameters errors
+	 * Since account:setup:ci in standard setup mode and account:setup:ci --select are handled by the same default
+	 * parameter validations, all the parameters are configured as not mandatory.
+	 * The validation of the not allowed parameters for account:setup:ci select mode is done here.
+	 * This method makes sure none the not allowed params for the setup mode is present
+	 * @param params input parameters
+	 * @returns empty list if the validation is correct, otherwise it returns the list of errors with the not allowed
+	 * fields
 	 * @private
 	 */
 	_validateActionParametersSelectMode(params) {

@@ -238,4 +238,4 @@ async function refreshAuthorization(authid, sdkPath, executionEnvironmentContext
 	return new SdkOperationResult(result);
 }
 
-module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, selectAuthenticationCI, checkIfReauthorizationIsNeeded, refreshAuthorization};
+module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, selectAuthenticationCI, checkIfReauthorizationIsNeeded, refreshAuthorization, COMMANDS};
