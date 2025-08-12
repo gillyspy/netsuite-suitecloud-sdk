@@ -19,7 +19,6 @@ module.exports = class AccountSetupCiOutputHandler extends BaseOutputHandler {
 
 	parse(actionResult) {
 
-		//if (actionResult.mode === SELECT) {
 		if (actionResult.mode === REUSE) {
 			//SELECT mode
 			this._log.result(NodeTranslationService.getMessage(
