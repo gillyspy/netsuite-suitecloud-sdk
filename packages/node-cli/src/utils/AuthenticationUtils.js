@@ -6,8 +6,12 @@
 
 const FileUtils = require('./FileUtils');
 const NodeTranslationService = require('../services/NodeTranslationService');
-const { ERRORS, UTILS } = require('../services/TranslationKeys');
-const { FILES } = require('../ApplicationConstants');
+const {
+	ERRORS,
+	UTILS,
+	COMMAND_SETUPACCOUNTCI: { ERRORS: { NOT_EXISTING_AUTH_ID } },
+} = require('../services/TranslationKeys');
+const { FILES} = require('../ApplicationConstants');
 const { ActionResult } = require('../services/actionresult/ActionResult');
 const AuthenticateActionResult = require('../services/actionresult/AuthenticateActionResult');
 const { executeWithSpinner } = require('../ui/CliSpinner');
@@ -175,6 +179,26 @@ async function authenticateCi(params, sdkPath, projectFolder, executionEnvironme
 		.build();
 }
 
+async function selectAuthenticationCI(authId, sdkPath, projectFolder) {
+	//Validate authId exists into the CI file
+	const authIDActionResult = await getAuthIds(sdkPath);
+	if (!authIDActionResult.isSuccess()) {
+		throw authIDActionResult.errorMessages;
+	}
+	const authIDs = Object.keys(authIDActionResult.data);
+
+	if (authIDs.includes(authId)) {
+		setDefaultAuthentication(projectFolder, authId);
+		return AuthenticateActionResult.Builder.success()
+			.withMode(COMMANDS.AUTHENTICATE.MODES.REUSE)
+			.withAuthId(authId)
+			.withAccountInfo(authIDActionResult.data[authId].accountInfo)
+			.build();
+	} else {
+		throw NodeTranslationService.getMessage(NOT_EXISTING_AUTH_ID, authId);
+	}
+}
+
 /**
  * 
  * @param {String} authid 
@@ -214,4 +238,4 @@ async function refreshAuthorization(authid, sdkPath, executionEnvironmentContext
 	return new SdkOperationResult(result);
 }
 
-module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, checkIfReauthorizationIsNeeded, refreshAuthorization };
+module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, selectAuthenticationCI, checkIfReauthorizationIsNeeded, refreshAuthorization, COMMANDS};
