@@ -66,6 +66,12 @@ const COMMANDS = {
 			AUTH_ID: 'authid',
 		}
 	},
+	FORCE_REFRESH_AUTHORIZATION: {
+		SDK_COMMAND: 'forcerefreshauthorization',
+		PARAMS: {
+			AUTH_ID: 'authid',
+		}
+	},
 };
 
 const FLAGS = {
@@ -238,4 +244,26 @@ async function refreshAuthorization(authid, sdkPath, executionEnvironmentContext
 	return new SdkOperationResult(result);
 }
 
-module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, selectAuthenticationCI, checkIfReauthorizationIsNeeded, refreshAuthorization, COMMANDS};
+/**
+ * 
+ * @param {String} authid 
+ * @param {String} sdkPath 
+ * @param {ExecutionEnvironmentContext} executionEnvironmentContext 
+ * @returns {SdkOperationResult} with data that contains the refreshed accessToken
+ */
+async function forceRefreshAuthorization(authid, sdkPath, executionEnvironmentContext) {
+	const sdkExecutor = new SdkExecutor(sdkPath, executionEnvironmentContext);
+	const reauthorizeAuthContext = SdkExecutionContext.Builder
+		.forCommand(COMMANDS.FORCE_REFRESH_AUTHORIZATION.SDK_COMMAND)
+		.addParam(COMMANDS.FORCE_REFRESH_AUTHORIZATION.PARAMS.AUTH_ID, authid)
+		.integration()
+		.build();
+	const result = await executeWithSpinner({
+		action: sdkExecutor.execute(reauthorizeAuthContext),
+		message: NodeTranslationService.getMessage(UTILS.AUTHENTICATION.AUTHORIZING)
+	});
+	
+	return new SdkOperationResult(result);
+}
+
+module.exports = { setDefaultAuthentication, getProjectDefaultAuthId, getAuthIds, authenticateWithOauth, authenticateCi, selectAuthenticationCI, checkIfReauthorizationIsNeeded, refreshAuthorization, forceRefreshAuthorization, COMMANDS};
