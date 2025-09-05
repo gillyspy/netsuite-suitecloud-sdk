@@ -34,10 +34,11 @@ module.exports = class DevAssistProxyService extends EventEmitter {
 		this._proxy = http.createServer();
 		this._name = 'DevAssistProxyService'; //TODO move to parameter
 		this._proxyReq = undefined; //TODO see if I can assign later
+		this._accessToken =  undefined;
 	}
 
 	_buildOptions(hostName, accessToken, req) {
-		const authorization = 'Bearer ' + accessToken;
+		const authorization = 'Bearerr ' + accessToken;
 		const options = {
 			hostname: hostName,
 			port: 443,
@@ -79,13 +80,16 @@ module.exports = class DevAssistProxyService extends EventEmitter {
 		}
 
 		let { accessToken, hostName } = await this._retrieveAccessToken(authId);
+		this._accessToken = accessToken;
 
 		//TODO check a server is running or not
 
 
 		this._proxy.addListener('request', async (req, res) => {
 			console.log(`${req.method} ${req.url}`);
-			this._createProxyReq(authId, hostName, accessToken, req, res, 0);
+			//we need the newAccessToken
+			this._createProxyReq(authId, hostName, this._accessToken, req, res, 0);
+			console.log('After add listener');
 		});
 
 		this._proxy.listen(localPort, LOCAL_HOSTNAME, () => {
@@ -113,51 +117,40 @@ module.exports = class DevAssistProxyService extends EventEmitter {
 		}
 	}
 
-	_createProxyReq(authId, hostName, accessToken, req, res, numRetries) {
-		let options = this._buildOptions(hostName, accessToken, req);
-		let proxyReq = https.request(options, (proxyRes) => {
-			console.log(`Proxy response: ${proxyRes.statusCode}`);
+	_createProxyReq(authId, hostName, accessToken, clineRequest, clineResponse, numRetries) {
+		let options = this._buildOptions(hostName, accessToken, clineRequest);
+		const authenticatedRequest = https.request(options, async (serverResponse) => {
+			console.log(`Proxy response: ${serverResponse.statusCode}`);
 
-			if (proxyRes.statusCode === UNAUTHORIZED_RESPONSE) {
-				console.log(UNAUTHORIZED_RESPONSE);
+			if (serverResponse.statusCode === UNAUTHORIZED_RESPONSE && numRetries === 0) {
+				try {
+					const newAccessToken = await this._forceRefreshAuth(authId);
+					console.log('New auth token' + newAccessToken);
+					this._accessToken = newAccessToken;
+				//	clineRequest.unpipe();
+					authenticatedRequest.abort();
+					authenticatedRequest.destroy();
 
-				this._forceRefreshAuth(authId).then(newAccessToken => {
-					console.log(newAccessToken);
-
-					// Abort current proxy request streams
-					proxyReq.abort();
-					proxyRes.destroy();
-					//TODO Carol, newAccessToken has to be assigned so it would be used instead of token into the new iteration
-
-					setTimeout(() => {
-						console.log("forward");
-						return this._createProxyReq(authId, hostName, newAccessToken, req, res, numRetries + 1);
-					}, 5000);
-
-
-					},
-				).catch(err => {
-						//TODO throw event
-						console.log(err);
-						res.writeHead(proxyRes.statusCode || INTERNAL_SERVER_ERROR_RESPONSE, proxyRes.headers);
-						proxyRes.pipe(res, { end: true });
-					}
-				);
-			} else {
-				res.writeHead(proxyRes.statusCode || INTERNAL_SERVER_ERROR_RESPONSE, proxyRes.headers);
-				proxyRes.pipe(res, { end: true });
-			//	req.pipe(proxyReq, { end: true });
-			//	res.end('SuiteCloud Proxy error: ' + err.message);
-			}
+					return this._createProxyReq(authId, hostName, newAccessToken, clineRequest, clineResponse, 1);
+				} catch (err) {
+					clineResponse.writeHead(UNAUTHORIZED_RESPONSE, serverResponse.headers);
+					serverResponse.pipe(clineResponse, { end: true });
+					console.error(` error when running foreRefreshAuth: ${err}`);
+				}
+			} //end if
+			clineResponse.writeHead(serverResponse.statusCode || INTERNAL_SERVER_ERROR_RESPONSE, serverResponse.headers);
+			serverResponse.pipe(clineResponse, { end: true });
 		});
 
-		proxyReq.on('error', (err) => {
+		authenticatedRequest.on('error', (err) => {
 			console.error('Proxy request error:', err);
-			res.writeHead(INTERNAL_SERVER_ERROR_RESPONSE);
-			res.end('SuiteCloud Proxy error: ' + err.message);
+			clineResponse.writeHead(INTERNAL_SERVER_ERROR_RESPONSE);
+			clineResponse.end('SuiteCloud Proxy error: ' + err.message);
 		});
 
-		req.pipe(proxyReq, { end: true });
+		//if (numRetries === 0) {
+			clineRequest.pipe(authenticatedRequest, { end: true });
+		//}
 
 	}
 
