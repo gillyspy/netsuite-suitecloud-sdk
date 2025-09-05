@@ -5,7 +5,7 @@
 const DevAssistProxyService = require('./services/DevAssistProxyService');
 const authId = 'antonioauth';
 
-const sdkpath = 'C:\\Users\\Carol\\.suitecloud-sdk\\cli\\cli-2025.1.0.jar';
+const sdkpath = 'C:\\Users\\Carol\\.suitecloud-sdk\\cli\\cli-2025.1.0-SNAPSHOT.jar';
 const proxyService = new DevAssistProxyService(sdkpath);
 
 
