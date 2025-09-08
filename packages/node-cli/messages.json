@@ -289,6 +289,7 @@
 	"DEV_ASSIST_PROXY_SERVICE_ERROR_MISSING_PORT": "The required parameter 'Port' is missing.",
 	"DEV_ASSIST_PROXY_SERVICE_ERROR_PORT_MUST_BE_NUMBER" : "The parameter 'Port' must be a number",
 	"DEV_ASSIST_PROXY_SERVICE_NOT_EXISTING_AUTH_ID" : "AuthId {0} is not available",
+	"DEV_ASSIST_PROXY_SERVICE_NEED_TO_REAUTHENTICATE" : "Manual re-authentication is needed",
 
 	"UNIT_TEST_TEST_FAILED": "The tests failed.",
 	"UNIT_TEST_TEST_FAILURES_PRESENT": "There are some Test failures. The deployment will not continue.",
