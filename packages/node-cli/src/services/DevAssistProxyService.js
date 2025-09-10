@@ -240,6 +240,7 @@ class DevAssistProxyService extends EventEmitter {
 		this._targetHost = hostName;
 		this._accessToken = accessToken;
 
+		await this.stop();
 		this._localProxy = http.createServer();
 
 		this._localProxy.addListener('request', async (req, res) => {
@@ -263,7 +264,6 @@ class DevAssistProxyService extends EventEmitter {
 		this._localProxy.listen(proxyPort, LOCAL_HOSTNAME, () => {
 			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
 			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
-			console.log(`Set Cline Base URL to: ${localURL}/api/internal/devassist`);
 		});
 	}
 
