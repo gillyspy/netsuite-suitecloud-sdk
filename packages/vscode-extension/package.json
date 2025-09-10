@@ -105,6 +105,11 @@
 				"command": "suitecloud.validate",
 				"title": "Validate Project",
 				"category": "SuiteCloud"
+			},
+			{
+				"command": "suitecloud.triggerreauthorization",
+				"title": "Trigger reauthorization - TODO: Remove this command",
+				"category": "SuiteCloud"
 			}
 		],
 		"keybindings": [
@@ -184,6 +189,29 @@
 					"group": "suitecloud@1"
 				}
 			]
+		},
+		"configuration": {
+			"title": "SuiteCloud",
+			"properties": {
+				"suitecloud.devAssist.authID": {
+					"order": 0,
+					"type": "string",
+					"default": "antonio-vm-mstrwlf-dev",
+					"markdownDescription": "Controls account credentials to be used by dev assist. Use exact account auth ID name from SuiteCloud extension configuration. Run `SuiteCloud: Set Up Account` to create new, or `SuiteCloud: Manage Accounts` to see and manage existing."
+				},
+				"suitecloud.devAssist.proxyPort": {
+					"order":1,
+					"type": "number",
+					"default": 8181,
+					"description": "Controls the port local proxy server will be listening to (see above). Leave empty to auto-detect."
+				},
+				"suitecloud.devAssist.enable": {
+					"order": 2,
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Controls local proxy server that enables SuiteCloud dev assist in Cline. Once [Cline extension](link/to/cline) is installed and enabled the following changes need to be made to its settings:\n* `API Provider` set to `OpenAI Compatible`\n* `Base URL` set to `http://127.0.0.1:[ProxyPort]/api/internal/devassist`\n\n[Read documentation](link/to/documentation)"
+				}
+			}
 		}
 	},
 	"scripts": {
