@@ -56,7 +56,7 @@ export interface DevAssistProxyService extends EventEmitter {
 interface DevAssistProxyServiceConstructor {
 	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContext): DevAssistProxyService;
 }
-export const DevAssistProxyService: DevAssistProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/DevAssistProxyService');
+export const  DevAssistProxyService: DevAssistProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/DevAssistProxyService').DevAssistProxyService;
 
 export const AccountCredentialsFormatter: {
 	getInfoString(accountCredentials: any): string;
