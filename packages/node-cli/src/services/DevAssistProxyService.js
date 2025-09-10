@@ -94,7 +94,7 @@ class DevAssistProxyService extends EventEmitter {
 	/**
 	 * This method refreshes authorization.
 	 * If successful returns true and updates this._accessToken
-	 * If not successful returns false an emits an event.
+	 * If not successful returns false and emits an event.
 	 * It returns an object with the results of the operation. See _buildResponseUpdateAccessToken method.
 	 * @returns {Promise<*>}
 	 * @private
