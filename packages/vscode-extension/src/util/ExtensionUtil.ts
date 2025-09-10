@@ -2,10 +2,18 @@
  ** Copyright (c) 2024 Oracle and/or its affiliates.  All rights reserved.
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
+import { EventEmitter } from 'node:stream';
 import { ActionResult, AuthListData } from '../types/ActionResult';
 
 export const ApplicationConstants = require('@oracle/suitecloud-cli/src/ApplicationConstants');
-export const ExecutionEnvironmentContext = require('@oracle/suitecloud-cli/src/ExecutionEnvironmentContext');
+interface ExecutionEnvironmentContext {
+	getPlatform(): string;
+	getPlatformVersion(): string;
+}
+interface ExecutionEnvironmentContextConstructor {
+	new(params?: { platform?: string, platformVersion?: string }): ExecutionEnvironmentContext;
+}
+export const ExecutionEnvironmentContext: ExecutionEnvironmentContextConstructor = require('@oracle/suitecloud-cli/src/ExecutionEnvironmentContext');
 export const SUITESCRIPT_TYPES: { id: string; name: string }[] = require('@oracle/suitecloud-cli/src/metadata/SuiteScriptTypesMetadata');
 export const SUITESCRIPT_MODULES: { id: string }[] = require('@oracle/suitecloud-cli/src/metadata/SuiteScriptModulesMetadata');
 
@@ -31,16 +39,25 @@ export const FileCabinetService = require('@oracle/suitecloud-cli/src/services/F
 export const FileSystemService = require('@oracle/suitecloud-cli/src/services/FileSystemService');
 export const ProjectInfoService = require('@oracle/suitecloud-cli/src/services/ProjectInfoService');
 export const TranslationService = require('@oracle/suitecloud-cli/src/services/TranslationService');
-export const ExecutionContextService :{
-	validateBrowserBasedAuthIsAllowed():void;
+export const ExecutionContextService: {
+	validateBrowserBasedAuthIsAllowed(): void;
 	validateMachineToMachineAuthIsAllowed(): void;
-	getBrowserBasedWarningMessages() : string | void;
+	getBrowserBasedWarningMessages(): string | void;
 } = require('@oracle/suitecloud-cli/src/services/ExecutionContextService');
 export const AuthenticationUtils: {
 	[key: string]: any;
 	getProjectDefaultAuthId(projectFolder?: string): string;
 	getAuthIds(sdkPath: string): Promise<ActionResult<AuthListData>>;
 } = require('@oracle/suitecloud-cli/src/utils/AuthenticationUtils');
+export interface DevAssistProxyService extends EventEmitter {
+	start(authId: string, localProxyPort: number): Promise<void>;
+	stop(): Promise<void>;
+}
+interface DevAssistProxyServiceConstructor {
+	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContext): DevAssistProxyService;
+}
+export const DevAssistProxyService: DevAssistProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/DevAssistProxyService');
+
 export const AccountCredentialsFormatter: {
 	getInfoString(accountCredentials: any): string;
 } = require('@oracle/suitecloud-cli/src/utils/AccountCredentialsFormatter');

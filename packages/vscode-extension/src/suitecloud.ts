@@ -28,6 +28,7 @@ import { VSTranslationService } from './service/VSTranslationService';
 import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
 import { FILES } from './ApplicationConstants';
 import { createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
+import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
 export const output: vscode.OutputChannel = vscode.window.createOutputChannel(SCLOUD_OUTPUT_CHANNEL_NAME);
@@ -78,10 +79,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		register('suitecloud.validate', new Validate())
 	);
 
+	const devAssitProxy = await startDevAssistProxyIfEnabled();
+
+	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.triggerreauthorization', () => devAssitProxy.emit('reauthorize', 'antonio-vm-mstrwlf-dev')))
+
 	// add watchers needed to update the status bars
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor((textEditor) => updateStatusBars(textEditor, suitecloudProjectStatusBar, authIDStatusBar)),
-		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar))
+		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar)),
+		vscode.workspace.onDidChangeConfiguration(devAssistConfigurationChangeHandler)
 	);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -90,4 +96,4 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when SuiteCloud extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
