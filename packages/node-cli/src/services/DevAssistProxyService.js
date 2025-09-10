@@ -9,7 +9,10 @@ const https = require('node:https');
 const EventEmitter = require('events');
 
 /** Events */
-const AUTH_REFRESH_MANUAL_EVENT = 'authRefreshManual';
+const EVENTS = {
+	SERVER_ERROR: 'serverError',
+	AUTH_REFRESH_MANUAL_EVENT : 'authRefreshManual'
+}
 
 /** Authentication methods */
 const {
@@ -34,9 +37,12 @@ const LOCAL_HOSTNAME = '127.0.0.1';
 const TARGET_SERVER_PORT = 443;
 
 /** Http codes */
-const UNAUTHORIZED_RESPONSE = 401;
-const FORBIDDEN_RESPONSE = 403;
-const INTERNAL_SERVER_ERROR_RESPONSE = 500;
+const HTTP_RESPONSE_CODE = {
+	UNAUTHORIZED: 401,
+	FORBIDDEN: 403,
+	INTERNAL_SERVER_ERROR: 500,
+	SERVICE_UNAVAILABLE: 503
+}
 
 class DevAssistProxyService extends EventEmitter {
 	constructor(sdkPath, executionEnvironmentContext) {
@@ -72,35 +78,55 @@ class DevAssistProxyService extends EventEmitter {
 	}
 
 	/**
+	 * Record which returns the results of _updateAccessToken
+	 * @type {*}
+	 */
+	_buildResponseUpdateAccessToken(opSuccessful, emitEvent, emitObjectMessage, errorMsg, httpStatusCode, authId) {
+		//boolean (true|false) whether the token has been refresh or has been any problem
+		if (opSuccessful) {
+			return Object.freeze({ opSuccessful });
+		} else {
+			const emitObject = { message: emitObjectMessage, authId: authId };
+			return Object.freeze({ opSuccessful, emitEvent, emitObject, errorMsg, httpStatusCode });
+		}
+	}
+
+	/**
 	 * This method refreshes authorization.
 	 * If successful returns true and updates this._accessToken
-	 * If not successful returns false an emits an event
+	 * If not successful returns false an emits an event.
+	 * It returns an object with the results of the operation. See _buildResponseUpdateAccessToken method.
 	 * @returns {Promise<*>}
 	 * @private
 	 */
-	async _forceRefreshAuth() {
-		let inspectAuthOperationResult = await checkIfReauthorizationIsNeeded(this._authId, this._sdkPath, this._executionEnvironmentContext);
+	//enum
+	async _updateAccessToken() {
+		const inspectAuthOperationResult = await checkIfReauthorizationIsNeeded(this._authId, this._sdkPath, this._executionEnvironmentContext);
+		//Not being able to execute the reauth if needed, can be vpn disconnected, network problems...
 		if (!inspectAuthOperationResult.isSuccess()) {
-			//check throw inspectAuthOperationResult.errorMessages;
-			//TODO send special message The remote server returned an error:\n\n\nReceived fatal alert: internal_error; when not being able to connect, for instance vpn disconnected
-			//Also not being able to connect to cli
-			return false;
+			const msg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.SERVER_COMMUNICATION_ERROR);
+			return this._buildResponseUpdateAccessToken(false, EVENTS.SERVER_ERROR, msg,
+				msg, HTTP_RESPONSE_CODE.FORBIDDEN, this._authId);
 		}
-		let inspectAuthData = inspectAuthOperationResult.data;
+		//Needs manual reauthorization
+		const inspectAuthData = inspectAuthOperationResult.data;
 		if (inspectAuthData[AUTHORIZATION_PROPERTIES_KEYS.NEEDS_REAUTHORIZATION]) {
 			//Emit event needs manual reauthorization
-			return false;
+			const msg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
+			return this._buildResponseUpdateAccessToken(false, EVENTS.AUTH_REFRESH_MANUAL_EVENT, msg,
+				msg, HTTP_RESPONSE_CODE.FORBIDDEN, this._authId);
 		}
 		//force refresh
-		let result = await forceRefreshAuthorization(this._authId, this._sdkPath, this._executionEnvironmentContext);
+		const result = await forceRefreshAuthorization(this._authId, this._sdkPath, this._executionEnvironmentContext);
 		if (result.status === 'ERROR') {
-			//Even problem when refresh authorization
-			//emit event for manual reauthorization
-			return false;
+			//Refresh unsuccessful
+			const msg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
+			return this._buildResponseUpdateAccessToken(false, EVENTS.AUTH_REFRESH_MANUAL_EVENT, msg,
+				msg, HTTP_RESPONSE_CODE.FORBIDDEN, this._authId);
 		} else {
-			//Update refresh token
+			//Updated refresh token successful
 			this._accessToken = result.data.accessToken;
-			return true;
+			return this._buildResponseUpdateAccessToken(true);
 		}
 	}
 
@@ -123,17 +149,11 @@ class DevAssistProxyService extends EventEmitter {
 
 		// Add agent for insecure connections when connecting to runboxes
 		if (this._targetHost && this._targetHost.includes('vm.eng')) {
-			console.log('Disabling reject unauthorized');
 			options.agent = new https.Agent({
 				rejectUnauthorized: false,
 			});
 			options.rejectUnauthorized = false;
 		}
-
-		console.log('Target: ' + options.hostname);
-		console.log('Path: ' + options.path);
-		console.log('Authorization: ' + (options.headers?.authorization?.substring(0, 20) + '...'));
-
 		return options;
 	}
 
@@ -161,6 +181,37 @@ class DevAssistProxyService extends EventEmitter {
 		res.end(JSON.stringify(message));
 	}
 
+	async _createProxyReq(options, body, res, attempts) {
+		const proxy = https.request(options, async (proxyRes) => {
+			console.log(`Proxy response ${attempts}: ${proxyRes.statusCode}`);
+			if (proxyRes.statusCode === HTTP_RESPONSE_CODE.UNAUTHORIZED && attempts <= MAX_RETRY_ATTEMPTS) {
+				proxyRes.resume();
+				const updateAccessTokenResponse = await this._updateAccessToken();
+				if (updateAccessTokenResponse.opSuccessful) {
+					this._updateOptionsAccessToken(options);
+					const proxyReq = await this._createProxyReq(options, body, res, attempts + 1);
+					proxyReq.write(body);
+					proxyReq.end();
+					return proxyReq;
+				} else {
+					this.emit(updateAccessTokenResponse.emitEvent, updateAccessTokenResponse.emitObject);
+					this._writeResponseMessage(res, updateAccessTokenResponse.httpStatusCode, updateAccessTokenResponse.errorMsg);
+					proxyRes.pipe(res, { end: true });
+					return;
+				}
+			}
+
+			res.writeHead(proxyRes.statusCode || HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR, proxyRes.headers);
+			proxyRes.pipe(res, { end: true });
+		});
+		proxy.on('error', (err) => {
+			console.error('Proxy request error:', err);
+			res.writeHead(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
+			res.end('SuiteCloud Proxy error: ' + err.message);
+		});
+		return proxy;
+	}
+
 	/**
 	 * starts the listener.
 	 * It can return an error, for instance when it cannot connect to the auth server or the parameters being incorrect
@@ -173,9 +224,8 @@ class DevAssistProxyService extends EventEmitter {
 		//Parameters validation
 		if (!authId) {
 			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
-		} else {
-			this._authId = authId;
 		}
+		this._authId = authId;
 
 		if (!proxyPort) {
 			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
@@ -186,18 +236,15 @@ class DevAssistProxyService extends EventEmitter {
 		}
 
 		//Retrieve from authId accessToken and target host
-		let { accessToken, hostName } = await this._retrieveCredentials();
+		const { accessToken, hostName } = await this._retrieveCredentials();
 		this._targetHost = hostName;
 		this._accessToken = accessToken;
 
 		this._localProxy = http.createServer();
 
-
 		this._localProxy.addListener('request', async (req, res) => {
-			console.log(`${req.method} ${req.url}`);
 
-			let options = this._buildOptions(req);
-			const self = this;
+			const options = this._buildOptions(req);
 
 			//Save body
 			const bodyChunks = [];
@@ -205,16 +252,9 @@ class DevAssistProxyService extends EventEmitter {
 				bodyChunks.push(chunk);
 			});
 
-			req.on('end', async function() {
+			req.on('end', async () => {
 				const body = Buffer.concat(bodyChunks);
-				const proxyReq = await self._createProxyReq(options, body, res, 0);
-
-				proxyReq.on('error', function(err) {
-					console.error('Proxy request error:', err);
-					res.writeHead(INTERNAL_SERVER_ERROR_RESPONSE);
-					res.end('SuiteCloud Proxy error: ' + err.message);
-				});
-
+				const proxyReq = await this._createProxyReq(options, body, res, 0);
 				proxyReq.write(body);
 				proxyReq.end();
 			});
@@ -224,40 +264,6 @@ class DevAssistProxyService extends EventEmitter {
 			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
 			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
 			console.log(`Set Cline Base URL to: ${localURL}/api/internal/devassist`);
-			console.log('SuiteCloud Proxy running.');
-			console.log(`Configure Cline Base URL to: ${localURL}/api/internal/devassist`);
-			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
-			console.log(`SuiteCloud Proxy is using the ${authId} authID`);
-			console.log(`Configure Cline Base URL to: ${localURL}/api/internal/devassist`);
-		});
-	}
-
-	async _createProxyReq(options, body, res, attempts) {
-		return https.request(options, async (proxyRes) => {
-			console.log(`Proxy response ${attempts}: ${proxyRes.statusCode}`);
-			if (proxyRes.statusCode === UNAUTHORIZED_RESPONSE && attempts <= MAX_RETRY_ATTEMPTS) {
-				proxyRes.resume();
-				let authSuccess = await this._forceRefreshAuth();
-				if (authSuccess) {
-					this._updateOptionsAccessToken(options);
-					let clientRequest = await this._createProxyReq(options, body, res, attempts + 1);
-					clientRequest.write(body);
-					clientRequest.end();
-					return clientRequest;
-				} else {
-					let needsToReauthenticateMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
-					this.emit(AUTH_REFRESH_MANUAL_EVENT, {
-						message: needsToReauthenticateMsg,
-						'authId': this._authId,
-					});
-					this._writeResponseMessage(res, FORBIDDEN_RESPONSE,needsToReauthenticateMsg);
-					proxyRes.pipe(res, { end: true });
-					return;
-				}
-			}
-
-			res.writeHead(proxyRes.statusCode || INTERNAL_SERVER_ERROR_RESPONSE, proxyRes.headers);
-			proxyRes.pipe(res, { end: true });
 		});
 	}
 
@@ -273,6 +279,11 @@ class DevAssistProxyService extends EventEmitter {
 			console.log('No server instance to stop.');
 		}
 	}
+
+	async reloadAccessToken() {
+		const { accessToken} = await this._retrieveCredentials();
+		this._accessToken = accessToken;
+	}
 }
 
-module.exports = { DevAssistProxyService, AUTH_REFRESH_MANUAL_EVENT };
+module.exports = { DevAssistProxyService, EVENTS };
