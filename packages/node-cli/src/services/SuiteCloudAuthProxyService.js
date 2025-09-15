@@ -44,7 +44,7 @@ const HTTP_RESPONSE_CODE = {
 	SERVICE_UNAVAILABLE: 503
 }
 
-class DevAssistProxyService extends EventEmitter {
+class SuiteCloudAuthProxyService extends EventEmitter {
 	constructor(sdkPath, executionEnvironmentContext) {
 		super();
 		this._sdkPath = sdkPath;
@@ -55,8 +55,6 @@ class DevAssistProxyService extends EventEmitter {
 		this._targetHost = undefined;
 		this._authId = undefined;
 	}
-
-
 
 	/**
 	 * starts the listener.
@@ -288,4 +286,4 @@ class DevAssistProxyService extends EventEmitter {
 	}
 }
 
-module.exports = { DevAssistProxyService, EVENTS };
+module.exports = { DevAssistProxyService: SuiteCloudAuthProxyService, EVENTS };
