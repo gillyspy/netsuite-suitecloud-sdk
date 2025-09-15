@@ -160,7 +160,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 * @type {*}
 	 */
 	_buildResponseUpdateAccessToken(opSuccessful, emitEvent, emitObjectMessage, errorMsg, httpStatusCode, authId) {
-		//boolean (true|false) whether the token has been refresh or has been any problem
+		//boolean (true|false) whether the token has been refreshed or there has been any problem
 		if (opSuccessful) {
 			return Object.freeze({ opSuccessful });
 		} else {
@@ -291,4 +291,4 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	}
 }
 
-module.exports = { DevAssistProxyService: SuiteCloudAuthProxyService, EVENTS };
+module.exports = { SuiteCloudAuthProxyService: SuiteCloudAuthProxyService, EVENTS };
