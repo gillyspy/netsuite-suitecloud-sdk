@@ -124,6 +124,10 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		}
 	}
 
+	/**
+	 * For being used after manual authentication. It refreshes the access token from credentials.
+	 * @returns {Promise<void>}
+	 */
 	async reloadAccessToken() {
 		const { accessToken} = await this._retrieveCredentials();
 		this._accessToken = accessToken;
