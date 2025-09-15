@@ -56,6 +56,81 @@ class DevAssistProxyService extends EventEmitter {
 		this._authId = undefined;
 	}
 
+
+
+	/**
+	 * starts the listener.
+	 * It can return an error, for instance when it cannot connect to the auth server or the parameters being incorrect
+	 * @param authId
+	 * @param proxyPort
+	 * @returns {Promise<void>}
+	 */
+	async start(authId, proxyPort) {
+
+		//Parameters validation
+		if (!authId) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
+		}
+		this._authId = authId;
+
+		if (!proxyPort) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
+		}
+
+		if (isNaN(proxyPort)) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
+		}
+
+		//Retrieve from authId accessToken and target host
+		const { accessToken, hostName } = await this._retrieveCredentials();
+		this._targetHost = hostName;
+		this._accessToken = accessToken;
+
+		await this.stop();
+		this._localProxy = http.createServer();
+
+		this._localProxy.addListener('request', async (req, res) => {
+
+			const options = this._buildOptions(req);
+
+			//Save body
+			const bodyChunks = [];
+			req.on('data', function(chunk) {
+				bodyChunks.push(chunk);
+			});
+
+			req.on('end', async () => {
+				const body = Buffer.concat(bodyChunks);
+				const proxyReq = await this._createProxyReq(options, body, res, 0);
+				proxyReq.write(body);
+				proxyReq.end();
+			});
+		});
+
+		this._localProxy.listen(proxyPort, LOCAL_HOSTNAME, () => {
+			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
+			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
+		});
+	}
+
+	/**
+	 * Stops server
+	 * @returns {Promise<void>}
+	 */
+	async stop() {
+		if (this._localProxy) {
+			this._localProxy.close(() => console.log('SuiteCloud Proxy server stopped.'));
+			this._localProxy = null;
+		} else {
+			console.log('No server instance to stop.');
+		}
+	}
+
+	async reloadAccessToken() {
+		const { accessToken} = await this._retrieveCredentials();
+		this._accessToken = accessToken;
+	}
+
 	/**
 	 * This method retrieves the credentials and returns the hostname and the accessToken
 	 * @returns {Promise<{hostName: string, accessToken: string}>}
@@ -210,79 +285,6 @@ class DevAssistProxyService extends EventEmitter {
 			res.end('SuiteCloud Proxy error: ' + err.message);
 		});
 		return proxy;
-	}
-
-	/**
-	 * starts the listener.
-	 * It can return an error, for instance when it cannot connect to the auth server or the parameters being incorrect
-	 * @param authId
-	 * @param proxyPort
-	 * @returns {Promise<void>}
-	 */
-	async start(authId, proxyPort) {
-
-		//Parameters validation
-		if (!authId) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
-		}
-		this._authId = authId;
-
-		if (!proxyPort) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
-		}
-
-		if (isNaN(proxyPort)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
-		}
-
-		//Retrieve from authId accessToken and target host
-		const { accessToken, hostName } = await this._retrieveCredentials();
-		this._targetHost = hostName;
-		this._accessToken = accessToken;
-
-		await this.stop();
-		this._localProxy = http.createServer();
-
-		this._localProxy.addListener('request', async (req, res) => {
-
-			const options = this._buildOptions(req);
-
-			//Save body
-			const bodyChunks = [];
-			req.on('data', function(chunk) {
-				bodyChunks.push(chunk);
-			});
-
-			req.on('end', async () => {
-				const body = Buffer.concat(bodyChunks);
-				const proxyReq = await this._createProxyReq(options, body, res, 0);
-				proxyReq.write(body);
-				proxyReq.end();
-			});
-		});
-
-		this._localProxy.listen(proxyPort, LOCAL_HOSTNAME, () => {
-			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
-			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
-		});
-	}
-
-	/**
-	 * Stops server
-	 * @returns {Promise<void>}
-	 */
-	async stop() {
-		if (this._localProxy) {
-			this._localProxy.close(() => console.log('SuiteCloud Proxy server stopped.'));
-			this._localProxy = null;
-		} else {
-			console.log('No server instance to stop.');
-		}
-	}
-
-	async reloadAccessToken() {
-		const { accessToken} = await this._retrieveCredentials();
-		this._accessToken = accessToken;
 	}
 }
 
