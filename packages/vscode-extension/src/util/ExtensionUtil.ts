@@ -49,14 +49,14 @@ export const AuthenticationUtils: {
 	getProjectDefaultAuthId(projectFolder?: string): string;
 	getAuthIds(sdkPath: string): Promise<ActionResult<AuthListData>>;
 } = require('@oracle/suitecloud-cli/src/utils/AuthenticationUtils');
-export interface DevAssistProxyService extends EventEmitter {
+export interface DevAssistProxyServiceInterface extends EventEmitter {
 	start(authId: string, localProxyPort: number): Promise<void>;
 	stop(): Promise<void>;
 }
 interface DevAssistProxyServiceConstructor {
-	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContext): DevAssistProxyService;
+	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContext): DevAssistProxyServiceInterface;
 }
-export const  DevAssistProxyService: DevAssistProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/DevAssistProxyService').DevAssistProxyService;
+export const  DevAssistProxyServiceClass: DevAssistProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/DevAssistProxyService').DevAssistProxyService;
 
 export const AccountCredentialsFormatter: {
 	getInfoString(accountCredentials: any): string;

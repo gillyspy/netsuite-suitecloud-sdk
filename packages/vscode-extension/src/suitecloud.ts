@@ -29,6 +29,8 @@ import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccou
 import { FILES } from './ApplicationConstants';
 import { createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
+import type { DevAssistProxyServiceInterface } from './util/ExtensionUtil';
+
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
 export const output: vscode.OutputChannel = vscode.window.createOutputChannel(SCLOUD_OUTPUT_CHANNEL_NAME);
@@ -50,9 +52,12 @@ let sdkDependenciesDownloadedAndValidated = false;
 // this method is called when SuiteCloud extension is activated
 // the extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-	installIfNeeded().then(() => {
+	// TODO remove before merging code
+	let devAssitProxy: DevAssistProxyServiceInterface;
+	installIfNeeded().then(async () => {
 		sdkDependenciesDownloadedAndValidated = true;
 		showSetupAccountWarningMessageIfNeeded();
+		devAssitProxy = await startDevAssistProxyIfEnabled()
 	});
 
 	// initialize status bars
@@ -78,8 +83,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		register('suitecloud.uploadfile', new UploadFile()),
 		register('suitecloud.validate', new Validate())
 	);
-
-	const devAssitProxy = await startDevAssistProxyIfEnabled();
 
 	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.triggerreauthorization', () => devAssitProxy.emit('reauthorize', 'antonio-vm-mstrwlf-dev')))
 

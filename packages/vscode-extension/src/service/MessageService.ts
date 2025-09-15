@@ -3,7 +3,7 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 
-import { window } from 'vscode';
+import { window, commands } from 'vscode';
 import { output } from '../suitecloud';
 import { BUTTONS, COMMAND } from './TranslationKeys';
 import { VSTranslationService } from './VSTranslationService';
@@ -49,7 +49,7 @@ export default class MessageService {
 	showWarningMessage(warningMessage: string, includeProjectName = true) {
 		window.showWarningMessage(
 			includeProjectName ? this.addProjectNameToMessage(warningMessage) : warningMessage
-			);
+		);
 	}
 
 	showWarningMessageWithOk(warningMessage: string, includeProjectName = true) {
@@ -110,9 +110,36 @@ export default class MessageService {
 			.then(this.showOutputIfClicked);
 	}
 
-	private showOutputIfClicked(message?: string) {
-		if (message) {
+	showDevAssistButtonMessage = 'See Details and open DevAsssist Settings';
+
+	showCommandErrorDevAssist(errorMessage?: string, includeProjectName: boolean = true) {
+		if (!this.vscodeCommandName) {
+			throw COMMAND_NOT_DEFINED;
+		}
+		const message = errorMessage ? errorMessage : this.translationService.getMessage(COMMAND.ERROR, this.vscodeCommandName);
+		window
+			.showErrorMessage(
+				includeProjectName ? this.addProjectNameToMessage(message) : message,
+				this.showDevAssistButtonMessage
+			)
+			.then(this.showOutputIfClicked);
+	}
+
+	private showOutputIfClicked = (message?: string) => {
+
+		if (message === this.translationService.getMessage(BUTTONS.SEE_DETAILS)) {
 			output.show();
 		}
+
+		if (message === this.showDevAssistButtonMessage) {
+			// show suitecloud output
+			output.show();
+			// open settings
+			commands.executeCommand(
+				'workbench.action.openSettings',
+				'@ext:Oracle.suitecloud-vscode-extension'
+			);
+		}
 	}
+
 }

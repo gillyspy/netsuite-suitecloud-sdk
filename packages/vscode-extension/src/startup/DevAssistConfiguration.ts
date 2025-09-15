@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
-// import SuiteCloudProxy from './SuiteCloudProxy';
 import { VSCODE_PLATFORM } from '../ApplicationConstants';
 import { getSdkPath } from '../core/sdksetup/SdkProperties';
 import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
 import { REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
 import { VSTranslationService } from '../service/VSTranslationService';
-import type { DevAssistProxyService as DevAssistProxyServiceType } from '../util/ExtensionUtil';
-import { AuthenticationUtils, DevAssistProxyService, ExecutionEnvironmentContext } from '../util/ExtensionUtil';
+import type { DevAssistProxyServiceInterface } from '../util/ExtensionUtil';
+import { AuthenticationUtils, DevAssistProxyServiceClass, ExecutionEnvironmentContext } from '../util/ExtensionUtil';
 
+// add breaklines to be able to differenciate logs in suitecloud output
+// if there is a problem when starting/restarting devassistproxy show a notificaiton with a button to see output and another that is open suiteclouud>devAssist settings
+// maybe what we want to do is to open suitecloud>devAssist settings
+// extra: add a status bar with current dev-assist-service status, clicking on it should bring the user to its setttings
+//      should be red color if there is a problem, blue if configuration is alright
 
 // CONSTANTS
 const defaultSettings = {
@@ -20,6 +24,13 @@ const defaultSettings = {
 const proxyServiceEvents = {
     reauthorize: 'authRefreshManual'
 }
+
+const proxyUrlParts = {
+    scheme: 'http://',
+    localhost: '127.0.0.1',
+    path: '/api/internal/devassist'
+}
+const getProxyUrl = (port: number) => `${proxyUrlParts.scheme}${proxyUrlParts.localhost}:${port}${proxyUrlParts.path}`
 
 // should be in sycn with vscode-extension package.json config properties
 const configKeys = {
@@ -34,54 +45,59 @@ const executionEnvironmentContext = new ExecutionEnvironmentContext({
     platformVersion: vscode.version,
 });
 
-let devAssistProxy: DevAssistProxyServiceType;
+let devAssistProxyService: DevAssistProxyServiceInterface;
 const vsLogger: VSConsoleLogger = new VSConsoleLogger();
-const messageService = new MessageService('DevAssistProxy');
+const vsNotificationService = new MessageService('DevAssistService');
 const translationService = new VSTranslationService();
 
 
 export const startDevAssistProxyIfEnabled = async () => {
-    const { devAssistAuthID, enableProxy, localPort } = getSettingsParams();
+    const devAssistConfig = getDevAssistConfig();
+    console.log('startDevAssistProxyIfEnabled', devAssistConfig);
 
-    if (enableProxy) {
+
+    if (devAssistConfig.enableProxy) {
         try {
-            initializeDevAssistProxy();
-            await devAssistProxy.start(devAssistAuthID, localPort);
-            vsLogger.info(`DevAssit service running. Using auhtID ${devAssistAuthID} and localPort ${localPort}.`)
+            initializeDevAssistService();
+            await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort);
         } catch (error) {
-            vsLogger.error(`There was a problem when starting the DevAssist service at startup.\n${error}`);
+            showStartDevAssistProblemNotification('startup', error as string, devAssistConfig);
         }
     } else {
-        if (devAssistProxy) {
+        if (devAssistProxyService) {
             // this shouldn't happen
             vsLogger.info("Stoping DevAssist proxy. This shouldn't happen.");
-            devAssistProxy.stop()
+            devAssistProxyService.stop()
         }
-        vsLogger.log('DevAssist service is not enabledß.')
+        vsLogger.log('DevAssist service is not enabled.')
     }
+    // add extra line to differenciate logs
+    vsLogger.info('');
 
     // just for testing purposes
-    return devAssistProxy;
+    return devAssistProxyService;
 }
 
-const initializeDevAssistProxy = () => {
-    const { devAssistAuthID, localPort } = getSettingsParams()
+const initializeDevAssistService = () => {
+    // const { authID: devAssistAuthID, localPort } = getSettingsParams()
+    const devAssistConfig = getDevAssistConfig()
 
     try {
-        devAssistProxy = new DevAssistProxyService(getSdkPath(), executionEnvironmentContext);
-        vsLogger.info(`DevAssist initialized using authID: ${devAssistAuthID} and port: ${localPort}`)
+        devAssistProxyService = new DevAssistProxyServiceClass(getSdkPath(), executionEnvironmentContext);
+        vsLogger.info(`DevAssist initialized using authID: ${devAssistConfig.authID} and port: ${devAssistConfig.localPort}`)
 
-        devAssistProxy.on(proxyServiceEvents.reauthorize, async (emitParams: { authId: string, message: string }) => {
-
-            const { devAssistAuthID, localPort } = getSettingsParams()
+        devAssistProxyService.on(proxyServiceEvents.reauthorize, async (emitParams: { authId: string, message: string }) => {
+            const devAssistConfigOnReauthorize = getDevAssistConfig();
             // TODO: not sure which authID we should use or if they could be different at all
-
             const refreshIsSuccessful = await refreshAuthorizationWithNotifications(emitParams.authId);
             // TODO: we could be using something like devAsssitProxy.reloadAccessToken() to avoid extra forceRefresh in next cline request
             if (refreshIsSuccessful) {
-                devAssistProxy.stop();
-                devAssistProxy.start(emitParams.authId, localPort);
-                 vsLogger.info(`DevAssist service started. Using authId: ${emitParams.authId}, localPort: ${localPort}`);
+                try {
+                    stopDevAssistService();
+                    await startDevAssistService(emitParams.authId, devAssistConfigOnReauthorize.localPort);
+                } catch (error) {
+                    showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistConfigOnReauthorize)
+                }
             }
         })
     } catch (error) {
@@ -91,14 +107,35 @@ const initializeDevAssistProxy = () => {
 
 };
 
-const getSettingsParams = (): { enableProxy: boolean, devAssistAuthID: string, localPort: number } => {
-    const devAssistConfig = vscode.workspace.getConfiguration(configKeys.devAssistSection);
+const startDevAssistService = async (devAssistAuthID: string, localPort: number) => {
+    await devAssistProxyService.start(devAssistAuthID, localPort);
+    const clineURLMessage = `Set Cline Base URL to: ${getProxyUrl(localPort)}`;
+    vsLogger.info(`DevAssist service is running.\n${clineURLMessage}`)
+    vsNotificationService.showCommandInfo(`DevAssist service running.\n${clineURLMessage}`);
+}
 
-    const enableProxy = devAssistConfig.get<boolean>(configKeys.enableProxy) || defaultSettings.enableProxy;
-    const devAssistAuthID = devAssistConfig.get<string>(configKeys.auhtID) || defaultSettings.authID;
-    const localPort = devAssistConfig.get<number>(configKeys.proxyPort) || defaultSettings.proxyPort;
+const stopDevAssistService = async () => {
+    await devAssistProxyService.stop();
+    const stopMessage = 'DevAssist service has been stoped.';
+    vsLogger.info(stopMessage)
+    vsNotificationService.showCommandInfo(stopMessage);
+}
 
-    return { enableProxy, devAssistAuthID, localPort }
+const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistConfig: devAssistConfig) => {
+    vsLogger.error(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`);
+    vsLogger.error(`Current DevAssist settings are: ${JSON.stringify({ devAssistConfig })}`);
+    vsNotificationService.showCommandErrorDevAssist('There was a problem when starting DevAssist service.');
+}
+
+type devAssistConfig = { enableProxy: boolean, authID: string, localPort: number };
+const getDevAssistConfig = (): devAssistConfig => {
+    const devAssistConfigSection = vscode.workspace.getConfiguration(configKeys.devAssistSection);
+
+    const enableProxy = devAssistConfigSection.get<boolean>(configKeys.enableProxy) || defaultSettings.enableProxy;
+    const authID = devAssistConfigSection.get<string>(configKeys.auhtID) || defaultSettings.authID;
+    const localPort = devAssistConfigSection.get<number>(configKeys.proxyPort) || defaultSettings.proxyPort;
+
+    return { enableProxy, authID, localPort }
 }
 
 // refresh authorization with notification popups 
@@ -107,7 +144,7 @@ const refreshAuthorizationWithNotifications = async (authID: string) => {
         platform: VSCODE_PLATFORM,
         platformVersion: vscode.version,
     });
-    messageService.showInformationMessage(
+    vsNotificationService.showInformationMessage(
         translationService.getMessage(
             REFRESH_AUTHORIZATION.CREDENTIALS_NEED_TO_BE_REFRESHED, authID
         )
@@ -123,10 +160,10 @@ const refreshAuthorizationWithNotifications = async (authID: string) => {
 
     if (!refreshAuthzOperationResult.isSuccess()) {
         // throw refreshAuthzOperationResult.errorMessages;
-        messageService.showCommandError(refreshAuthzOperationResult.errorMessages.join('\n'), false);
+        vsNotificationService.showCommandError(refreshAuthzOperationResult.errorMessages.join('\n'), false);
         return false;
     }
-    messageService.showInformationMessage(
+    vsNotificationService.showInformationMessage(
         translationService.getMessage(
             REFRESH_AUTHORIZATION.AUTHORIZATION_REFRESH_COMPLETED
         )
@@ -139,23 +176,26 @@ const refreshAuthorizationWithNotifications = async (authID: string) => {
 
 export const devAssistConfigurationChangeHandler = async (configurationChangeEvent: vscode.ConfigurationChangeEvent) => {
     if (configurationChangeEvent.affectsConfiguration(configKeys.devAssistSection)) {
-        const { devAssistAuthID, enableProxy, localPort } = getSettingsParams()
-        console.log('DevAssist Proxy enabled: ' + enableProxy);
-        if (enableProxy === true) {
-            if (devAssistProxy) {
-                devAssistProxy?.stop();
+        const devAssistConfig = getDevAssistConfig();
+        console.log('DevAssist Proxy enabled: ' + devAssistConfig.enableProxy);
+        console.log(devAssistConfig);
+
+        if (devAssistConfig.enableProxy === true) {
+            if (devAssistProxyService) {
+                await devAssistProxyService?.stop();
             } else {
-                initializeDevAssistProxy();
+                initializeDevAssistService();
             }
+
             try {
-                vsLogger.info(`About to start DevAssist service. Using authId: ${devAssistAuthID}, localPort: ${localPort}`);
-                await devAssistProxy.start(devAssistAuthID, localPort);
-                vsLogger.info(`DevAssist service started. Using authId: ${devAssistAuthID}, localPort: ${localPort}`);
+                await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort);
             } catch (error) {
-                vsLogger.error(`Problem starting DevAssist service.\n${error}`);
+                showStartDevAssistProblemNotification('settingsChange', error as string, devAssistConfig);
             }
         } else {
-            await devAssistProxy?.stop();
+            await stopDevAssistService();
         }
+        // add extra line to differenciate logs
+        vsLogger.info('');
     }
 };
