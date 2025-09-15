@@ -127,6 +127,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	async reloadAccessToken() {
 		const { accessToken} = await this._retrieveCredentials();
 		this._accessToken = accessToken;
+		console.log('access token refreshed');
 	}
 
 	/**
