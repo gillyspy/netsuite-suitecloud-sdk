@@ -137,7 +137,7 @@ export default class MessageService {
 			// open settings
 			commands.executeCommand(
 				'workbench.action.openSettings',
-				'@ext:Oracle.suitecloud-vscode-extension'
+				'@ext:oracle.suitecloud-vscode-extension'
 			);
 		}
 	}

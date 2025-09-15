@@ -196,7 +196,7 @@
 				"suitecloud.devAssist.authID": {
 					"order": 0,
 					"type": "string",
-					"default": "antonio-vm-mstrwlf-dev",
+					"default": "authid-to-be-used-by-devassist",
 					"markdownDescription": "Controls account credentials to be used by dev assist. Use exact account auth ID name from SuiteCloud extension configuration. Run `SuiteCloud: Set Up Account` to create new, or `SuiteCloud: Manage Accounts` to see and manage existing."
 				},
 				"suitecloud.devAssist.proxyPort": {

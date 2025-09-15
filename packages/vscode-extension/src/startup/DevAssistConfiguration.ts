@@ -18,7 +18,7 @@ import { AuthenticationUtils, DevAssistProxyServiceClass, ExecutionEnvironmentCo
 const defaultSettings = {
     enableProxy: false,
     proxyPort: 8181,
-    authID: 'runbox'
+    authID: 'authid-to-be-used-by-devassist'
 }
 
 const proxyServiceEvents = {
@@ -51,16 +51,16 @@ const vsNotificationService = new MessageService('DevAssistService');
 const translationService = new VSTranslationService();
 
 
-export const startDevAssistProxyIfEnabled = async () => {
+export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.StatusBarItem) => {
     const devAssistConfig = getDevAssistConfig();
     console.log('startDevAssistProxyIfEnabled', devAssistConfig);
 
     if (devAssistConfig.enableProxy) {
         try {
-            initializeDevAssistService();
-            await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort);
+            initializeDevAssistService(devAssistStatusBar);
+            await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort, devAssistStatusBar);
         } catch (error) {
-            showStartDevAssistProblemNotification('startup', error as string, devAssistConfig);
+            showStartDevAssistProblemNotification('startup', error as string, devAssistConfig, devAssistStatusBar);
         }
     } else {
         if (devAssistProxyService) {
@@ -78,7 +78,7 @@ export const startDevAssistProxyIfEnabled = async () => {
     return devAssistProxyService;
 }
 
-export const devAssistConfigurationChangeHandler = async (configurationChangeEvent: vscode.ConfigurationChangeEvent) => {
+export const devAssistConfigurationChangeHandler = async (configurationChangeEvent: vscode.ConfigurationChangeEvent, devAssistStatusBar: vscode.StatusBarItem) => {
     if (configurationChangeEvent.affectsConfiguration(configKeys.devAssistSection)) {
         const devAssistConfig = getDevAssistConfig();
         console.log('DevAssist Proxy enabled: ' + devAssistConfig.enableProxy);
@@ -88,16 +88,16 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
             if (devAssistProxyService) {
                 await devAssistProxyService?.stop();
             } else {
-                initializeDevAssistService();
+                initializeDevAssistService(devAssistStatusBar);
             }
 
             try {
-                await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort);
+                await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort, devAssistStatusBar);
             } catch (error) {
-                showStartDevAssistProblemNotification('settingsChange', error as string, devAssistConfig);
+                showStartDevAssistProblemNotification('settingsChange', error as string, devAssistConfig, devAssistStatusBar);
             }
         } else {
-            await stopDevAssistService();
+            await stopDevAssistService(devAssistStatusBar);
         }
         // add extra line to differenciate logs
         vsLogger.info('');
@@ -105,7 +105,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
 };
 
 
-const initializeDevAssistService = () => {
+const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
     const devAssistConfig = getDevAssistConfig()
 
     try {
@@ -120,10 +120,10 @@ const initializeDevAssistService = () => {
             // TODO: we could be using something like devAsssitProxy.reloadAccessToken() to avoid extra forceRefresh in next cline request
             if (refreshIsSuccessful) {
                 try {
-                    stopDevAssistService();
-                    await startDevAssistService(emitParams.authId, devAssistConfigOnReauthorize.localPort);
+                    stopDevAssistService(devAssistStatusBar);
+                    await startDevAssistService(emitParams.authId, devAssistConfigOnReauthorize.localPort, devAssistStatusBar);
                 } catch (error) {
-                    showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistConfigOnReauthorize)
+                    showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistConfigOnReauthorize, devAssistStatusBar)
                 }
             }
         })
@@ -132,27 +132,41 @@ const initializeDevAssistService = () => {
     }
 };
 
-const startDevAssistService = async (devAssistAuthID: string, localPort: number) => {
+const startDevAssistService = async (devAssistAuthID: string, localPort: number, devAssistStatusBar: vscode.StatusBarItem) => {
     await devAssistProxyService.start(devAssistAuthID, localPort);
-    
+
     const clineURLMessage = `Set Cline Base URL to: ${getProxyUrl(localPort)}`;
     const devAssistRunningAndClineURL = `DevAssist service is running.\n${clineURLMessage}`;
-    
+
+    devAssistStatusBar.text = `$(terminal-view-icon) DevAssist is running.`;
+    devAssistStatusBar.backgroundColor = undefined;
+    devAssistStatusBar.show();
+
     vsLogger.info(devAssistRunningAndClineURL)
     vsNotificationService.showCommandInfo(devAssistRunningAndClineURL);
 }
 
-const stopDevAssistService = async () => {
+const stopDevAssistService = async (devAssistStatusBar: vscode.StatusBarItem) => {
     await devAssistProxyService.stop();
+
+    devAssistStatusBar.text = `$(ports-stop-forward-icon) DevAssist is stopped.`;
+    devAssistStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground')
+    devAssistStatusBar.show();
+
     const stopMessage = 'DevAssist service has been stoped.';
     vsLogger.info(stopMessage)
     vsNotificationService.showCommandInfo(stopMessage);
 }
 
-const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistConfig: devAssistConfig) => {
+const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistConfig: devAssistConfig, devAssistStatusBar: vscode.StatusBarItem) => {
     vsLogger.error(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`);
     // for debugging purposes
-    vsLogger.error(`Current DevAssist settings are: ${JSON.stringify({ devAssistConfig })}`);
+    // vsLogger.error(`Current DevAssist settings are: ${JSON.stringify({ devAssistConfig })}`);
+
+    devAssistStatusBar.text = `$(ports-stop-forward-icon) DevAssist is stopped.`;
+    devAssistStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground')
+    devAssistStatusBar.show();
+
     vsNotificationService.showCommandErrorDevAssist('There was a problem when starting DevAssist service.');
 }
 

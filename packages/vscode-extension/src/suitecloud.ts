@@ -27,7 +27,7 @@ import { EXTENSION_INSTALLATION } from './service/TranslationKeys';
 import { VSTranslationService } from './service/VSTranslationService';
 import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
 import { FILES } from './ApplicationConstants';
-import { createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
+import { createDevAssistStatusBar, createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
 import type { DevAssistProxyServiceInterface } from './util/ExtensionUtil';
 
@@ -57,10 +57,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	installIfNeeded().then(async () => {
 		sdkDependenciesDownloadedAndValidated = true;
 		showSetupAccountWarningMessageIfNeeded();
-		devAssitProxy = await startDevAssistProxyIfEnabled()
+		devAssitProxy = await startDevAssistProxyIfEnabled(devAssistStatusBar)
 	});
 
 	// initialize status bars
+	const devAssistStatusBar = createDevAssistStatusBar();
 	const suitecloudProjectStatusBar = createSuiteCloudProjectStatusBar();
 	const authIDStatusBar = createAuthIDStatusBar();
 	updateStatusBars(vscode.window.activeTextEditor, suitecloudProjectStatusBar, authIDStatusBar);
@@ -90,7 +91,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor((textEditor) => updateStatusBars(textEditor, suitecloudProjectStatusBar, authIDStatusBar)),
 		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar)),
-		vscode.workspace.onDidChangeConfiguration(devAssistConfigurationChangeHandler)
+		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent,  devAssistStatusBar)))
 	);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
