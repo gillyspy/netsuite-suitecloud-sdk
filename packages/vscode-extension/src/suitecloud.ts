@@ -29,7 +29,7 @@ import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccou
 import { FILES } from './ApplicationConstants';
 import { createDevAssistStatusBar, createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
-import type { DevAssistProxyServiceInterface } from './util/ExtensionUtil';
+import type { SuiteCloudAuthProxyServiceInterface } from './util/ExtensionUtil';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
@@ -53,7 +53,7 @@ let sdkDependenciesDownloadedAndValidated = false;
 // the extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
 	// TODO remove before merging code
-	let devAssitProxy: DevAssistProxyServiceInterface;
+	let devAssitProxy: SuiteCloudAuthProxyServiceInterface;
 	installIfNeeded().then(async () => {
 		sdkDependenciesDownloadedAndValidated = true;
 		showSetupAccountWarningMessageIfNeeded();

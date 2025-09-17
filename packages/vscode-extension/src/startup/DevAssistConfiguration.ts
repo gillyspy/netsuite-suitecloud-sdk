@@ -5,14 +5,9 @@ import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
 import { REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
 import { VSTranslationService } from '../service/VSTranslationService';
-import type { DevAssistProxyServiceInterface } from '../util/ExtensionUtil';
-import { AuthenticationUtils, DevAssistProxyServiceClass, ExecutionEnvironmentContext } from '../util/ExtensionUtil';
+import type { SuiteCloudAuthProxyServiceInterface } from '../util/ExtensionUtil';
+import { AuthenticationUtils, SuiteCloudAuthProxyService, ExecutionEnvironmentContext } from '../util/ExtensionUtil';
 
-// add breaklines to be able to differenciate logs in suitecloud output
-// if there is a problem when starting/restarting devassistproxy show a notificaiton with a button to see output and another that is open suiteclouud>devAssist settings
-// maybe what we want to do is to open suitecloud>devAssist settings
-// extra: add a status bar with current dev-assist-service status, clicking on it should bring the user to its setttings
-//      should be red color if there is a problem, blue if configuration is alright
 
 // CONSTANTS
 const defaultSettings = {
@@ -45,7 +40,7 @@ const executionEnvironmentContext = new ExecutionEnvironmentContext({
     platformVersion: vscode.version,
 });
 
-let devAssistProxyService: DevAssistProxyServiceInterface;
+let devAssistProxyService: SuiteCloudAuthProxyServiceInterface;
 const vsLogger: VSConsoleLogger = new VSConsoleLogger();
 const vsNotificationService = new MessageService('DevAssistService');
 const translationService = new VSTranslationService();
@@ -109,7 +104,7 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     const devAssistConfig = getDevAssistConfig()
 
     try {
-        devAssistProxyService = new DevAssistProxyServiceClass(getSdkPath(), executionEnvironmentContext);
+        devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext);
         vsLogger.info(`DevAssist initialized using authID: ${devAssistConfig.authID} and port: ${devAssistConfig.localPort}`)
 
         // adding listener to trigger manual reauthentication from vscode
@@ -197,12 +192,15 @@ const refreshAuthorizationWithNotifications = async (authID: string) => {
         getSdkPath(),
         executionEnvironmentContext
     );
+
+    // TODO remove debbugging logs
     console.log('log from refreshAuthorization DevAssistConfiguration.', { refreshAuthzOperationResult });
     vsLogger.info('log from refreshAuthorization DevAssistConfiguration.')
     vsLogger.info(JSON.stringify(refreshAuthzOperationResult))
 
     if (!refreshAuthzOperationResult.isSuccess()) {
         // throw refreshAuthzOperationResult.errorMessages;
+        // vsLogger.error(refreshAuthzOperationResult.)
         vsNotificationService.showCommandError(refreshAuthzOperationResult.errorMessages.join('\n'), false);
         return false;
     }
