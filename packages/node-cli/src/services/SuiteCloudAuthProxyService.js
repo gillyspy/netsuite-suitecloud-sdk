@@ -44,7 +44,7 @@ const HTTP_RESPONSE_CODE = {
 	SERVICE_UNAVAILABLE: 503
 }
 
-class DevAssistProxyService extends EventEmitter {
+class SuiteCloudAuthProxyService extends EventEmitter {
 	constructor(sdkPath, executionEnvironmentContext) {
 		super();
 		this._sdkPath = sdkPath;
@@ -54,6 +54,84 @@ class DevAssistProxyService extends EventEmitter {
 		this._localProxy = undefined;
 		this._targetHost = undefined;
 		this._authId = undefined;
+	}
+
+	/**
+	 * starts the listener.
+	 * It can return an error, for instance when it cannot connect to the auth server or the parameters being incorrect
+	 * @param authId
+	 * @param proxyPort
+	 * @returns {Promise<void>}
+	 */
+	async start(authId, proxyPort) {
+
+		//Parameters validation
+		if (!authId) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
+		}
+		this._authId = authId;
+
+		if (!proxyPort) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
+		}
+
+		if (isNaN(proxyPort)) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
+		}
+
+		//Retrieve from authId accessToken and target host
+		const { accessToken, hostName } = await this._retrieveCredentials();
+		this._targetHost = hostName;
+		this._accessToken = accessToken;
+
+		await this.stop();
+		this._localProxy = http.createServer();
+
+		this._localProxy.addListener('request', async (req, res) => {
+
+			const options = this._buildOptions(req);
+
+			//Save body
+			const bodyChunks = [];
+			req.on('data', function(chunk) {
+				bodyChunks.push(chunk);
+			});
+
+			req.on('end', async () => {
+				const body = Buffer.concat(bodyChunks);
+				const proxyReq = await this._createProxyReq(options, body, res, 0);
+				proxyReq.write(body);
+				proxyReq.end();
+			});
+		});
+
+		this._localProxy.listen(proxyPort, LOCAL_HOSTNAME, () => {
+			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
+			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
+		});
+	}
+
+	/**
+	 * Stops server
+	 * @returns {Promise<void>}
+	 */
+	async stop() {
+		if (this._localProxy) {
+			this._localProxy.close(() => console.log('SuiteCloud Proxy server stopped.'));
+			this._localProxy = null;
+		} else {
+			console.log('No server instance to stop.');
+		}
+	}
+
+	/**
+	 * For being used after manual authentication. It refreshes the access token from credentials.
+	 * @returns {Promise<void>}
+	 */
+	async reloadAccessToken() {
+		const { accessToken} = await this._retrieveCredentials();
+		this._accessToken = accessToken;
+		console.log('access token refreshed');
 	}
 
 	/**
@@ -82,7 +160,7 @@ class DevAssistProxyService extends EventEmitter {
 	 * @type {*}
 	 */
 	_buildResponseUpdateAccessToken(opSuccessful, emitEvent, emitObjectMessage, errorMsg, httpStatusCode, authId) {
-		//boolean (true|false) whether the token has been refresh or has been any problem
+		//boolean (true|false) whether the token has been refreshed or there has been any problem
 		if (opSuccessful) {
 			return Object.freeze({ opSuccessful });
 		} else {
@@ -94,7 +172,7 @@ class DevAssistProxyService extends EventEmitter {
 	/**
 	 * This method refreshes authorization.
 	 * If successful returns true and updates this._accessToken
-	 * If not successful returns false an emits an event.
+	 * If not successful returns false and emits an event.
 	 * It returns an object with the results of the operation. See _buildResponseUpdateAccessToken method.
 	 * @returns {Promise<*>}
 	 * @private
@@ -211,79 +289,6 @@ class DevAssistProxyService extends EventEmitter {
 		});
 		return proxy;
 	}
-
-	/**
-	 * starts the listener.
-	 * It can return an error, for instance when it cannot connect to the auth server or the parameters being incorrect
-	 * @param authId
-	 * @param proxyPort
-	 * @returns {Promise<void>}
-	 */
-	async start(authId, proxyPort) {
-
-		//Parameters validation
-		if (!authId) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
-		}
-		this._authId = authId;
-
-		if (!proxyPort) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
-		}
-
-		if (isNaN(proxyPort)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
-		}
-
-		//Retrieve from authId accessToken and target host
-		const { accessToken, hostName } = await this._retrieveCredentials();
-		this._targetHost = hostName;
-		this._accessToken = accessToken;
-
-		this._localProxy = http.createServer();
-
-		this._localProxy.addListener('request', async (req, res) => {
-
-			const options = this._buildOptions(req);
-
-			//Save body
-			const bodyChunks = [];
-			req.on('data', function(chunk) {
-				bodyChunks.push(chunk);
-			});
-
-			req.on('end', async () => {
-				const body = Buffer.concat(bodyChunks);
-				const proxyReq = await this._createProxyReq(options, body, res, 0);
-				proxyReq.write(body);
-				proxyReq.end();
-			});
-		});
-
-		this._localProxy.listen(proxyPort, LOCAL_HOSTNAME, () => {
-			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
-			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
-			console.log(`Set Cline Base URL to: ${localURL}/api/internal/devassist`);
-		});
-	}
-
-	/**
-	 * Stops server
-	 * @returns {Promise<void>}
-	 */
-	async stop() {
-		if (this._localProxy) {
-			this._localProxy.close(() => console.log('SuiteCloud Proxy server stopped.'));
-			this._localProxy = null;
-		} else {
-			console.log('No server instance to stop.');
-		}
-	}
-
-	async reloadAccessToken() {
-		const { accessToken} = await this._retrieveCredentials();
-		this._accessToken = accessToken;
-	}
 }
 
-module.exports = { DevAssistProxyService, EVENTS };
+module.exports = { SuiteCloudAuthProxyService: SuiteCloudAuthProxyService, EVENTS };
