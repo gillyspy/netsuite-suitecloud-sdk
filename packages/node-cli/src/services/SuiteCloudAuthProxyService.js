@@ -3,6 +3,7 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
+
 /** http libraries */
 const http = require('node:http');
 const https = require('node:https');
@@ -11,8 +12,8 @@ const EventEmitter = require('events');
 /** Events */
 const EVENTS = {
 	SERVER_ERROR: 'serverError',
-	AUTH_REFRESH_MANUAL_EVENT : 'authRefreshManual'
-}
+	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
+};
 
 /** Authentication methods */
 const {
@@ -41,8 +42,8 @@ const HTTP_RESPONSE_CODE = {
 	UNAUTHORIZED: 401,
 	FORBIDDEN: 403,
 	INTERNAL_SERVER_ERROR: 500,
-	SERVICE_UNAVAILABLE: 503
-}
+	SERVICE_UNAVAILABLE: 503,
+};
 
 class SuiteCloudAuthProxyService extends EventEmitter {
 	constructor(sdkPath, executionEnvironmentContext) {
@@ -66,42 +67,32 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	async start(authId, proxyPort) {
 
 		//Parameters validation
-		if (!authId) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
-		}
+		this._evalInputParameters(authId, proxyPort);
 		this._authId = authId;
-
-		if (!proxyPort) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
-		}
-
-		if (isNaN(proxyPort)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
-		}
 
 		//Retrieve from authId accessToken and target host
 		const { accessToken, hostName } = await this._retrieveCredentials();
 		this._targetHost = hostName;
 		this._accessToken = accessToken;
 
-		await this.stop();
+		this.stop();
 		this._localProxy = http.createServer();
 
-		this._localProxy.addListener('request', async (req, res) => {
+		this._localProxy.addListener('request', async (request, response) => {
 
-			const options = this._buildOptions(req);
+			const requestOptions = this._buildRequestOptions(request);
 
 			//Save body
 			const bodyChunks = [];
-			req.on('data', function(chunk) {
+			request.on('data', function(chunk) {
 				bodyChunks.push(chunk);
 			});
 
-			req.on('end', async () => {
+			request.on('end', async () => {
 				const body = Buffer.concat(bodyChunks);
-				const proxyReq = await this._createProxyReq(options, body, res, 0);
-				proxyReq.write(body);
-				proxyReq.end();
+				const proxyRequest = await this._createProxyRequest(requestOptions, body, response, 0);
+				proxyRequest.write(body);
+				proxyRequest.end();
 			});
 		});
 
@@ -112,10 +103,9 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	}
 
 	/**
-	 * Stops server
-	 * @returns {Promise<void>}
+	 * Public method that stops the proxy
 	 */
-	async stop() {
+	stop() {
 		if (this._localProxy) {
 			this._localProxy.close(() => console.log('SuiteCloud Proxy server stopped.'));
 			this._localProxy = null;
@@ -129,9 +119,29 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 * @returns {Promise<void>}
 	 */
 	async reloadAccessToken() {
-		const { accessToken} = await this._retrieveCredentials();
+		const { accessToken } = await this._retrieveCredentials();
 		this._accessToken = accessToken;
 		console.log('access token refreshed');
+	}
+
+	/**
+	 * It validates the input parameters
+	 * @param authId
+	 * @param proxyPort
+	 * @private
+	 */
+	_evalInputParameters(authId, proxyPort) {
+		if (!authId) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
+		}
+
+		if (!proxyPort) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
+		}
+
+		if (isNaN(proxyPort)) {
+			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
+		}
 	}
 
 	/**
@@ -156,139 +166,165 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	}
 
 	/**
-	 * Record which returns the results of _updateAccessToken
-	 * @type {*}
+	 * Builds request options
+	 * @param request request
+	 * @returns {{path: *, headers: *&{authorization: string}, hostname: *, method: *, port: number}}
+	 * @private
 	 */
-	_buildResponseUpdateAccessToken(opSuccessful, emitEvent, emitObjectMessage, errorMsg, httpStatusCode, authId) {
-		//boolean (true|false) whether the token has been refreshed or there has been any problem
-		if (opSuccessful) {
-			return Object.freeze({ opSuccessful });
-		} else {
-			const emitObject = { message: emitObjectMessage, authId: authId };
-			return Object.freeze({ opSuccessful, emitEvent, emitObject, errorMsg, httpStatusCode });
+	_buildRequestOptions(request) {
+		const authorization = 'Bearer ' + this._accessToken;
+
+		const requestOptions = {
+			hostname: this._targetHost,
+			port: TARGET_SERVER_PORT,
+			path: request.url,
+			method: request.method,
+			headers: { ...request.headers, authorization },
+		};
+
+		// Add agent for insecure connections when connecting to runboxes
+		if (this._targetHost && this._targetHost.includes('vm.eng')) {
+			requestOptions.agent = new https.Agent({
+				rejectUnauthorized: false,
+			});
+			requestOptions.rejectUnauthorized = false;
 		}
+		return requestOptions;
+	}
+
+	async _createProxyRequest(requestOptions, body, response, attempts) {
+		const proxyRequest = https.request(requestOptions, async (proxyResponse) => {
+			console.log(`Proxy response attempts ${attempts}: response ${proxyResponse.statusCode}`);
+			if (proxyResponse.statusCode === HTTP_RESPONSE_CODE.UNAUTHORIZED && attempts <= MAX_RETRY_ATTEMPTS) {
+				proxyResponse.resume();
+				const refreshOperationResponse = await this._tryRefreshOperation();
+
+				if (refreshOperationResponse.accessTokenHasBeenUpdated) {
+					this._updateRequestAuthorizationHeader(requestOptions);
+					const newProxyRequest = await this._createProxyRequest(requestOptions, body, response, attempts + 1);
+					newProxyRequest.write(body);
+					newProxyRequest.end();
+				} else {
+					const emitObject = { message: refreshOperationResponse.emit.errorMessage, authId: this._authId };
+					this.emit(refreshOperationResponse.emit.eventName, emitObject);
+					//Message shown to cline
+					this._writeResponseMessage(response, refreshOperationResponse.proxyServerResponse.statusCode, refreshOperationResponse.proxyServerResponse.errorMessage);
+					proxyResponse.pipe(response, { end: true });
+
+				}
+			} else {
+				response.writeHead(proxyResponse.statusCode || HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR, proxyResponse.headers);
+				proxyResponse.pipe(response, { end: true });
+			}
+
+		});
+
+		proxyRequest.on('error', (err) => {
+			console.error('Proxy request error:', err);
+			response.writeHead(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
+			//TODO Review this message and see confluence error pages and review with the tech writers
+			response.end('SuiteCloud Proxy error: ' + err.message);
+		});
+		return proxyRequest;
 	}
 
 	/**
 	 * This method refreshes authorization.
 	 * If successful returns true and updates this._accessToken
-	 * If not successful returns false and emits an event.
-	 * It returns an object with the results of the operation. See _buildResponseUpdateAccessToken method.
+	 * If not successful returns false and returns the http response and the info to generate the emit message.
 	 * @returns {Promise<*>}
 	 * @private
 	 */
-	//enum
-	async _updateAccessToken() {
+	async _tryRefreshOperation() {
+		const refreshInfo = {
+			accessTokenHasBeenUpdated: false,
+			emit: {
+				eventName: undefined,
+				errorMessage: undefined,
+			},
+			proxyServerResponse: {
+				statusCode: undefined,
+				errorMessage: undefined,
+			},
+		};
+
 		const inspectAuthOperationResult = await checkIfReauthorizationIsNeeded(this._authId, this._sdkPath, this._executionEnvironmentContext);
-		//Not being able to execute the reauth if needed, can be vpn disconnected, network problems...
+
+		//Not being able to execute the reauth if needed, it can be vpn disconnected, network problems...
 		if (!inspectAuthOperationResult.isSuccess()) {
-			const msg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.SERVER_COMMUNICATION_ERROR);
-			return this._buildResponseUpdateAccessToken(false, EVENTS.SERVER_ERROR, msg,
-				msg, HTTP_RESPONSE_CODE.FORBIDDEN, this._authId);
+			//Need to remove \n and \r since they are not shown properly into the output
+			const errorMsg = inspectAuthOperationResult.errorMessages.join(' ').replace(/\r?\n/g, ' ');
+
+			refreshInfo.emit.eventName = EVENTS.SERVER_ERROR;
+			refreshInfo.emit.errorMessage = errorMsg;
+
+			refreshInfo.proxyServerResponse.statusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
+			refreshInfo.proxyServerResponse.errorMessage = errorMsg;
+
+			return Object.freeze(refreshInfo);
 		}
+
 		//Needs manual reauthorization
 		const inspectAuthData = inspectAuthOperationResult.data;
 		if (inspectAuthData[AUTHORIZATION_PROPERTIES_KEYS.NEEDS_REAUTHORIZATION]) {
-			//Emit event needs manual reauthorization
-			const msg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
-			return this._buildResponseUpdateAccessToken(false, EVENTS.AUTH_REFRESH_MANUAL_EVENT, msg,
-				msg, HTTP_RESPONSE_CODE.FORBIDDEN, this._authId);
+			const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
+
+			refreshInfo.emit.eventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
+			refreshInfo.emit.errorMessage = errorMsg;
+
+			refreshInfo.proxyServerResponse.statusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
+			refreshInfo.proxyServerResponse.errorMessage = errorMsg;
+
+			return Object.freeze(refreshInfo);
 		}
+
 		//force refresh
 		const result = await forceRefreshAuthorization(this._authId, this._sdkPath, this._executionEnvironmentContext);
 		if (result.status === 'ERROR') {
 			//Refresh unsuccessful
-			const msg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
-			return this._buildResponseUpdateAccessToken(false, EVENTS.AUTH_REFRESH_MANUAL_EVENT, msg,
-				msg, HTTP_RESPONSE_CODE.FORBIDDEN, this._authId);
+			const errorMsg = result.errorMessages.join(' ').replace(/\r?\n/g, ' ');
+
+			refreshInfo.emit.eventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
+			refreshInfo.emit.errorMessage = errorMsg;
+
+			refreshInfo.proxyServerResponse.statusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
+			refreshInfo.proxyServerResponse.errorMessage = errorMsg.replace(/"/g, '\'');
+
+			return Object.freeze(refreshInfo);
 		} else {
-			//Updated refresh token successful
+			//If the refresh has been successful
+			//Return operation result as true and update the accessToken
+			refreshInfo.accessTokenHasBeenUpdated = true;
 			this._accessToken = result.data.accessToken;
-			return this._buildResponseUpdateAccessToken(true);
+
+			return Object.freeze(refreshInfo);
 		}
 	}
 
 	/**
-	 * Builds request options
-	 * @param req request
-	 * @returns {{path: *, headers: *&{authorization: string}, hostname: *, method: *, port: number}}
+	 * Update requestOptions access token without need to rebuild the requestOptions
+	 * @param requestOptions
 	 * @private
 	 */
-	_buildOptions(req) {
-		const authorization = 'Bearer ' + this._accessToken;
-
-		const options = {
-			hostname: this._targetHost,
-			port: TARGET_SERVER_PORT,
-			path: req.url,
-			method: req.method,
-			headers: { ...req.headers, authorization },
-		};
-
-		// Add agent for insecure connections when connecting to runboxes
-		if (this._targetHost && this._targetHost.includes('vm.eng')) {
-			options.agent = new https.Agent({
-				rejectUnauthorized: false,
-			});
-			options.rejectUnauthorized = false;
-		}
-		return options;
-	}
-
-	/**
-	 * Update options access token
-	 * @param options
-	 * @private
-	 */
-	_updateOptionsAccessToken(options) {
-		if (options.headers && options.headers.authorization) {
-			options.headers.authorization = 'Bearer ' + this._accessToken;
+	_updateRequestAuthorizationHeader(requestOptions) {
+		if (requestOptions.headers && requestOptions.headers.authorization) {
+			requestOptions.headers.authorization = 'Bearer ' + this._accessToken;
 		}
 	}
 
 	/**
 	 * Write JSON response message
-	 * @param res
+	 * @param response
 	 * @param responseCode
 	 * @param responseMessage
 	 * @private
 	 */
-	_writeResponseMessage(res, responseCode, responseMessage) {
-		res.writeHead(responseCode, { 'Content-Type': 'application/json' });
+	_writeResponseMessage(response, responseCode, responseMessage) {
+		response.writeHead(responseCode, { 'Content-Type': 'application/json' });
 		const message = { error: responseMessage };
-		res.end(JSON.stringify(message));
+		response.end(JSON.stringify(message));
 	}
 
-	async _createProxyReq(options, body, res, attempts) {
-		const proxy = https.request(options, async (proxyRes) => {
-			console.log(`Proxy response ${attempts}: ${proxyRes.statusCode}`);
-			if (proxyRes.statusCode === HTTP_RESPONSE_CODE.UNAUTHORIZED && attempts <= MAX_RETRY_ATTEMPTS) {
-				proxyRes.resume();
-				const updateAccessTokenResponse = await this._updateAccessToken();
-				if (updateAccessTokenResponse.opSuccessful) {
-					this._updateOptionsAccessToken(options);
-					const proxyReq = await this._createProxyReq(options, body, res, attempts + 1);
-					proxyReq.write(body);
-					proxyReq.end();
-					return proxyReq;
-				} else {
-					this.emit(updateAccessTokenResponse.emitEvent, updateAccessTokenResponse.emitObject);
-					this._writeResponseMessage(res, updateAccessTokenResponse.httpStatusCode, updateAccessTokenResponse.errorMsg);
-					proxyRes.pipe(res, { end: true });
-					return;
-				}
-			}
-
-			res.writeHead(proxyRes.statusCode || HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR, proxyRes.headers);
-			proxyRes.pipe(res, { end: true });
-		});
-		proxy.on('error', (err) => {
-			console.error('Proxy request error:', err);
-			res.writeHead(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
-			res.end('SuiteCloud Proxy error: ' + err.message);
-		});
-		return proxy;
-	}
 }
 
 module.exports = { SuiteCloudAuthProxyService: SuiteCloudAuthProxyService, EVENTS };
