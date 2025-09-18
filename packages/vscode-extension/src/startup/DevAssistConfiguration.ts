@@ -5,7 +5,7 @@ import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
 import { REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
 import { VSTranslationService } from '../service/VSTranslationService';
-import type { SuiteCloudAuthProxyServiceInterface } from '../util/ExtensionUtil';
+import type { SuiteCloudAuthProxyServiceInterface } from '../types/JavascriptNodeCli';
 import { AuthenticationUtils, SuiteCloudAuthProxyService, ExecutionEnvironmentContext } from '../util/ExtensionUtil';
 
 

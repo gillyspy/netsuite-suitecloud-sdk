@@ -2,8 +2,8 @@
  ** Copyright (c) 2024 Oracle and/or its affiliates.  All rights reserved.
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
-import { EventEmitter } from 'node:stream';
-import { ActionResult, AuthListData } from '../types/ActionResult';
+import type { ActionResult, AuthListData } from '../types/ActionResult';
+import type { SdkOperationResult, SuiteCloudAuthProxyServiceConstructor, ExecutionEnvironmentContextConstructor, ExecutionEnvironmentContextInterface } from '../types/JavascriptNodeCli'
 
 
 export const SUITESCRIPT_TYPES: { id: string; name: string }[] = require('@oracle/suitecloud-cli/src/metadata/SuiteScriptTypesMetadata');
@@ -22,30 +22,6 @@ export const actionResultStatus: {
 	ERROR: string;
 } = require('@oracle/suitecloud-cli/src/services/actionresult/ActionResult').STATUS;
 
-type SdkOperationResultType = {
-	data: any;
-	errorCode: undefined;
-	errorMessages: string[];
-	resultMessage?: string;
-	status:'SUCCESS';
-	isSuccess(): true;
-} | {
-	data: undefined;
-	errorCode?: string;
-	errorMessages: string[]
-	resultMessage: undefined;
-	status:'ERROR';
-	isSuccess(): false;
-}
-const SdkOperationResult = require('@oracle/suitecloud-cli/src/utils/SdkOperationResult');
-
-interface ExecutionEnvironmentContext {
-	getPlatform(): string;
-	getPlatformVersion(): string;
-}
-interface ExecutionEnvironmentContextConstructor {
-	new(params?: { platform?: string, platformVersion?: string }): ExecutionEnvironmentContext;
-}
 export const ExecutionEnvironmentContext: ExecutionEnvironmentContextConstructor = require('@oracle/suitecloud-cli/src/ExecutionEnvironmentContext');
 
 
@@ -69,17 +45,10 @@ export const AuthenticationUtils: {
 	[key: string]: any;
 	getProjectDefaultAuthId(projectFolder?: string): string;
 	getAuthIds(sdkPath: string): Promise<ActionResult<AuthListData>>;
-	refreshAuthorization(authid: string, sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContext): Promise<SdkOperationResultType>
+	refreshAuthorization(authid: string, sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInterface): Promise<SdkOperationResult<null>>
 } = require('@oracle/suitecloud-cli/src/utils/AuthenticationUtils');
-export interface SuiteCloudAuthProxyServiceInterface extends EventEmitter {
-	start(authId: string, localProxyPort: number): Promise<void>;
-	stop(): Promise<void>;
-	reloadAccessToken(): Promise<void>
-}
-interface SuiteCloudAuthProxyServiceConstructor {
-	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContext): SuiteCloudAuthProxyServiceInterface;
-}
-export const  SuiteCloudAuthProxyService: SuiteCloudAuthProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/SuiteCloudAuthProxyService').SuiteCloudAuthProxyService;
+
+export const SuiteCloudAuthProxyService: SuiteCloudAuthProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/SuiteCloudAuthProxyService').SuiteCloudAuthProxyService;
 
 export const AccountCredentialsFormatter: {
 	getInfoString(accountCredentials: any): string;

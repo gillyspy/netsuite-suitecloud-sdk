@@ -29,7 +29,7 @@ import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccou
 import { FILES } from './ApplicationConstants';
 import { createDevAssistStatusBar, createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
-import type { SuiteCloudAuthProxyServiceInterface } from './util/ExtensionUtil';
+import type { SuiteCloudAuthProxyServiceInterface } from './types/JavascriptNodeCli';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
