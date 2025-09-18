@@ -194,21 +194,20 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 	async _createProxyRequest(requestOptions, body, response, attempts) {
 		const proxyRequest = https.request(requestOptions, async (proxyResponse) => {
-			console.log(`Proxy response attempts ${attempts}: response ${proxyResponse.statusCode}`);
 			if (proxyResponse.statusCode === HTTP_RESPONSE_CODE.UNAUTHORIZED && attempts <= MAX_RETRY_ATTEMPTS) {
 				proxyResponse.resume();
-				const refreshOperationResponse = await this._tryRefreshOperation();
+				const refreshOperationResult = await this._tryRefreshOperation();
 
-				if (refreshOperationResponse.accessTokenHasBeenUpdated) {
+				if (refreshOperationResult.accessTokenHasBeenUpdated) {
 					this._updateRequestAuthorizationHeader(requestOptions);
 					const newProxyRequest = await this._createProxyRequest(requestOptions, body, response, attempts + 1);
 					newProxyRequest.write(body);
 					newProxyRequest.end();
 				} else {
-					const emitObject = { message: refreshOperationResponse.emit.errorMessage, authId: this._authId };
-					this.emit(refreshOperationResponse.emit.eventName, emitObject);
+					const emitObject = { message: refreshOperationResult.errorMessage, authId: this._authId };
+					this.emit(refreshOperationResult.emitEventName, emitObject);
 					//Message shown to cline
-					this._writeResponseMessage(response, refreshOperationResponse.proxyServerResponse.statusCode, refreshOperationResponse.proxyServerResponse.errorMessage);
+					this._writeResponseMessage(response, refreshOperationResult.responseStatusCode, refreshOperationResult.errorMessage);
 					proxyResponse.pipe(response, { end: true });
 
 				}
@@ -237,29 +236,21 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 */
 	async _tryRefreshOperation() {
 		const refreshInfo = {
-			accessTokenHasBeenUpdated: false,
-			emit: {
-				eventName: undefined,
-				errorMessage: undefined,
-			},
-			proxyServerResponse: {
-				statusCode: undefined,
-				errorMessage: undefined,
-			},
+			accessTokenHasBeenUpdated: false,//Whether the token has been updated or not.
+			emitEventName: undefined,        //Event to be thrown.
+			responseStatusCode: undefined,   //HTTP response status code.
+			errorMessage: undefined          //Error message, used both for emit data and http response.
 		};
 
 		const inspectAuthOperationResult = await checkIfReauthorizationIsNeeded(this._authId, this._sdkPath, this._executionEnvironmentContext);
 
 		//Not being able to execute the reauth if needed, it can be vpn disconnected, network problems...
 		if (!inspectAuthOperationResult.isSuccess()) {
-			//Need to remove \n and \r since they are not shown properly into the output
-			const errorMsg = inspectAuthOperationResult.errorMessages.join(' ').replace(/\r?\n/g, ' ');
+			const errorMsg = this._cleanText(inspectAuthOperationResult.errorMessages.join('. '));
 
-			refreshInfo.emit.eventName = EVENTS.SERVER_ERROR;
-			refreshInfo.emit.errorMessage = errorMsg;
-
-			refreshInfo.proxyServerResponse.statusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
-			refreshInfo.proxyServerResponse.errorMessage = errorMsg;
+			refreshInfo.emitEventName = EVENTS.SERVER_ERROR;
+			refreshInfo.errorMessage = errorMsg;
+			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
 			return Object.freeze(refreshInfo);
 		}
@@ -269,36 +260,53 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (inspectAuthData[AUTHORIZATION_PROPERTIES_KEYS.NEEDS_REAUTHORIZATION]) {
 			const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
 
-			refreshInfo.emit.eventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
-			refreshInfo.emit.errorMessage = errorMsg;
-
-			refreshInfo.proxyServerResponse.statusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
-			refreshInfo.proxyServerResponse.errorMessage = errorMsg;
+			refreshInfo.emitEventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
+			refreshInfo.errorMessage = errorMsg;
+			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
 			return Object.freeze(refreshInfo);
 		}
 
 		//force refresh
-		const result = await forceRefreshAuthorization(this._authId, this._sdkPath, this._executionEnvironmentContext);
-		if (result.status === 'ERROR') {
+		const forceRefreshOperationResult = await forceRefreshAuthorization(this._authId, this._sdkPath, this._executionEnvironmentContext);
+		if (!forceRefreshOperationResult.isSuccess()) {
 			//Refresh unsuccessful
-			const errorMsg = result.errorMessages.join(' ').replace(/\r?\n/g, ' ');
+			const errorMsg = this._cleanText(forceRefreshOperationResult.errorMessages.join('. '));
 
-			refreshInfo.emit.eventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
-			refreshInfo.emit.errorMessage = errorMsg;
-
-			refreshInfo.proxyServerResponse.statusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
-			refreshInfo.proxyServerResponse.errorMessage = errorMsg.replace(/"/g, '\'');
+			refreshInfo.emitEventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
+			refreshInfo.errorMessage = errorMsg;
+			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
 			return Object.freeze(refreshInfo);
 		} else {
 			//If the refresh has been successful
-			//Return operation result as true and update the accessToken
+			//Return operation forceRefreshOperationResult as true and update the accessToken
 			refreshInfo.accessTokenHasBeenUpdated = true;
-			this._accessToken = result.data.accessToken;
+			this._accessToken = forceRefreshOperationResult.data.accessToken;
 
 			return Object.freeze(refreshInfo);
 		}
+	}
+
+	/**
+	 * Method to clear output messages.
+	 * The reason for this is the output do not show properly \n and \r
+	 * So they are replaced by . and made some extra adjustments.
+	 * @param input
+	 * @returns {*}
+	 */
+	_cleanText(input){
+		let result = input.replace(/\r/g, '');   // Remove \r
+		result = result.replace(/\n/g, '. ');  // Replace \n with ". "
+		result = result.replace(/,\./g, '.');  // Replace ",." with "."
+		result = result.replace(/"/g, '\''); //Replace \" by ' since \" also show problems.
+		while (result.includes('  ')) {    // Replace double spaces with single space
+			result = result.replace(/  /g, ' ');
+		}
+		while (result.includes('..')) { // Replace ".." with "."
+			result = result.replace(/\.\./g, '.');
+		}
+		return result;
 	}
 
 	/**
