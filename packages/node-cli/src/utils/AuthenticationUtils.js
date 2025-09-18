@@ -210,7 +210,7 @@ async function selectAuthenticationCI(authId, sdkPath, projectFolder) {
  * @param {String} authid 
  * @param {String} sdkPath 
  * @param {ExecutionEnvironmentContext} executionEnvironmentContext 
- * @returns {SdkOperationResult}
+ * @returns {Promise<SdkOperationResult>}
  */
 async function checkIfReauthorizationIsNeeded(authid, sdkPath, executionEnvironmentContext) {
 	const sdkExecutor = new SdkExecutor(sdkPath, executionEnvironmentContext);
@@ -228,7 +228,7 @@ async function checkIfReauthorizationIsNeeded(authid, sdkPath, executionEnvironm
  * @param {String} authid 
  * @param {String} sdkPath 
  * @param {ExecutionEnvironmentContext} executionEnvironmentContext 
- * @returns {SdkOperationResult}
+ * @returns {Promise<SdkOperationResult>}
  */
 async function refreshAuthorization(authid, sdkPath, executionEnvironmentContext) {
 	const sdkExecutor = new SdkExecutor(sdkPath, executionEnvironmentContext);
@@ -249,7 +249,7 @@ async function refreshAuthorization(authid, sdkPath, executionEnvironmentContext
  * @param {String} authid 
  * @param {String} sdkPath 
  * @param {ExecutionEnvironmentContext} executionEnvironmentContext 
- * @returns {SdkOperationResult} with data that contains the refreshed accessToken
+ * @returns {Promise<SdkOperationResult>} with data that contains the refreshed accessToken
  */
 async function forceRefreshAuthorization(authid, sdkPath, executionEnvironmentContext) {
 	const sdkExecutor = new SdkExecutor(sdkPath, executionEnvironmentContext);
