@@ -110,7 +110,8 @@ export default class MessageService {
 			.then(this.showOutputIfClicked);
 	}
 
-	showDevAssistButtonMessage = 'See Details and open DevAsssist Settings';
+	// TODO move to messages and maybe refactor DevAssist messaging methods
+	showDevAssistButtonMessage = 'See details and settings';
 
 	showCommandErrorDevAssist(errorMessage?: string, includeProjectName: boolean = true) {
 		if (!this.vscodeCommandName) {
@@ -125,6 +126,24 @@ export default class MessageService {
 			.then(this.showOutputIfClicked);
 	}
 
+	showDevAssistStartUpMessage(infoMessage?: string, includeProjectName: boolean = true) {
+		if (!this.vscodeCommandName) {
+			throw COMMAND_NOT_DEFINED;
+		}
+		const message = infoMessage ? infoMessage : this.translationService.getMessage(COMMAND.ERROR, this.vscodeCommandName);
+		window
+			.showWarningMessage(
+				includeProjectName ? this.addProjectNameToMessage(message) : message,
+				'DevAsssist Settings'
+			)
+			.then(() => {
+				commands.executeCommand(
+					'workbench.action.openSettings',
+					'suitecloud.devAssist'
+				);
+			});
+	}
+
 	private showOutputIfClicked = (message?: string) => {
 
 		if (message === this.translationService.getMessage(BUTTONS.SEE_DETAILS)) {
@@ -137,7 +156,7 @@ export default class MessageService {
 			// open settings
 			commands.executeCommand(
 				'workbench.action.openSettings',
-				'@ext:oracle.suitecloud-vscode-extension'
+				'suitecloud.devAssist'
 			);
 		}
 	}

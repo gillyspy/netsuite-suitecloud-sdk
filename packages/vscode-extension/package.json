@@ -107,9 +107,10 @@
 				"category": "SuiteCloud"
 			},
 			{
-				"command": "suitecloud.triggerreauthorization",
-				"title": "Trigger reauthorization - TODO: Remove this command",
-				"category": "SuiteCloud"
+				"command": "suitecloud.opensettings",
+				"title": "Open DevAssist settings",
+				"category": "SuiteCloud",
+				"enablement": "true"
 			}
 		],
 		"keybindings": [
@@ -210,6 +211,12 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Controls local proxy server that enables SuiteCloud dev assist in Cline. Once [Cline extension](link/to/cline) is installed and enabled the following changes need to be made to its settings:\n* `API Provider` set to `OpenAI Compatible`\n* `Base URL` set to `http://127.0.0.1:[ProxyPort]/api/internal/devassist`\n\n[Read documentation](link/to/documentation)"
+				},
+				"suitecloud.devAssist.showNotification": {
+					"order":3,
+					"type": "boolean",
+					"default": true,
+					"description": "Want a heads-up each time you start up and the SuiteCloud Dev Assist service isn't running? Turn this on to get a notification."
 				}
 			}
 		}

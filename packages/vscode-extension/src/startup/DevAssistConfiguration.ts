@@ -10,14 +10,37 @@ import { AuthenticationUtils, SuiteCloudAuthProxyService, ExecutionEnvironmentCo
 
 
 // CONSTANTS
-const defaultSettings = {
-    enableProxy: false,
-    proxyPort: 8181,
-    authID: 'authid-to-be-used-by-devassist'
+type devAssistConfig = {
+    proxyEnabled: boolean,
+    authID: string,
+    localPort: number,
+    startupNotificationEnabled: boolean
+};
+const defaultSettings: devAssistConfig = {
+    proxyEnabled: false,
+    localPort: 8181,
+    authID: 'authid-to-be-used-by-devassist',
+    startupNotificationEnabled: true,
+}
+
+const devAssistConfigStatus: { current: devAssistConfig, previous: devAssistConfig } = {
+    current: {
+        proxyEnabled: false,
+        authID: '',
+        localPort: 0,
+        startupNotificationEnabled: true,
+    },
+    previous: {
+        proxyEnabled: false,
+        authID: '',
+        localPort: 0,
+        startupNotificationEnabled: true
+    }
 }
 
 const proxyServiceEvents = {
-    reauthorize: 'authRefreshManual'
+    reauthorize: 'authRefreshManual',
+    serverError: 'serverError'
 }
 
 const proxyUrlParts = {
@@ -30,9 +53,10 @@ const getProxyUrl = (port: number) => `${proxyUrlParts.scheme}${proxyUrlParts.lo
 // should be in sycn with vscode-extension package.json config properties
 const configKeys = {
     devAssistSection: 'suitecloud.devAssist',
-    enableProxy: 'enable',
+    proxyEnabled: 'enable',
     auhtID: 'authID',
-    proxyPort: 'proxyPort'
+    localPort: 'proxyPort',
+    startupNotificationEnabled: 'showNotification'
 }
 
 const executionEnvironmentContext = new ExecutionEnvironmentContext({
@@ -47,15 +71,19 @@ const translationService = new VSTranslationService();
 
 
 export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.StatusBarItem) => {
-    const devAssistConfig = getDevAssistConfig();
-    console.log('startDevAssistProxyIfEnabled', devAssistConfig);
+    updateDevAssistConfigStatus();
+    console.log('startDevAssistProxyIfEnabled', devAssistConfigStatus.current);
 
-    if (devAssistConfig.enableProxy) {
+    if (devAssistConfigStatus.current.startupNotificationEnabled && !devAssistConfigStatus.current.proxyEnabled) {
+        vsNotificationService.showDevAssistStartUpMessage('SuiteCloud Dev Assist is here. Enable it here [link to Settings] and start using in it')
+    }
+
+    if (devAssistConfigStatus.current.proxyEnabled) {
         try {
             initializeDevAssistService(devAssistStatusBar);
-            await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort, devAssistStatusBar);
+            await startDevAssistService(devAssistConfigStatus.current.authID, devAssistConfigStatus.current.localPort, devAssistStatusBar);
         } catch (error) {
-            showStartDevAssistProblemNotification('startup', error as string, devAssistConfig, devAssistStatusBar);
+            showStartDevAssistProblemNotification('startup', error as string, devAssistConfigStatus.current, devAssistStatusBar);
         }
     } else {
         if (devAssistProxyService) {
@@ -75,11 +103,16 @@ export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.St
 
 export const devAssistConfigurationChangeHandler = async (configurationChangeEvent: vscode.ConfigurationChangeEvent, devAssistStatusBar: vscode.StatusBarItem) => {
     if (configurationChangeEvent.affectsConfiguration(configKeys.devAssistSection)) {
-        const devAssistConfig = getDevAssistConfig();
-        console.log('DevAssist Proxy enabled: ' + devAssistConfig.enableProxy);
-        console.log(devAssistConfig);
+        updateDevAssistConfigStatus();
 
-        if (devAssistConfig.enableProxy === true) {
+        if (!devAssistConfigStatusHasEffectivelyChanged()) {
+            // if configuration has not effectively changed do not perform any action
+            return;
+        }
+        console.log('DevAssist Proxy enabled: ' + devAssistConfigStatus.current.proxyEnabled);
+        console.log(devAssistConfigStatus.current);
+
+        if (devAssistConfigStatus.current.proxyEnabled === true) {
             if (devAssistProxyService) {
                 await devAssistProxyService?.stop();
             } else {
@@ -87,12 +120,13 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
             }
 
             try {
-                await startDevAssistService(devAssistConfig.authID, devAssistConfig.localPort, devAssistStatusBar);
+                await startDevAssistService(devAssistConfigStatus.current.authID, devAssistConfigStatus.current.localPort, devAssistStatusBar);
             } catch (error) {
-                showStartDevAssistProblemNotification('settingsChange', error as string, devAssistConfig, devAssistStatusBar);
+                showStartDevAssistProblemNotification('settingsChange', error as string, devAssistConfigStatus.current, devAssistStatusBar);
             }
-        } else {
+        } else { // devAssistConfig.proxyEnabled === false
             await stopDevAssistService(devAssistStatusBar);
+            devAssistStatusBar.hide()
         }
         // add extra line to differenciate logs
         vsLogger.info('');
@@ -101,27 +135,31 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
 
 
 const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
-    const devAssistConfig = getDevAssistConfig()
-
     try {
         devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext);
-        vsLogger.info(`DevAssist initialized using authID: ${devAssistConfig.authID} and port: ${devAssistConfig.localPort}`)
+        vsLogger.info(`DevAssist initialized using authID: ${devAssistConfigStatus.current.authID} and port: ${devAssistConfigStatus.current.localPort}`)
 
         // adding listener to trigger manual reauthentication from vscode
         devAssistProxyService.on(proxyServiceEvents.reauthorize, async (emitParams: { authId: string, message: string }) => {
-            const devAssistConfigOnReauthorize = getDevAssistConfig();
+            updateDevAssistConfigStatus();
             // TODO: not sure which authID we should use or if they could be different at all
             const refreshIsSuccessful = await refreshAuthorizationWithNotifications(emitParams.authId);
             // TODO: we could be using something like devAsssitProxy.reloadAccessToken() to avoid extra forceRefresh in next cline request
             if (refreshIsSuccessful) {
                 try {
                     stopDevAssistService(devAssistStatusBar);
-                    await startDevAssistService(emitParams.authId, devAssistConfigOnReauthorize.localPort, devAssistStatusBar);
+                    await startDevAssistService(emitParams.authId, devAssistConfigStatus.current.localPort, devAssistStatusBar);
                 } catch (error) {
-                    showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistConfigOnReauthorize, devAssistStatusBar)
+                    showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistConfigStatus.current, devAssistStatusBar)
                 }
             }
-        })
+        });
+
+        devAssistProxyService.on(proxyServiceEvents.serverError, (emitParams: { authId: string, message: string }) => {
+            updateDevAssistConfigStatus();
+            // just forwarding info into suitecloud output for now
+            vsLogger.error(`ServerError has occured when running DevAssist service.\nError: ${emitParams.message}`)
+        });
     } catch (error) {
         vsLogger.error(`There was an error when initializing DevAssist service.\n${error}`)
     }
@@ -146,11 +184,13 @@ const stopDevAssistService = async (devAssistStatusBar: vscode.StatusBarItem) =>
 
     devAssistStatusBar.text = `$(ports-stop-forward-icon) DevAssist is stopped.`;
     devAssistStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground')
-    devAssistStatusBar.show();
+    // devAssistStatusBar.show();
 
-    const stopMessage = 'DevAssist service has been stoped.';
-    vsLogger.info(stopMessage)
-    vsNotificationService.showCommandInfo(stopMessage);
+    if (!devAssistConfigStatus.current.proxyEnabled && devAssistConfigStatus.previous.proxyEnabled) {
+        const stopMessage = 'DevAssist service has been stoped.';
+        vsLogger.info(stopMessage)
+        vsNotificationService.showCommandInfo(stopMessage);
+    }
 }
 
 const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistConfig: devAssistConfig, devAssistStatusBar: vscode.StatusBarItem) => {
@@ -165,15 +205,55 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
     vsNotificationService.showCommandErrorDevAssist('There was a problem when starting DevAssist service.');
 }
 
-type devAssistConfig = { enableProxy: boolean, authID: string, localPort: number };
-const getDevAssistConfig = (): devAssistConfig => {
+const updateDevAssistConfigStatus = (): void => {
+
+    const previousConfig: devAssistConfig = devAssistConfigStatus.current;
+
+    const currentConfig: devAssistConfig = getDevAssistCurrentSettings();
+
+    // const configHasEffectivelyChanged = devAssistConfigurationHasChanged(newConfig)
+
+    // update saved status
+    devAssistConfigStatus.current = currentConfig;
+    devAssistConfigStatus.previous = previousConfig;
+}
+
+const getDevAssistCurrentSettings = (): devAssistConfig => {
     const devAssistConfigSection = vscode.workspace.getConfiguration(configKeys.devAssistSection);
 
-    const enableProxy = devAssistConfigSection.get<boolean>(configKeys.enableProxy) || defaultSettings.enableProxy;
-    const authID = devAssistConfigSection.get<string>(configKeys.auhtID) || defaultSettings.authID;
-    const localPort = devAssistConfigSection.get<number>(configKeys.proxyPort) || defaultSettings.proxyPort;
+    //  * The *effective* value (returned by {@linkcode WorkspaceConfiguration.get get}) is computed by overriding or merging the values in the following order:
+    //  *
+    //  * 1. `defaultValue` (if defined in `package.json` otherwise derived from the value's type)
+    //  * 2. `globalValue` (if defined)
+    //  * 3. `workspaceValue` (if defined)
+    //  * 4. `workspaceFolderValue` (if defined)
+    //  * 5. `defaultLanguageValue` (if defined)
+    //  * 6. `globalLanguageValue` (if defined)
+    //  * 7. `workspaceLanguageValue` (if defined)
+    //  * 8. `workspaceFolderLanguageValue` (if defined)
+    //  * Refer to [Settings](https://code.visualstudio.com/docs/getstarted/settings) for more information.
 
-    return { enableProxy, authID, localPort }
+    // we don't know exaclty were configuration change comes from when devAssistConfigurationChangeHandler is called
+    // it could be that configuration has changed from globalValue (user) and there is workspaceValue that has left intact
+    // this is not 100% sure but configuration could have been changed even in different vscode editor instance
+    // we should not be performing any action in the case devAssist settings haven't effectivelly changed 
+    const proxyEnabled = devAssistConfigSection.get<boolean>(configKeys.proxyEnabled) || defaultSettings.proxyEnabled;
+    const authID = devAssistConfigSection.get<string>(configKeys.auhtID) || defaultSettings.authID;
+    const localPort = devAssistConfigSection.get<number>(configKeys.localPort) || defaultSettings.localPort;
+    const startupNotificationEnabled = devAssistConfigSection.get<boolean>(configKeys.startupNotificationEnabled) || defaultSettings.startupNotificationEnabled;
+
+    return { proxyEnabled, authID, localPort, startupNotificationEnabled }
+}
+
+const devAssistConfigStatusHasEffectivelyChanged = (): boolean => {
+    // omiting to compare startupNotificationEnabled status
+    if (devAssistConfigStatus.current.authID === devAssistConfigStatus.previous.authID &&
+        devAssistConfigStatus.current.localPort === devAssistConfigStatus.previous.localPort &&
+        devAssistConfigStatus.current.proxyEnabled === devAssistConfigStatus.previous.proxyEnabled
+    ) {
+        return false
+    }
+    return true;
 }
 
 // refresh authorization with notification popups 

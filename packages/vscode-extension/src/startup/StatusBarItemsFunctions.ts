@@ -43,7 +43,7 @@ export function createDevAssistStatusBar(): vscode.StatusBarItem {
 	const devAssistStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, STATUS_BAR_PRIORITY - 2);
 	devAssistStatusBar.tooltip = 'Shows DevAssist service status';
 	devAssistStatusBar.hide();
-
+	devAssistStatusBar.command ='suitecloud.opensettings';
 	return devAssistStatusBar;
 }
 

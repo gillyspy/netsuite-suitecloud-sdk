@@ -85,7 +85,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		register('suitecloud.validate', new Validate())
 	);
 
-	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.triggerreauthorization', () => devAssitProxy.emit('reauthorize', 'antonio-vm-mstrwlf-dev')))
+	// this command is used to open devAssist settings by clicking on devAssistStatusBar
+	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.opensettings',
+		() => vscode.commands.executeCommand('workbench.action.openSettings','suitecloud.devAssist'))
+	);
 
 	// add watchers needed to update the status bars
 	context.subscriptions.push(
