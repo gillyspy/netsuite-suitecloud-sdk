@@ -3,10 +3,14 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 
-import { window, commands } from 'vscode';
+import { window, commands, workspace } from 'vscode';
 import { output } from '../suitecloud';
-import { BUTTONS, COMMAND } from './TranslationKeys';
+import { BUTTONS, COMMAND, DEVASSIST } from './TranslationKeys';
 import { VSTranslationService } from './VSTranslationService';
+import { DEVASSIST_CONFIG } from '../ApplicationConstants';
+// import { DEVASSIST_CONIF_KEYS } from '../startup/DevAssistConfiguration';
+
+
 
 const DEFAULT_TIMEOUT = 5000;
 const COMMAND_NOT_DEFINED = 'Command not defined';
@@ -110,9 +114,6 @@ export default class MessageService {
 			.then(this.showOutputIfClicked);
 	}
 
-	// TODO move to messages and maybe refactor DevAssist messaging methods
-	showDevAssistButtonMessage = 'See details and settings';
-
 	showCommandErrorDevAssist(errorMessage?: string, includeProjectName: boolean = true) {
 		if (!this.vscodeCommandName) {
 			throw COMMAND_NOT_DEFINED;
@@ -121,26 +122,31 @@ export default class MessageService {
 		window
 			.showErrorMessage(
 				includeProjectName ? this.addProjectNameToMessage(message) : message,
-				this.showDevAssistButtonMessage
+				this.translationService.getMessage(DEVASSIST.SERVICE_IS_STOPPED.NOTIFICATION_BUTTON)
 			)
 			.then(this.showOutputIfClicked);
 	}
 
-	showDevAssistStartUpMessage(infoMessage?: string, includeProjectName: boolean = true) {
+	showDevAssistStartUpMessage(infoMessage?: string) {
 		if (!this.vscodeCommandName) {
 			throw COMMAND_NOT_DEFINED;
 		}
 		const message = infoMessage ? infoMessage : this.translationService.getMessage(COMMAND.ERROR, this.vscodeCommandName);
 		window
-			.showWarningMessage(
-				includeProjectName ? this.addProjectNameToMessage(message) : message,
-				'DevAsssist Settings'
+			.showInformationMessage(
+				message,
+				this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.OPEN_SETTINGS),
+				this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.DONT_SHOW_AGAIN),
+
 			)
-			.then(() => {
-				commands.executeCommand(
-					'workbench.action.openSettings',
-					'suitecloud.devAssist'
-				);
+			.then((message?: string) => {
+				if (message === this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.OPEN_SETTINGS)) {
+					this.openDevAssistSettings();
+				}
+				if (message === this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.DONT_SHOW_AGAIN)) {
+					const devAssistConfigSection = workspace.getConfiguration(DEVASSIST_CONFIG.KEYS.devAssistSection);
+					devAssistConfigSection.update(DEVASSIST_CONFIG.KEYS.startupNotificationEnabled, false);
+				}		
 			});
 	}
 
@@ -150,15 +156,19 @@ export default class MessageService {
 			output.show();
 		}
 
-		if (message === this.showDevAssistButtonMessage) {
+		if (message === this.translationService.getMessage(DEVASSIST.SERVICE_IS_STOPPED.NOTIFICATION_BUTTON)) {
 			// show suitecloud output
 			output.show();
 			// open settings
-			commands.executeCommand(
-				'workbench.action.openSettings',
-				'suitecloud.devAssist'
-			);
+			this.openDevAssistSettings();
 		}
+	}
+
+	private openDevAssistSettings = () => {
+		commands.executeCommand(
+			'workbench.action.openSettings',
+			DEVASSIST_CONFIG.KEYS.devAssistSection
+		);
 	}
 
 }

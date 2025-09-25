@@ -28,3 +28,20 @@ export const ACP_UNRESTRICTED_FOLDERS: string[] = [
 	FOLDERS.TEMPLATES_MARKETING_TEMPLATES,
 	FOLDERS.WEB_SITE_HOSTING_FILES,
 ];
+
+export const DEVASSIST_CONFIG = {
+	// should be in sycn with vscode-extension package.json config properties
+	KEYS: {
+		devAssistSection: 'suitecloud.devAssist',
+		proxyEnabled: 'enable',
+		auhtID: 'authID',
+		localPort: 'localPort',
+		startupNotificationEnabled: 'showNotification'
+	},
+	DEFAULT_VALUES: {
+		proxyEnabled: false,
+		localPort: 8181,
+		authID: 'authid-to-be-used-by-dev-assist',
+		startupNotificationEnabled: true,
+	}
+}
