@@ -3,12 +3,12 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 
-import { window, commands, workspace } from 'vscode';
+import { commands, window, workspace } from 'vscode';
+import { DEVASSIST } from '../ApplicationConstants';
 import { output } from '../suitecloud';
-import { BUTTONS, COMMAND, DEVASSIST } from './TranslationKeys';
+import { BUTTONS, COMMAND, DEVASSIST_SERVICE } from './TranslationKeys';
 import { VSTranslationService } from './VSTranslationService';
-import { DEVASSIST_CONFIG } from '../ApplicationConstants';
-// import { DEVASSIST_CONIF_KEYS } from '../startup/DevAssistConfiguration';
+
 
 
 
@@ -122,7 +122,7 @@ export default class MessageService {
 		window
 			.showErrorMessage(
 				includeProjectName ? this.addProjectNameToMessage(message) : message,
-				this.translationService.getMessage(DEVASSIST.SERVICE_IS_STOPPED.NOTIFICATION_BUTTON)
+				this.translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON)
 			)
 			.then(this.showOutputIfClicked);
 	}
@@ -135,18 +135,18 @@ export default class MessageService {
 		window
 			.showInformationMessage(
 				message,
-				this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.OPEN_SETTINGS),
-				this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.DONT_SHOW_AGAIN),
+				this.translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.OPEN_SETTINGS),
+				this.translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.DONT_SHOW_AGAIN),
 
 			)
 			.then((message?: string) => {
-				if (message === this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.OPEN_SETTINGS)) {
+				if (message === this.translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.OPEN_SETTINGS)) {
 					this.openDevAssistSettings();
 				}
-				if (message === this.translationService.getMessage(DEVASSIST.STARTUP.BUTTON.DONT_SHOW_AGAIN)) {
-					const devAssistConfigSection = workspace.getConfiguration(DEVASSIST_CONFIG.KEYS.devAssistSection);
-					devAssistConfigSection.update(DEVASSIST_CONFIG.KEYS.startupNotificationEnabled, false);
-				}		
+				if (message === this.translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.DONT_SHOW_AGAIN)) {
+					const devAssistConfigSection = workspace.getConfiguration(DEVASSIST.CONFIG_KEYS.devAssistSection);
+					devAssistConfigSection.update(DEVASSIST.CONFIG_KEYS.startupNotificationEnabled, false);
+				}
 			});
 	}
 
@@ -156,10 +156,10 @@ export default class MessageService {
 			output.show();
 		}
 
-		if (message === this.translationService.getMessage(DEVASSIST.SERVICE_IS_STOPPED.NOTIFICATION_BUTTON)) {
+		if (message === this.translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON)) {
 			// show suitecloud output
 			output.show();
-			// open settings
+			// open devassist settings
 			this.openDevAssistSettings();
 		}
 	}
@@ -167,7 +167,7 @@ export default class MessageService {
 	private openDevAssistSettings = () => {
 		commands.executeCommand(
 			'workbench.action.openSettings',
-			DEVASSIST_CONFIG.KEYS.devAssistSection
+			DEVASSIST.CONFIG_KEYS.devAssistSection
 		);
 	}
 

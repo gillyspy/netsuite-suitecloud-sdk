@@ -6,6 +6,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { DEVASSIST, FILES } from './ApplicationConstants';
 import AddDependencies from './commands/AddDependencies';
 import BaseAction from './commands/BaseAction';
 import CompareFile from './commands/CompareFile';
@@ -25,11 +26,9 @@ import Validate from './commands/Validate';
 import { installIfNeeded } from './core/sdksetup/SdkServices';
 import { EXTENSION_INSTALLATION } from './service/TranslationKeys';
 import { VSTranslationService } from './service/VSTranslationService';
-import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
-import { FILES } from './ApplicationConstants';
-import { createDevAssistStatusBar, createAuthIDStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
-import type { SuiteCloudAuthProxyServiceInterface } from './types/JavascriptNodeCli';
+import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
+import { createAuthIDStatusBar, createDevAssistStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
@@ -52,12 +51,10 @@ let sdkDependenciesDownloadedAndValidated = false;
 // this method is called when SuiteCloud extension is activated
 // the extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-	// TODO remove before merging code
-	let devAssitProxy: SuiteCloudAuthProxyServiceInterface;
-	installIfNeeded().then(async () => {
+	installIfNeeded().then(() => {
 		sdkDependenciesDownloadedAndValidated = true;
 		showSetupAccountWarningMessageIfNeeded();
-		devAssitProxy = await startDevAssistProxyIfEnabled(devAssistStatusBar)
+		startDevAssistProxyIfEnabled(devAssistStatusBar)
 	});
 
 	// initialize status bars
@@ -87,14 +84,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// this command is used to open devAssist settings by clicking on devAssistStatusBar
 	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.opensettings',
-		() => vscode.commands.executeCommand('workbench.action.openSettings','suitecloud.devAssist'))
+		() => vscode.commands.executeCommand('workbench.action.openSettings', DEVASSIST.CONFIG_KEYS.devAssistSection))
 	);
 
 	// add watchers needed to update the status bars
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor((textEditor) => updateStatusBars(textEditor, suitecloudProjectStatusBar, authIDStatusBar)),
 		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar)),
-		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent,  devAssistStatusBar)))
+		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent, devAssistStatusBar)))
 	);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)

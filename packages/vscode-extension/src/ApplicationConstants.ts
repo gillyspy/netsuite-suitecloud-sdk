@@ -29,9 +29,9 @@ export const ACP_UNRESTRICTED_FOLDERS: string[] = [
 	FOLDERS.WEB_SITE_HOSTING_FILES,
 ];
 
-export const DEVASSIST_CONFIG = {
+export const DEVASSIST = {
 	// should be in sycn with vscode-extension package.json config properties
-	KEYS: {
+	CONFIG_KEYS: {
 		devAssistSection: 'suitecloud.devAssist',
 		proxyEnabled: 'enable',
 		auhtID: 'authID',
@@ -43,5 +43,10 @@ export const DEVASSIST_CONFIG = {
 		localPort: 8181,
 		authID: 'authid-to-be-used-by-dev-assist',
 		startupNotificationEnabled: true,
+	},
+	PROXY_URL: {
+		SCHEME: 'http://',
+		LOCALHOST_IP: '127.0.0.1',
+		PATH: '/api/internal/devassist'
 	}
 }
