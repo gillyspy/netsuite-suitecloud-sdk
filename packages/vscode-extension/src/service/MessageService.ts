@@ -9,9 +9,6 @@ import { output } from '../suitecloud';
 import { BUTTONS, COMMAND, DEVASSIST_SERVICE } from './TranslationKeys';
 import { VSTranslationService } from './VSTranslationService';
 
-
-
-
 const DEFAULT_TIMEOUT = 5000;
 const COMMAND_NOT_DEFINED = 'Command not defined';
 

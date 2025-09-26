@@ -56,6 +56,7 @@ export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.St
 
     if (devAssistConfigStatus.current.proxyEnabled) {
         try {
+            devAssistStatusBar.show();
             initializeDevAssistService(devAssistStatusBar);
             await startDevAssistService(devAssistConfigStatus.current.authID, devAssistConfigStatus.current.localPort, devAssistStatusBar);
         } catch (error) {
@@ -196,10 +197,10 @@ const getDevAssistCurrentSettings = (): devAssistConfig => {
 }
 
 const devAssistConfigStatusHasEffectivelyChanged = (): boolean => {
-    // we don't know exaclty were configuration change comes from when devAssistConfigurationChangeHandler is called
-    // it could be that configuration has changed from globalValue (user) and there is workspaceValue that has left intact
-    // this is not 100% sure but configuration could have been changed even in different vscode editor instance
-    // we should not be performing any action in the case devAssist settings haven't effectivelly changed 
+    // we don't know exactly where configuration change comes from when devAssistConfigurationChangeHandler is called
+    // it could be that the configuration has changed from globalValue (user) and there is a workspaceValue that has been left intact
+    // this is not 100% certain, but the configuration could have been changed even in a different vscode editor instance
+    // we should not be performing any action in the case where DevAssist settings haven't effectively changed
 
     // intentionally omiting to compare startupNotificationEnabled status
     if (devAssistConfigStatus.current.authID === devAssistConfigStatus.previous.authID &&
