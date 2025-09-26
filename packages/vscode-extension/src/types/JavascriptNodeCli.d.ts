@@ -29,7 +29,7 @@ export interface ExecutionEnvironmentContextConstructor {
 
 export interface SuiteCloudAuthProxyServiceInterface extends EventEmitter {
 	start(authId: string, localProxyPort: number): Promise<void>;
-	stop(): Promise<void>;
+	stop(): void;
 	reloadAccessToken(): Promise<void>
 }
 export interface SuiteCloudAuthProxyServiceConstructor {

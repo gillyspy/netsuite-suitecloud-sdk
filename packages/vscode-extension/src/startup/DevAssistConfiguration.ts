@@ -93,7 +93,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
             // add extra line to differenciate logs
             vsLogger.info('');
         } else { // devAssistConfigStatus.current.proxyEnabled === false
-            await stopDevAssistService(devAssistStatusBar);
+            stopDevAssistService(devAssistStatusBar);
             devAssistStatusBar.hide()
         }
     }
@@ -143,8 +143,8 @@ const PROXY_URL = DEVASSIST.PROXY_URL
 const getProxyUrl = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}${PROXY_URL.PATH}`;
 const getProyUrlWithoutPath = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}`;
 
-const stopDevAssistService = async (devAssistStatusBar: vscode.StatusBarItem) => {
-    await devAssistProxyService?.stop();
+const stopDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
+    devAssistProxyService?.stop();
 
     setErrorDevAssistStausBarMessage(devAssistStatusBar);
     // only notify that devassist service has been disabled in the transition from enabled to disabled
