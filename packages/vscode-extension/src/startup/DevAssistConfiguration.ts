@@ -124,7 +124,7 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     // adding listener to forward ServerError from SutieCloudAuthProxy to vscode suitecloud output
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR, (emitParams: { authId: string, message: string }) => {
         // just forwarding info into suitecloud output for now
-        vsLogger.error(`ServerError has occured when running DevAssist service.\nError: ${emitParams.message}`);
+        vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message));
         // add line sepparator
         vsLogger.error('');
     });

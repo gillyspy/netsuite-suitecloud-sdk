@@ -62,6 +62,7 @@
 	"DEVASSIST_SERVICE_IS_STOPPED_NOTIFICATION": "Something went wrong with SuiteCloud Dev Assist service.",
 	"DEVASSIST_SERVICE_IS_STOPPED_NOTIFICATION_BUTTON": "See Details and Settings",
 	"DEVASSIST_SERVICE_IS_STOPPED_OUTPUT": "There was a problem when starting SuiteCloud Dev Assist service.\n{0}",
+	"DEVASSIST_SERVICE_SERVER_ERROR_OUTPUT": "A server error has occurred while running SuiteCloud Dev Assist service.\nError: {0}",
 	"DEVASSIST_SERVICE_IS_STOPPED_STATUSBAR": "SuiteCloud Dev Assist has stopped",
 	"DEVASSIST_SERVICE_STARTUP_BUTTON_DONT_SHOW_AGAIN": "Don't show again",
 	"DEVASSIST_SERVICE_STARTUP_BUTTON_OPEN_SETTINGS": "Open Settings",
