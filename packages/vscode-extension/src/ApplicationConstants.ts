@@ -36,13 +36,13 @@ export const DEVASSIST = {
 		proxyEnabled: 'enable',
 		auhtID: 'authID',
 		localPort: 'localPort',
-		startupNotificationEnabled: 'showNotification'
+		startupNotificationDisabled: 'hideNotification'
 	},
 	DEFAULT_VALUES: {
 		proxyEnabled: false,
 		localPort: 8181,
 		authID: 'authid-to-be-used-by-dev-assist',
-		startupNotificationEnabled: true,
+		startupNotificationDisabled: false,
 	},
 	PROXY_URL: {
 		SCHEME: 'http://',

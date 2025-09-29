@@ -198,10 +198,10 @@
 					"order": 0,
 					"type": "string",
 					"default": "authid-to-be-used-by-dev-assist",
-					"markdownDescription": "Choose which NetSuite account credentials you want SuiteCloud Dev Assist service to use. Make sure your auth ID matches one of the IDs set up in your SuiteCloud extension configuration.\n* Not sure what auth IDs you have? Run `SuiteCloud: Manage Accounts` to list them.\n* If you're here for the first time, start by creating a project with `SuiteCloud: Create Project`, then use `SuiteCloud: Set Up Account` to create your first auth ID.\n\nWant more info? Check out [Creating a SuiteCloud Project in SuiteCloud Extension for Visual Studio Code](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=section_162938506015.html) and [Setting Up NetSuite Accounts in SuiteCloud Extension for Visual Studio Code](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=section_160147609118.html)."
-				}, 
+					"markdownDescription": "Choose which NetSuite account credentials you want SuiteCloud Dev Assist service to use. \n* Not sure what auth IDs you have? Run `SuiteCloud: Manage Accounts` to list them.\n\n\nWant more info? Check see [Setting up SuiteCloud Dev Assist for Cline in the SuiteCloud Extension for Visual Studio Code](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=article_0916095619.html)."
+				},
 				"suitecloud.devAssist.localPort": {
-					"order":1,
+					"order": 1,
 					"type": "number",
 					"default": 8181,
 					"description": "Pick the local port for SuiteCloud Dev Assist service."
@@ -209,14 +209,14 @@
 				"suitecloud.devAssist.enable": {
 					"order": 2,
 					"type": "boolean",
-					"default": true,
-					"markdownDescription": "By enabling the SuiteCloud Dev Assist Service, you're accepting the terms and conditions listed [here](devassist.license.link)\n\nTurn this on to make SuiteCloud Dev Assist service available in your Cline extension. You need to enter a valid auth ID and a local port. When the service is running and Cline is installed, update the following Cline settings:\n* `API Provider`: Set to `OpenAI Compatible`\n* `Base URL`: Set to `http://127.0.0.1:[local port]/api/internal/devassist`\n\nWant more info? See [Setting up SuiteCloud Dev Assist for Cline in the SuiteCloud Extension for Visual Studio Code](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=article_0916095619.html)."
+					"default": false,
+					"markdownDescription": "By enabling the SuiteCloud Dev Assist service, you're accepting the terms and conditions listed [here](link).\n\nTurn this on to make SuiteCloud Dev Assist service available and update the following Cline settings:\n* `API Provider`: Set to `OpenAI Compatible`\n* `Base URL`: Set to http://127.0.0.1:[proxy_port]"
 				},
-				"suitecloud.devAssist.showNotification": {
-					"order":3,
+				"suitecloud.devAssist.hideNotification": {
+					"order": 3,
 					"type": "boolean",
-					"default": true,
-					"description": "Want a heads-up each time you start up and the SuiteCloud Dev Assist service isn't running? Turn this on to get a notification."
+					"default": false,
+					"description": "Don't want to get a welcome notification for SuiteCloud Dev Assist? Check this box."
 				}
 			}
 		}

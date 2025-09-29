@@ -7,13 +7,13 @@ import { DEVASSIST_SERVICE, REFRESH_AUTHORIZATION } from '../service/Translation
 import { VSTranslationService } from '../service/VSTranslationService';
 import type { SuiteCloudAuthProxyServiceInterface } from '../types/JavascriptNodeCli';
 import { AuthenticationUtils, ExecutionEnvironmentContext, SuiteCloudAuthProxyService } from '../util/ExtensionUtil';
-
+import { output } from '../suitecloud';
 
 type devAssistConfig = {
     proxyEnabled: boolean,
     authID: string,
     localPort: number,
-    startupNotificationEnabled: boolean
+    startupNotificationDisabled: boolean
 };
 
 const devAssistConfigStatus: { current: devAssistConfig, previous: devAssistConfig } = {
@@ -21,13 +21,13 @@ const devAssistConfigStatus: { current: devAssistConfig, previous: devAssistConf
         proxyEnabled: false,
         authID: '',
         localPort: 0,
-        startupNotificationEnabled: true,
+        startupNotificationDisabled: false,
     },
     previous: {
         proxyEnabled: false,
         authID: '',
         localPort: 0,
-        startupNotificationEnabled: true
+        startupNotificationDisabled: false
     }
 }
 
@@ -50,8 +50,8 @@ const translationService = new VSTranslationService();
 export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.StatusBarItem) => {
     updateDevAssistConfigStatus();
 
-    if (devAssistConfigStatus.current.startupNotificationEnabled && !devAssistConfigStatus.current.proxyEnabled) {
-        vsNotificationService.showDevAssistStartUpMessage(translationService.getMessage(DEVASSIST_SERVICE.STARTUP.MESSAGE))
+    if (!devAssistConfigStatus.current.startupNotificationDisabled && !devAssistConfigStatus.current.proxyEnabled) {
+        showDevAssistStartUpNotification();
     }
 
     if (devAssistConfigStatus.current.proxyEnabled) {
@@ -83,7 +83,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
             devAssistStatusBar.show();
             try {
                 if (devAssistProxyService) {
-                    await devAssistProxyService?.stop();
+                    devAssistProxyService?.stop();
                 } else {
                     initializeDevAssistService(devAssistStatusBar);
                 }
@@ -157,11 +157,47 @@ const stopDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
     }
 }
 
+const showDevAssistStartUpNotification = () => {
+    const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.STARTUP.MESSAGE);
+    const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+        {
+            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.OPEN_SETTINGS),
+            buttonAction: openDevAssistSettings
+        },
+        {
+            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.DONT_SHOW_AGAIN),
+            buttonAction: () => {
+                const devAssistConfigSection = vscode.workspace.getConfiguration(DEVASSIST.CONFIG_KEYS.devAssistSection);
+                devAssistConfigSection.update(DEVASSIST.CONFIG_KEYS.startupNotificationDisabled, true);
+            }
+        }
+    ];
+    vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
+}
+
 const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistStatusBar: vscode.StatusBarItem) => {
     // console.log(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`)
     setErrorDevAssistStausBarMessage(devAssistStatusBar)
     vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.OUTPUT, error));
-    vsNotificationService.showCommandErrorDevAssist(translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION));
+    const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
+    const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+        {
+            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON),
+            buttonAction: () => {
+                // show suitecloud output and devassist settings
+                output.show()
+                openDevAssistSettings();
+            },
+        },
+    ];
+    vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
+}
+
+const openDevAssistSettings = () => {
+    vscode.commands.executeCommand(
+        'workbench.action.openWorkspaceSettings',
+        DEVASSIST.CONFIG_KEYS.devAssistSection
+    );
 }
 
 const updateDevAssistConfigStatus = (): void => {
@@ -191,9 +227,9 @@ const getDevAssistCurrentSettings = (): devAssistConfig => {
     const proxyEnabled = devAssistConfigSection.get<boolean>(DEVASSIST.CONFIG_KEYS.proxyEnabled, DEVASSIST.DEFAULT_VALUES.proxyEnabled);
     const authID = devAssistConfigSection.get<string>(DEVASSIST.CONFIG_KEYS.auhtID, DEVASSIST.DEFAULT_VALUES.authID);
     const localPort = devAssistConfigSection.get<number>(DEVASSIST.CONFIG_KEYS.localPort, DEVASSIST.DEFAULT_VALUES.localPort);
-    const startupNotificationEnabled = devAssistConfigSection.get<boolean>(DEVASSIST.CONFIG_KEYS.startupNotificationEnabled, DEVASSIST.DEFAULT_VALUES.startupNotificationEnabled);
+    const startupNotificationEnabled = devAssistConfigSection.get<boolean>(DEVASSIST.CONFIG_KEYS.startupNotificationDisabled, DEVASSIST.DEFAULT_VALUES.startupNotificationDisabled);
 
-    return { proxyEnabled, authID, localPort, startupNotificationEnabled }
+    return { proxyEnabled, authID, localPort, startupNotificationDisabled: startupNotificationEnabled }
 }
 
 const devAssistConfigStatusHasEffectivelyChanged = (): boolean => {
@@ -202,7 +238,7 @@ const devAssistConfigStatusHasEffectivelyChanged = (): boolean => {
     // this is not 100% certain, but the configuration could have been changed even in a different vscode editor instance
     // we should not be performing any action in the case where DevAssist settings haven't effectively changed
 
-    // intentionally omiting to compare startupNotificationEnabled status
+    // intentionally omiting to compare startupNotificationDisabled status
     if (devAssistConfigStatus.current.authID === devAssistConfigStatus.previous.authID &&
         devAssistConfigStatus.current.localPort === devAssistConfigStatus.previous.localPort &&
         devAssistConfigStatus.current.proxyEnabled === devAssistConfigStatus.previous.proxyEnabled
@@ -251,4 +287,3 @@ const refreshAuthorizationWithNotifications = async (authID: string) => {
     );
     return true;
 }
-
