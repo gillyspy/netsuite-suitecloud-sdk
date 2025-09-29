@@ -36,7 +36,7 @@ export const DEVASSIST = {
 		proxyEnabled: 'enable',
 		auhtID: 'authID',
 		localPort: 'localPort',
-		startupNotificationDisabled: 'hideNotification'
+		startupNotificationDisabled: 'hideWelcomeNotification'
 	},
 	DEFAULT_VALUES: {
 		proxyEnabled: false,
