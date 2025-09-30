@@ -227,7 +227,7 @@
 		"watch": "tsc -watch -p ./"
 	},
 	"dependencies": {
-		"@oracle/suitecloud-cli": "^3.1.0-snapshot-241"
+		"@oracle/suitecloud-cli": "^3.1.0"
 	},
 	"devDependencies": {
 		"@types/mocha": "10.0.10",
