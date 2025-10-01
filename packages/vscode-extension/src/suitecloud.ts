@@ -84,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// this command is used to open devAssist settings by clicking on devAssistStatusBar
 	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.opensettings',
-		() => vscode.commands.executeCommand('workbench.action.openSettings', DEVASSIST.CONFIG_KEYS.devAssistSection))
+		() => vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', DEVASSIST.CONFIG_KEYS.devAssistSection))
 	);
 
 	// add watchers needed to update the status bars
