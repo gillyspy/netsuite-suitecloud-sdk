@@ -19,6 +19,16 @@ export type SdkOperationResult<T> = {
 	isSuccess(): false;
 }
 
+export interface ConsoleLoggerInterface {
+	info(message: string): void;
+	result(message: string): void;
+	warning(message: string): void;
+	error(message: string): void;
+}
+export interface ConsoleLoggerConstructor {
+	new(): ConsoleLoggerInterface
+}
+
 export interface ExecutionEnvironmentContextInterface {
 	getPlatform(): string;
 	getPlatformVersion(): string;

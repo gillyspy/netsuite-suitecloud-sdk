@@ -64,7 +64,7 @@ export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.St
         }
     } else {
         // TODO: We might want to propose to configure and enable service
-        vsLogger.log(translationService.getMessage(DEVASSIST_SERVICE.IS_DISABLED.OUTPUT));
+        vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_DISABLED.OUTPUT));
     }
     // add extra line to differenciate logs
     vsLogger.info('');
