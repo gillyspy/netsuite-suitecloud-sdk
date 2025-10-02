@@ -3,7 +3,7 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 import type { ActionResult, AuthListData } from '../types/ActionResult';
-import type { SdkOperationResult, SuiteCloudAuthProxyServiceConstructor, ExecutionEnvironmentContextConstructor, ExecutionEnvironmentContextInterface } from '../types/JavascriptNodeCli'
+import type { ConsoleLoggerConstructor, ExecutionEnvironmentContextConstructor, ExecutionEnvironmentContextInterface, SdkOperationResult, SuiteCloudAuthProxyServiceConstructor } from '../types/JavascriptNodeCli';
 
 
 export const SUITESCRIPT_TYPES: { id: string; name: string }[] = require('@oracle/suitecloud-cli/src/metadata/SuiteScriptTypesMetadata');
@@ -29,7 +29,7 @@ export const CommandActionExecutor = require('@oracle/suitecloud-cli/src/core/Co
 export const CommandsMetadataService = require('@oracle/suitecloud-cli/src/core/CommandsMetadataService');
 export const CommandOptionsValidator = require('@oracle/suitecloud-cli/src/core/CommandOptionsValidator');
 export const CLIConfigurationService = require('@oracle/suitecloud-cli/src/core/extensibility/CLIConfigurationService');
-export const ConsoleLogger = require('@oracle/suitecloud-cli/src/loggers/ConsoleLogger');
+export const ConsoleLogger: ConsoleLoggerConstructor = require('@oracle/suitecloud-cli/src/loggers/ConsoleLogger');
 export const AccountFileCabinetService = require('@oracle/suitecloud-cli/src/services/AccountFileCabinetService');
 export const EnvironmentInformationService = require('@oracle/suitecloud-cli/src/services/EnvironmentInformationService');
 export const FileCabinetService = require('@oracle/suitecloud-cli/src/services/FileCabinetService');
