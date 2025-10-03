@@ -19,29 +19,29 @@ export type SdkOperationResult<T> = {
 	isSuccess(): false;
 }
 
-export interface ConsoleLoggerInterface {
+export interface ConsoleLoggerInstance {
 	info(message: string): void;
 	result(message: string): void;
 	warning(message: string): void;
 	error(message: string): void;
 }
 export interface ConsoleLoggerConstructor {
-	new(): ConsoleLoggerInterface
+	new(): ConsoleLoggerInstance
 }
 
-export interface ExecutionEnvironmentContextInterface {
+export interface ExecutionEnvironmentContextInstance {
 	getPlatform(): string;
 	getPlatformVersion(): string;
 }
 export interface ExecutionEnvironmentContextConstructor {
-	new(params?: { platform?: string, platformVersion?: string }): ExecutionEnvironmentContextInterface;
+	new(params?: { platform?: string, platformVersion?: string }): ExecutionEnvironmentContextInstance;
 }
 
-export interface SuiteCloudAuthProxyServiceInterface extends EventEmitter {
+export interface SuiteCloudAuthProxyServiceInstance extends EventEmitter {
 	start(authId: string, localProxyPort: number): Promise<void>;
 	stop(): void;
 	reloadAccessToken(): Promise<void>
 }
 export interface SuiteCloudAuthProxyServiceConstructor {
-	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInterface): SuiteCloudAuthProxyServiceInterface;
+	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInstance): SuiteCloudAuthProxyServiceInstance;
 }
