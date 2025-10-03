@@ -26,7 +26,7 @@ export interface ConsoleLoggerInstance {
 	error(message: string): void;
 }
 export interface ConsoleLoggerConstructor {
-	new(): ConsoleLoggerInterface
+	new(): ConsoleLoggerInstance
 }
 
 export interface ExecutionEnvironmentContextInstance {
