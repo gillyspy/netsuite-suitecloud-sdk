@@ -5,7 +5,6 @@ import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
 import { DEVASSIST_SERVICE, REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
 import { VSTranslationService } from '../service/VSTranslationService';
-import type { SuiteCloudAuthProxyServiceInterface } from '../types/JavascriptNodeCli';
 import { AuthenticationUtils, ExecutionEnvironmentContext, SuiteCloudAuthProxyService } from '../util/ExtensionUtil';
 import { output } from '../suitecloud';
 
@@ -41,7 +40,7 @@ const executionEnvironmentContext = new ExecutionEnvironmentContext({
     platformVersion: vscode.version,
 });
 
-let devAssistProxyService: SuiteCloudAuthProxyServiceInterface;
+let devAssistProxyService: SuiteCloudAuthProxyService;
 const vsLogger: VSConsoleLogger = new VSConsoleLogger();
 const vsNotificationService = new MessageService('DevAssistService');
 const translationService = new VSTranslationService();

@@ -3,7 +3,7 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 import type { ActionResult, AuthListData } from '../types/ActionResult';
-import type { ConsoleLoggerConstructor, ExecutionEnvironmentContextConstructor, ExecutionEnvironmentContextInterface, SdkOperationResult, SuiteCloudAuthProxyServiceConstructor } from '../types/JavascriptNodeCli';
+import type { ConsoleLoggerConstructor, ExecutionEnvironmentContextConstructor, ExecutionEnvironmentContextInstance, SdkOperationResult, SuiteCloudAuthProxyServiceConstructor } from '../types/JavascriptNodeCli';
 
 
 export const SUITESCRIPT_TYPES: { id: string; name: string }[] = require('@oracle/suitecloud-cli/src/metadata/SuiteScriptTypesMetadata');
@@ -45,10 +45,22 @@ export const AuthenticationUtils: {
 	[key: string]: any;
 	getProjectDefaultAuthId(projectFolder?: string): string;
 	getAuthIds(sdkPath: string): Promise<ActionResult<AuthListData>>;
-	refreshAuthorization(authid: string, sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInterface): Promise<SdkOperationResult<null>>
+	refreshAuthorization(authid: string, sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInstance): Promise<SdkOperationResult<null>>
 } = require('@oracle/suitecloud-cli/src/utils/AuthenticationUtils');
 
-export const SuiteCloudAuthProxyService: SuiteCloudAuthProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/SuiteCloudAuthProxyService').SuiteCloudAuthProxyService;
+/**
+ * Approach for adapting a JavaScript class for TypeScript use:
+ * 
+ * 1. Define TypeScript type definitions for both the class instance and the class constructor.
+ * 2. Import the JavaScript class using the constructor type for proper typing support.
+ * 3. Create a new TypeScript class that extends the (typed) imported JavaScript class, with an empty body.
+ * 
+ * By extending from the typed JavaScript class, the new TypeScript class inherits the code implementation from the original JavaScript class,
+ * while also gaining type safety. This makes it possible to use the new TypeScript class as both the constructor and instance type—enabling seamless,
+ * type-safe integration of legacy JavaScript classes in TypeScript.
+ */
+const SuiteCloudAuthProxyServiceTypedJSClass: SuiteCloudAuthProxyServiceConstructor = require('@oracle/suitecloud-cli/src/services/SuiteCloudAuthProxyService').SuiteCloudAuthProxyService;
+export class SuiteCloudAuthProxyService extends SuiteCloudAuthProxyServiceTypedJSClass { };
 
 export const AccountCredentialsFormatter: {
 	getInfoString(accountCredentials: any): string;
