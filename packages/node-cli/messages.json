@@ -194,6 +194,10 @@
 	"COMMAND_SETUPACCOUNT_OUTPUT_REUSED_AUTH_ID": "This project will use the authentication ID \"{0}\" as default for the following company and role: {1} [{2}]. If you want to change your default credentials, run \"suitecloud account:setup\" again.",
 
 	"COMMAND_SETUPACCOUNTCI_OUTPUT_NEW_OAUTH": "The authentication was successful with the following account and role: {0} [{1}]. This project will use the authentication ID \"{2}\" as default.",
+	"COMMAND_SETUPACCOUNTCI_OUTPUT_SELECT_DEFAULT_ACCOUNT": "The authentication ID was successfully changed. This project will use the auth ID \"{0}\" as default.",
+	"COMMAND_SETUPACCOUNTCI_OPTIONS_IS_MANDATORY_SETUP_MODE": "\"{0}\" option is mandatory in setup mode.",
+	"COMMAND_SETUPACCOUNTCI_OPTIONS_IS_NOT_ALLOWED_SELECT_MODE": "\"{0}\" option is not allowed in select mode.",
+	"COMMAND_SETUPACCOUNTCI_NOT_EXISTING_AUTH_ID" : "Authentication ID \"{0}\" does not exist.",
 
 	"COMMAND_UPDATE_ERRORS_CUSTOM_RECORD": "{0} was not updated. {1}",
 	"COMMAND_UPDATE_ERRORS_NO_OBJECTS_IN_PROJECT": "The \"Objects\" folder of your project does not contain any objects. Run \"suitecloud object:import -i\" to import objects from your account to your project.",
@@ -281,6 +285,12 @@
 	"SDK_DOWNLOAD_SERVICE_GET_TIMEOUT": "GET request timeout.",
 	"SDK_DOWNLOAD_SERVICE_WRONG_DOWNLOAD_URL_PROTOCOL": "Invalid SDK jar file download url protocol. Only http: or https: are allowed.",
 
+	"DEV_ASSIST_PROXY_SERVICE_ERROR_MISSING_AUTH_ID": "The required parameter \"AuthId\" is missing.",
+	"DEV_ASSIST_PROXY_SERVICE_ERROR_MISSING_PORT": "The required parameter \"Port\" is missing.",
+	"DEV_ASSIST_PROXY_SERVICE_ERROR_PORT_MUST_BE_NUMBER" : "The required parameter \"Port\" must be a number.",
+	"DEV_ASSIST_PROXY_SERVICE_NOT_EXISTING_AUTH_ID" : "AuthId {0} is not available",
+	"DEV_ASSIST_PROXY_SERVICE_NEED_TO_REAUTHENTICATE" : "Manual re-authentication is needed. You’ll need to sign in again to continue.",
+
 	"UNIT_TEST_TEST_FAILED": "The tests failed.",
 	"UNIT_TEST_TEST_FAILURES_PRESENT": "There are some Test failures. The deployment will not continue.",
 
@@ -295,3 +305,4 @@
 
 	"YES": "Yes"
 }
+

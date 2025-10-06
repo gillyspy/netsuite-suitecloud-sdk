@@ -35,6 +35,21 @@ export function createAuthIDStatusBar(): vscode.StatusBarItem {
 }
 
 /**
+ * Create the status bar item used to display DevAssist service status
+ *
+ * @returns {vscode.StatusBarItem} The authID status bar item
+ */
+export function createDevAssistStatusBar(): vscode.StatusBarItem {
+	const devAssistStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, STATUS_BAR_PRIORITY - 2);
+	devAssistStatusBar.tooltip = 'Shows DevAssist service status';
+	// this devAssistStatusBar visibility is controlled by DevAssistConfiguration.ts (startDevAssistProxyIfEnabled, devAssistConfigurationChangeHandler)
+	// initially hidden because devassist service could be disabled 
+	devAssistStatusBar.hide();
+	devAssistStatusBar.command ='suitecloud.opensettings';
+	return devAssistStatusBar;
+}
+
+/**
  * Update the active suitecloud project and used authID based on textEditor
  *
  * @param {vscode.TextEditor|undefined} textEditor

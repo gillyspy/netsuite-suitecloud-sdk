@@ -2,7 +2,7 @@
 	"account:manageauth": {
 		"options": {
 			"info": {
-				"description": "Prints the following information for the specified authentication ID: account ID, role ID, and url. Usage: account:manageauth --info [myAuthId]."
+					"description": "Prints the following information for the specified authentication ID: account ID, role ID, and url. Usage: account:manageauth --info [myAuthId]."
 			},
 			"list": {
 				"description": "Prints a list of all the configured authentication IDs. Usage: account:manageauth --list."
@@ -19,7 +19,7 @@
 		}
 	},
 	"account:setup:ci": {
-		"description": "Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. This command does not require browser-based login to NetSuite.\nTo change the default auth ID for the project, run: suitecloud account:setup.",
+		"description": "Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. No browser-based login required.\nTo change the default auth ID later, run: suitecloud account:setup:ci --select [myAuthId].",
 		"options": {
 			"domain": {
 				"name": "domain",
@@ -33,6 +33,28 @@
 			},
 			"url": {
 				"disableInIntegrationMode": true
+			},
+			"account": {
+				"mandatory": false
+			},
+			"authid": {
+				"mandatory": false
+			},
+			"certificateid": {
+				"mandatory": false
+			},
+			"privatekeypath": {
+				"mandatory": false
+			},
+			"select": {
+				"name": "select",
+				"option": "select",
+				"description": "Selects an existing auth ID as the default for your SuiteCloud project. Usage account:setup:ci --select myAuthId.",
+				"mandatory": false,
+				"type": "SINGLE",
+				"usage": "",
+				"defaultOption": false,
+				"disableInIntegrationMode": false
 			}
 		}
 	},
