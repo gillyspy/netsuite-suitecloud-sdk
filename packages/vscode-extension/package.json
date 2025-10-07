@@ -12,7 +12,7 @@
 	"publisher": "Oracle",
 	"license": "UPL-1.0",
 	"private": true,
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"icon": "resources/extension_icon_dark.png",
 	"repository": {
 		"type": "git",
@@ -105,6 +105,12 @@
 				"command": "suitecloud.validate",
 				"title": "Validate Project",
 				"category": "SuiteCloud"
+			},
+			{
+				"command": "suitecloud.opensettings",
+				"title": "Open DevAssist settings",
+				"category": "SuiteCloud",
+				"enablement": "false"
 			}
 		],
 		"keybindings": [
@@ -184,6 +190,35 @@
 					"group": "suitecloud@1"
 				}
 			]
+		},
+		"configuration": {
+			"title": "SuiteCloud",
+			"properties": {
+				"suitecloud.devAssist.authID": {
+					"order": 0,
+					"type": "string",
+					"default": "authid-to-be-used-by-dev-assist",
+					"markdownDescription": "Choose which NetSuite account credentials you want SuiteCloud Dev Assist service to use. \n* Not sure what auth IDs you have? Run `SuiteCloud: Manage Accounts` to list them.\n\n\nWant more info? See [Setting up SuiteCloud Dev Assist for Cline in the SuiteCloud Extension for Visual Studio Code](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=article_0916095619.html)."
+				},
+				"suitecloud.devAssist.localPort": {
+					"order": 1,
+					"type": "number",
+					"default": 8181,
+					"description": "Pick the local port for SuiteCloud Dev Assist service."
+				},
+				"suitecloud.devAssist.enable": {
+					"order": 2,
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "By enabling the SuiteCloud Dev Assist service, you're accepting the terms and conditions listed [here](https://github.com/oracle/netsuite-suitecloud-sdk/blob/4442d9f219f741e53edad6400a63c98735a99c73/packages/vscode-extension/SUITECLOUD_DEV_ASSIST_TERMS_AND_CONDITIONS).\n\nTurn this on to make SuiteCloud Dev Assist service available and update the following Cline settings:\n* `API Provider`: Set to `OpenAI Compatible`.\n* `Base URL`: Set to `http://127.0.0.1:[local_port]/api/internal/devassist`."
+				},
+				"suitecloud.devAssist.hideWelcomeNotification": {
+					"order": 3,
+					"type": "boolean",
+					"default": false,
+					"description": "Don't want to get a welcome notification for SuiteCloud Dev Assist? Check this box."
+				}
+			}
 		}
 	},
 	"scripts": {
@@ -192,7 +227,7 @@
 		"watch": "tsc -watch -p ./"
 	},
 	"dependencies": {
-		"@oracle/suitecloud-cli": "^3.0.0"
+		"@oracle/suitecloud-cli": "^3.1.0"
 	},
 	"devDependencies": {
 		"@types/mocha": "10.0.10",
