@@ -198,7 +198,7 @@
 					"order": 0,
 					"type": "string",
 					"default": "authid-to-be-used-by-dev-assist",
-					"markdownDescription": "Choose which NetSuite account credentials you want SuiteCloud Developer Assistant service to use. Not sure what auth IDs you have? Run `SuiteCloud: Manage Accounts` to list them.\n\nWant more info? See [help documentation](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=article_0916095619.html)."
+					"markdownDescription": "Choose which NetSuite account credentials you want SuiteCloud Developer Assistant service to use. Not sure which auth IDs you have? Run `SuiteCloud: Manage Accounts` to list them.\n\nWant more information on setting up a NetSuite account? See [NetSuite Help Center](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=section_160147609118.html)."
 				},
 				"suitecloud.developerAssistant.localPort": {
 					"order": 1,
@@ -210,13 +210,13 @@
 					"order": 2,
 					"type": "boolean",
 					"default": false,
-					"markdownDescription": "Enables SuiteCloud Developer Assistant service. By enabling it you're accepting the [terms and conditions](https://github.com/oracle/netsuite-suitecloud-sdk/blob/4442d9f219f741e53edad6400a63c98735a99c73/packages/vscode-extension/SUITECLOUD_DEV_ASSIST_TERMS_AND_CONDITIONS).\n\nTurn this on to make SuiteCloud Developer Assistant service available and update the following Cline settings:\n* `API Provider`: Set to `OpenAI Compatible`.\n* `Base URL`: Set to `http://127.0.0.1:[local_port]/api/internal/devassist`."
+					"markdownDescription": "Check this box to enable SuiteCloud Developer Assistant service. By enabling it, you accept the [terms and conditions](https://github.com/oracle/netsuite-suitecloud-sdk/blob/4442d9f219f741e53edad6400a63c98735a99c73/packages/vscode-extension/SUITECLOUD_DEV_ASSIST_TERMS_AND_CONDITIONS).\n\n To make it available in Cline, go to Cline settings and update the following:\n* `API Provider`: Set to `OpenAI Compatible`.\n* `Base URL`: Set to `http://127.0.0.1:[local_port]/api/internal/devassist`.\n* `OpenAI Compatible API Key`: Set to any text of your choice.\n\nWant more information on setting up SuiteCloud Developer Assistant? See [Netsuite Help Center](https://nlcorp.app.netsuite.com/app/help/helpcenter.nl?fid=article_0916095619.html)."
 				},
-				"suitecloud.developerAssistant.hideWelcomeNotification": {
+				"suitecloud.developerAssistant.disableWelcomeNotification": {
 					"order": 3,
 					"type": "boolean",
 					"default": false,
-					"description": "Don't want to get a welcome notification for SuiteCloud Developer Assistant? Check this box."
+					"description": "Check this box if you don't want to receive a welcome notification for SuiteCloud Developer Assistant service."
 				}
 			}
 		}
