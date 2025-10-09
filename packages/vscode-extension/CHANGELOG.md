@@ -1,5 +1,9 @@
 # Change Log
 
+## 3.1.0
+
+- New SuiteCloud Developer Assistant feature
+
 ## 3.0.0
 
 - Secure Credentials Storage for SuiteCloud SDK
