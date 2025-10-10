@@ -99,9 +99,9 @@ You can now configure the SuiteCloud Developer Assistant for Cline with SuiteClo
 To set up SuiteCloud Developer Assistant for Cline:
 1.  Open SuiteCloud Extension for VS Code and click the SuiteCloud Developer Assistant welcome message to go to the SuiteCloud Extension for VS Code settings.
 2.  In **Workspace** > **SuiteCloud**, configure the fields as follows:
-    * **SuiteCloud Developer Assistant Service Auth ID:** Set to the auth ID you want to use for the SuiteCloud Developer Assistant service.
-    * **SuiteCloud: Enable Authentication Proxy:** Set it to enabled.
-    * **Port:** Leave blank, because it is autopopulated.
+    * **Developer Assistant Auth ID:** Set to the auth ID you want to use for the SuiteCloud Developer Assistant service.
+    * **Developer Assistant: Enable:** Set it to enabled.
+    * **Local Port:** Leave blank, because it is autopopulated.
 3. In the activity bar, go to the Cline extension. Click the provider/model selector, and configure the fields as follows:
       * **API Provider:** Set to Open AI Compatible.
       * **Base URL:** Set to the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration.
