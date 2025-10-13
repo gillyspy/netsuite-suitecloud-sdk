@@ -54,7 +54,7 @@
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_CANCEL_PROCESS": "Cancel the deployment process",
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_DISPLAY_WARNING": "Display a warning and continue the deployment process",
 
-	"DEVASSIST_SERVICE_IS_DISABLED_NOTIFICATION": "SuiteCloud Developer Assistant service has been disabled. ",
+	"DEVASSIST_SERVICE_IS_DISABLED_NOTIFICATION": "SuiteCloud Developer Assistant service has been disabled.",
 	"DEVASSIST_SERVICE_IS_DISABLED_OUTPUT": "SuiteCloud Developer Assistant service has been disabled.",
 	"DEVASSIST_SERVICE_IS_RUNNING_NOTIFICATION": "SuiteCloud Developer Assistant service is running. Use Cline Base URL to: {0}",
 	"DEVASSIST_SERVICE_IS_RUNNING_OUTPUT": "SuiteCloud Developer Assistant service is now running at {0} and is using the {1} auth ID.\nUse this Cline Base URL {2}.",
