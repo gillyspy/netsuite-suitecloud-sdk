@@ -90,7 +90,7 @@ The selected account is set as default for the project.
 
 ## SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code
 
-You can now configure the SuiteCloud Developer Assistant using Cline with SuiteCloud Extension for Visual Studio Code. SuiteCloud Developer Assistant is an AI-powered coding assistant designed for SuiteCloud developers and administrators. Integrated with Visual Studio Code through the Cline extension, it uses advanced language models specialized for SuiteCloud and SuiteScript to support NetSuite customization tasks. With SuiteCloud Developer Assistant, you can:
+You can now configure the SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code. SuiteCloud Developer Assistant is an AI-powered coding assistant designed for SuiteCloud developers and administrators. Integrated with Visual Studio Code through the Cline extension, it uses advanced language models specialized for SuiteCloud and SuiteScript to support NetSuite customization tasks. With SuiteCloud Developer Assistant, you can:
   * Get real-time, context-aware coding assistance within your SuiteCloud projects
   * Generate SuiteScript 2.1 code based on your input
   * Create and manage XML custom objects to speed up development
