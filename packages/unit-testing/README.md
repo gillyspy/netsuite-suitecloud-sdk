@@ -50,7 +50,7 @@ However, if you want to configure SuiteCloud Unit Testing manually, do the follo
 7. Create a `sample-test.js` file, inside of the `__tests__` folder, with the following content:
     ```javascript
     describe('Basic jest test with simple assert', () => {
-        it('should assert stings are equal', () => {
+        it('should assert strings are equal', () => {
             const a = 'foobar';
             const b = 'foobar';
             expect(a).toMatch(b);
@@ -62,7 +62,7 @@ to run your test. You should see an output similar to the following:
     ```
     PASS  __tests__/sample-test.js
     Basic jest test with simple assert
-        √ should assert stings are equal (2ms)
+        √ should assert strings are equal (2ms)
     ```
 
 **You successfully ran your first test for a SuiteCloud project!**
