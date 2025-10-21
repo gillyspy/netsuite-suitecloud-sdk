@@ -173,13 +173,14 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 */
 	_buildRequestOptions(request) {
 		const authorization = 'Bearer ' + this._accessToken;
+		const host = this._targetHost;
 
 		const requestOptions = {
 			hostname: this._targetHost,
 			port: TARGET_SERVER_PORT,
 			path: request.url,
 			method: request.method,
-			headers: { ...request.headers, authorization },
+			headers: { ...request.headers, host, authorization },
 		};
 
 		// Add agent for insecure connections when connecting to runboxes
