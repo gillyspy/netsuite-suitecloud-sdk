@@ -8,6 +8,7 @@ const {
 const assert = require('assert');
 const { throwValidationException } = require('../../../utils/ExceptionUtils');
 const NodeTranslationService = require('../../../services/NodeTranslationService');
+const TRANSLATION_KEYS = require('../../../services/TranslationKeys');
 const {
 	ACCOUNT_SETUP_CI: {
 		COMMAND: {
@@ -24,7 +25,7 @@ class AccountSetupCiValidation {
 		this._runInInteractiveMode = runInInteractiveMode;
 	}
 
-	validateAuthIDFormat(authId) {
+	validateAuthIDFormat(authId, isSetupMode) {
 		const validateResult = showValidationResults(
 			authId,
 			validateFieldIsNotEmpty,
@@ -32,8 +33,14 @@ class AccountSetupCiValidation {
 			validateAlphanumericHyphenUnderscore,
 			validateMaximumLength,
 		);
-		if (typeof validateResult === 'string') {
-			throw validateResult;
+		if (validateResult !== true) {
+			throwValidationException(
+				[NodeTranslationService.getMessage(TRANSLATION_KEYS.COMMAND_OPTIONS.VALIDATION_SHOW_ERROR_MESSAGE,
+					isSetupMode ? OPTIONS.AUTHID : OPTIONS.SELECT, validateResult
+				)],
+				false,
+				this._commandMetadata
+			);
 		}
 	}
 
@@ -42,11 +49,12 @@ class AccountSetupCiValidation {
 	 * and the setup mode --authid <authI> --certificateid <certId>--privatekeypath <privatekeypath> -account <account> -domain <domain>
 	 * all mandatory except domain which is optional.
 	 * @param params
+	 * @param isSetupMode
 	 */
-	validateActionParametersByMode(params) {
+	validateActionParametersByMode(params, isSetupMode) {
 		assert(this._commandMetadata);
 		assert(this._commandMetadata.options);
-		const validationErrors = this._isSetupMode(params) ?
+		const validationErrors = isSetupMode ?
 			this._validateActionParametersSetupMode(params) :
 			this._validateActionParametersSelectMode(params);
 
@@ -85,10 +93,6 @@ class AccountSetupCiValidation {
 		return Object.keys(params)
 			.filter(paramKey => paramKey !== OPTIONS.SELECT)
 			.map(notAllowedParam => NodeTranslationService.getMessage(ERRORS.IS_NOT_ALLOWED_SELECT_MODE, notAllowedParam));
-	}
-
-	_isSetupMode(params) {
-		return (!params[OPTIONS.SELECT]);
 	}
 
 }

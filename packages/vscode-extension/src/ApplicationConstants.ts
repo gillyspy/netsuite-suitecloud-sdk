@@ -32,11 +32,11 @@ export const ACP_UNRESTRICTED_FOLDERS: string[] = [
 export const DEVASSIST = {
 	// should be in sycn with vscode-extension package.json config properties
 	CONFIG_KEYS: {
-		devAssistSection: 'suitecloud.devAssist',
+		devAssistSection: 'suitecloud.developerAssistant',
 		proxyEnabled: 'enable',
 		auhtID: 'authID',
 		localPort: 'localPort',
-		startupNotificationDisabled: 'hideWelcomeNotification'
+		startupNotificationDisabled: 'disableWelcomeNotification'
 	},
 	DEFAULT_VALUES: {
 		proxyEnabled: false,
