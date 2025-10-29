@@ -65,8 +65,11 @@ export default class VSConsoleLogger extends ConsoleLogger {
 		this.println(message);
 	}
 
-	// Log the current Timestamp
-	// used to preface specific Logs outside the execution context of SuiteCloud commands (where no execution details are available)
+	/**
+	 * Logs the current timestamp ("YYYY-MM-DD hh:mm:ss").
+	 *
+	 * Use this method to preface specific logs outside the execution context of SuiteCloud commands (classes where no execution details are available).
+	 */
 	public printTimestamp() : void {
 		this.addExecutionDetailsToLog = false;
 		this.println(getTimestamp());
