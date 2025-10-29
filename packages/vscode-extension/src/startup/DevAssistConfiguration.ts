@@ -34,7 +34,7 @@ const PROXY_SERVICE_EVENTS = {
     REAUTHORIZE: 'authRefreshManual',
     SERVER_ERROR: 'serverError',
     ALREADY_USED_PORT: 'alreadyUsedPort',
-    LISTENING_PORT_ERROR: 'listeningPortError'
+    PROXY_ERROR: 'proxyError'
 }
 
 const executionEnvironmentContext = new ExecutionEnvironmentContext({
@@ -125,20 +125,20 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
 
     // adding listener to forward ServerError from SuiteCloudAuthProxy to vscode suitecloud output
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR, (emitParams: { authId: string, message: string }) => {
-		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message); //TODO: verify wrapper message
+		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message);
 		showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.SERVER_ERROR, errorMsgWrap, devAssistStatusBar);
         vsLogger.error('');
 	});
 
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, (emitParams: { authId: string, message: string }) => {
-		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message) //TODO: verify wrapper message
+		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message);
         showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, errorMsgWrap, devAssistStatusBar);
 		vsLogger.error('');
     });
 
-    devAssistProxyService.on(PROXY_SERVICE_EVENTS.LISTENING_PORT_ERROR, (emitParams: { authId: string, message: string }) => {
-		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message); //TODO: verify wrapper message
-        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.LISTENING_PORT_ERROR, errorMsgWrap, devAssistStatusBar);
+    devAssistProxyService.on(PROXY_SERVICE_EVENTS.PROXY_ERROR, (emitParams: { authId: string, message: string }) => {
+		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message);
+        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.PROXY_ERROR, errorMsgWrap, devAssistStatusBar);
         vsLogger.error('');
     });
 

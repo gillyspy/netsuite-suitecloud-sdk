@@ -14,7 +14,7 @@ const EVENTS = {
 	SERVER_ERROR: 'serverError',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
 	ALREADY_USED_PORT: 'alreadyUsedPort',
-	LISTENING_PORT_ERROR: 'listeningPortError'
+	PROXY_ERROR: 'proxyError'
 };
 
 /** Authentication methods */
@@ -105,14 +105,11 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 		this._localProxy.on('error', (error) => {
 			if (error.code === 'EADDRINUSE') {
-				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort);
+				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '');
 				this._handleListeningPortError(errorMsg, EVENTS.ALREADY_USED_PORT);
 			} else {
-				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.LISTENING_PORT_ERROR, proxyPort, error.message ?? '');
-				this._handleListeningPortError(errorMsg, EVENTS.LISTENING_PORT_ERROR); // -> EVENTS.PROXY_ERROR
-				// INTERNAL_PROXY_SERVER_ERROR
-				// Error MSG: "Internal Client Suitecloud DevAssist Service: {0}"
-
+				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
+				this._handleListeningPortError(errorMsg, EVENTS.PROXY_ERROR);
 			}
 		});
 	}
