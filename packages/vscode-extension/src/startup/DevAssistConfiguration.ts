@@ -125,20 +125,14 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
 
     // adding listener to forward ServerError from SuiteCloudAuthProxy to vscode suitecloud output
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR, (emitParams: { authId: string, message: string }) => {
-		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message);
-		showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.SERVER_ERROR, errorMsgWrap, devAssistStatusBar);
+		const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.SERVER_ERROR, emitParams.message);
+		showDevAssistEmitProblemNotification(PROXY_SERVICE_EVENTS.SERVER_ERROR, errorMessage, devAssistStatusBar);
         vsLogger.error('');
 	});
 
-    devAssistProxyService.on(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, (emitParams: { authId: string, message: string }) => {
-		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message);
-        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, errorMsgWrap, devAssistStatusBar);
-		vsLogger.error('');
-    });
-
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.PROXY_ERROR, (emitParams: { authId: string, message: string }) => {
-		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message);
-        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.PROXY_ERROR, errorMsgWrap, devAssistStatusBar);
+		const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PROXY_ERROR, emitParams.message);
+        showDevAssistEmitProblemNotification(PROXY_SERVICE_EVENTS.PROXY_ERROR, errorMessage, devAssistStatusBar);
         vsLogger.error('');
     });
 
@@ -192,6 +186,24 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
     // console.log(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`)
     setErrorDevAssistStausBarMessage(devAssistStatusBar)
     vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.OUTPUT, error));
+    const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
+    const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+        {
+            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON),
+            buttonAction: () => {
+                // show suitecloud output and devassist settings
+                output.show()
+                openDevAssistSettings();
+            },
+        },
+    ];
+    vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
+}
+
+const showDevAssistEmitProblemNotification = (errorStage: string, emitError: string, devAssistStatusBar: vscode.StatusBarItem) => {
+    // console.log(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`)
+    setErrorDevAssistStausBarMessage(devAssistStatusBar)
+    vsLogger.error(emitError);
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {

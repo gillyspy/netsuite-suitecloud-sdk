@@ -13,7 +13,6 @@ const EventEmitter = require('events');
 const EVENTS = {
 	SERVER_ERROR: 'serverError',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
-	ALREADY_USED_PORT: 'alreadyUsedPort',
 	PROXY_ERROR: 'proxyError'
 };
 
@@ -86,7 +85,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 			//Save body
 			const bodyChunks = [];
-			request.on('data', function(chunk) {
+			request.on('data', function (chunk) {
 				bodyChunks.push(chunk);
 			});
 
@@ -104,13 +103,10 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		});
 
 		this._localProxy.on('error', (error) => {
-			if (error.code === 'EADDRINUSE') {
-				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '');
-				this._handleListeningPortError(errorMsg, EVENTS.ALREADY_USED_PORT);
-			} else {
-				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
-				this._handleListeningPortError(errorMsg, EVENTS.PROXY_ERROR);
-			}
+			const errorMessage = (error.code === 'EADDRINUSE') ?
+				NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '')
+				: NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
+			this._handleListeningErrors(errorMessage, EVENTS.PROXY_ERROR);
 		});
 	}
 
@@ -136,7 +132,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		console.log('access token refreshed');
 	}
 
-	_handleListeningPortError(errorMsg, event) {
+	_handleListeningErrors(errorMsg, event) {
 		console.error(errorMsg);
 		const emitObject = { message: errorMsg, authId: this._authId };
 		this.emit(event, emitObject);
@@ -313,7 +309,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 * @param input
 	 * @returns {*}
 	 */
-	_cleanText(input){
+	_cleanText(input) {
 		let result = input.replace(/\r/g, '');   // Remove \r
 		result = result.replace(/\n/g, '. ');  // Replace \n with ". "
 		result = result.replace(/,\./g, '.');  // Replace ",." with "."
@@ -353,4 +349,4 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 }
 
-module.exports = { SuiteCloudAuthProxyService: SuiteCloudAuthProxyService, EVENTS };
+module.exports = { SuiteCloudAuthProxyService, EVENTS };
