@@ -63,6 +63,7 @@ export const startDevAssistProxyIfEnabled = async (devAssistStatusBar: vscode.St
         }
     } else {
         // TODO: We might want to propose to configure and enable service
+        vsLogger.printTimestamp();
         vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_DISABLED.OUTPUT));
     }
     // add extra line to differenciate logs
@@ -94,7 +95,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
             vsLogger.info('');
         } else { // devAssistConfigStatus.current.proxyEnabled === false
             stopDevAssistService(devAssistStatusBar);
-            devAssistStatusBar.hide()
+            devAssistStatusBar.hide();
         }
     }
 };
@@ -114,9 +115,9 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
                 stopDevAssistService(devAssistStatusBar);
                 await startDevAssistService(devAssistConfigStatus.current.authID, devAssistConfigStatus.current.localPort, devAssistStatusBar);
             } catch (error) {
-                showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistStatusBar)
+                showStartDevAssistProblemNotification('afterManualRefresh', error as string, devAssistStatusBar);
             }
-            // add line sepparator
+            // add line separator
             vsLogger.error('');
         }
     });
@@ -124,8 +125,9 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     // adding listener to forward ServerError from SutieCloudAuthProxy to vscode suitecloud output
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR, (emitParams: { authId: string, message: string }) => {
         // just forwarding info into suitecloud output for now
+        vsLogger.printTimestamp();
         vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message));
-        // add line sepparator
+        // add line separator
         vsLogger.error('');
     });
 };
@@ -133,15 +135,16 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
 const startDevAssistService = async (devAssistAuthID: string, localPort: number, devAssistStatusBar: vscode.StatusBarItem) => {
     await devAssistProxyService.start(devAssistAuthID, localPort);
 
-    setSuccessDevAssistStausBarMessage(devAssistStatusBar)
+    setSuccessDevAssistStausBarMessage(devAssistStatusBar);
     const proxyUrl = getProxyUrl(localPort);
     vsNotificationService.showCommandInfo(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl));
-    vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.OUTPUT, getProyUrlWithoutPath(localPort), devAssistAuthID, proxyUrl));
+    vsLogger.printTimestamp();
+    vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.OUTPUT, getProxyUrlWithoutPath(localPort), devAssistAuthID, proxyUrl));
 }
 
-const PROXY_URL = DEVASSIST.PROXY_URL
+const PROXY_URL = DEVASSIST.PROXY_URL;
 const getProxyUrl = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}${PROXY_URL.PATH}`;
-const getProyUrlWithoutPath = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}`;
+const getProxyUrlWithoutPath = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}`;
 
 const stopDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
     devAssistProxyService?.stop();
@@ -149,9 +152,11 @@ const stopDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
     setErrorDevAssistStausBarMessage(devAssistStatusBar);
     // only notify that devassist service has been disabled in the transition from enabled to disabled
     if (!devAssistConfigStatus.current.proxyEnabled && devAssistConfigStatus.previous.proxyEnabled) {
-        vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_DISABLED.NOTIFICATION))
         vsNotificationService.showCommandInfo(translationService.getMessage(DEVASSIST_SERVICE.IS_DISABLED.OUTPUT));
-        // add extra line to differenciate logs
+
+        vsLogger.printTimestamp();
+        vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_DISABLED.NOTIFICATION));
+        // add line separator
         vsLogger.info('');
     }
 }
@@ -176,7 +181,8 @@ const showDevAssistStartUpNotification = () => {
 
 const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistStatusBar: vscode.StatusBarItem) => {
     // console.log(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`)
-    setErrorDevAssistStausBarMessage(devAssistStatusBar)
+    setErrorDevAssistStausBarMessage(devAssistStatusBar);
+    vsLogger.printTimestamp();
     vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.OUTPUT, error));
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
@@ -184,7 +190,7 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
             buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON),
             buttonAction: () => {
                 // show suitecloud output and devassist settings
-                output.show()
+                output.show();
                 openDevAssistSettings();
             },
         },
@@ -242,7 +248,7 @@ const devAssistConfigStatusHasEffectivelyChanged = (): boolean => {
         devAssistConfigStatus.current.localPort === devAssistConfigStatus.previous.localPort &&
         devAssistConfigStatus.current.proxyEnabled === devAssistConfigStatus.previous.proxyEnabled
     ) {
-        return false
+        return false;
     }
     return true;
 }
@@ -255,7 +261,7 @@ const setSuccessDevAssistStausBarMessage = (devAssistStatusBar: vscode.StatusBar
 }
 const setErrorDevAssistStausBarMessage = (devAssistStatusBar: vscode.StatusBarItem): void => {
     devAssistStatusBar.text = `$(netsuite-mobius-colorless-icon)  ${translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.STATUSBAR)}`;
-    devAssistStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground')
+    devAssistStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
 }
 
 // refresh authorization with notification popups 
