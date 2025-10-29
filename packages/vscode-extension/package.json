@@ -219,6 +219,15 @@
 					"description": "Check this box if you don't want to receive a welcome notification for SuiteCloud Developer Assistant service."
 				}
 			}
+		},
+		"icons": {
+			"netsuite-mobius-colorless-icon": {
+				"description": "NetSuite Logo Text Icon",
+				"default": {
+					"fontPath": "resources/icon/SuiteCloudSDKTextIcons.woff",
+					"fontCharacter": "\\E900"
+				}
+			}
 		}
 	},
 	"scripts": {
