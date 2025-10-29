@@ -123,23 +123,22 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
         }
     });
 
-    // adding listener to forward ServerError from SutieCloudAuthProxy to vscode suitecloud output
+    // adding listener to forward ServerError from SuiteCloudAuthProxy to vscode suitecloud output
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR, (emitParams: { authId: string, message: string }) => {
-        // just forwarding info into suitecloud output for now
-        vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message));
-        // add line separator
+		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message); //TODO: verify wrapper message
+		showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.SERVER_ERROR, errorMsgWrap, devAssistStatusBar);
         vsLogger.error('');
-    });
+	});
 
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, (emitParams: { authId: string, message: string }) => {
-        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, emitParams.message, devAssistStatusBar);
-        vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message));
-        vsLogger.error('');
+		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message) //TODO: verify wrapper message
+        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.ALREADY_USED_PORT, errorMsgWrap, devAssistStatusBar);
+		vsLogger.error('');
     });
 
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.LISTENING_PORT_ERROR, (emitParams: { authId: string, message: string }) => {
-        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.LISTENING_PORT_ERROR, emitParams.message, devAssistStatusBar);
-        vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message));
+		const errorMsgWrap = translationService.getMessage(DEVASSIST_SERVICE.SERVER_ERROR.OUTPUT, emitParams.message); //TODO: verify wrapper message
+        showStartDevAssistProblemNotification(PROXY_SERVICE_EVENTS.LISTENING_PORT_ERROR, errorMsgWrap, devAssistStatusBar);
         vsLogger.error('');
     });
 

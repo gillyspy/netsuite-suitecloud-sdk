@@ -109,7 +109,10 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 				this._handleListeningPortError(errorMsg, EVENTS.ALREADY_USED_PORT);
 			} else {
 				const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.LISTENING_PORT_ERROR, proxyPort, error.message ?? '');
-				this._handleListeningPortError(errorMsg, EVENTS.LISTENING_PORT_ERROR);
+				this._handleListeningPortError(errorMsg, EVENTS.LISTENING_PORT_ERROR); // -> EVENTS.PROXY_ERROR
+				// INTERNAL_PROXY_SERVER_ERROR
+				// Error MSG: "Internal Client Suitecloud DevAssist Service: {0}"
+
 			}
 		});
 	}
