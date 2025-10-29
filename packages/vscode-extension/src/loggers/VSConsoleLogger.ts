@@ -34,7 +34,7 @@ export default class VSConsoleLogger extends ConsoleLogger {
 		}
 	}
 
-	public hiddeInitialProjectFolerNameDetails() {
+	public hideInitialProjectFolderNameDetails() {
 		this.hideProjectFolderName = true;
 	}
 
