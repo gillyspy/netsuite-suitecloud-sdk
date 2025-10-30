@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DevAssist Feedback</title>
+	<link rel="stylesheet" href="feedbackForm.css">
+</head>
+<body>
+<div class="container">
+	<h1>DevAssist Feedback</h1>
+	<h2>Share quick feedback about an AI answer. Works fully offline - no data leaves this page</h2>
+	<form id="feedback-form">
+		<label for="feedback-text">Your feedback</label>
+		<textarea id="feedback-text" name="feedback" rows="4" required></textarea>
+
+		<div class="checkbox-group">
+			<label>This feedback is about:</label>
+			<div>
+				<input type="checkbox" id="unit-testing" name="topics" value="Unit Testing">
+				<label for="unit-testing">Unit Testing</label>
+			</div>
+			<div>
+				<input type="checkbox" id="generate-code" name="topics" value="Generate Code">
+				<label for="generate-code">Generate Code</label>
+			</div>
+			<div>
+				<input type="checkbox" id="explain-code" name="topics" value="Explain Code">
+				<label for="explain-code">Explain Code</label>
+			</div>
+			<div>
+				<input type="checkbox" id="other" name="topics" value="Other">
+				<label for="other">Other</label>
+			</div>
+		</div>
+
+		<div class="rating-group">
+			<label>Rating (1 - 5):</label>
+			<div class="stars" id="star-rating">
+				<span data-value="1">&#9733;</span>
+				<span data-value="2">&#9733;</span>
+				<span data-value="3">&#9733;</span>
+				<span data-value="4">&#9733;</span>
+				<span data-value="5">&#9733;</span>
+			</div>
+		</div>
+
+		<div class="button-group">
+			<button type="button" id="cancel-button">Cancel</button>
+			<button type="submit" id="send-button">Send Feedback</button>
+		</div>
+	</form>
+</div>
+<script>
+	// Star rating functionality
+	const stars = document.querySelectorAll('#star-rating span');
+	let rating = 0;
+
+	stars.forEach(star => {
+		star.addEventListener('click', () => {
+			rating = parseInt(star.getAttribute('data-value'));
+			stars.forEach((s, i) => {
+				s.classList.toggle('selected', i < rating);
+			});
+		});
+	});
+
+	document.getElementById('feedback-form').addEventListener('submit', event => {
+		event.preventDefault();
+		const feedback = document.getElementById('feedback-text').value;
+		const topics = Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(cb => cb.value);
+		// Send data to extension host
+		vscode.postMessage({ type: 'submit', feedback, topics, rating });
+	});
+
+	document.getElementById('cancel-button').addEventListener('click', () => {
+		vscode.postMessage({ type: 'cancel' });
+	});
+
+	// VS Code API communication
+	const vscode = acquireVsCodeApi();
+</script>
+</body>
+</html>

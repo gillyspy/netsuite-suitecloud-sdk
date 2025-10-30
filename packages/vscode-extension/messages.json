@@ -54,6 +54,22 @@
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_CANCEL_PROCESS": "Cancel the deployment process",
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_DISPLAY_WARNING": "Display a warning and continue the deployment process",
 
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_DOCUMENT_TITLE": "SuiteCloud Developer Assistant Feedback Form",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_TITLE": "SuiteCloud Developer Assistant Feedback",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBTITLE": "Share quick feedback about the SuiteCloud Developer Assistant. Works fully offline—no data leaves this page.",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_TEXTAREA_SUBTITLE": "Your feedback",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_TEXTAREA_HINT": "What worked well? What should be improved?",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_CHECKBOX_LIST_SUBTITLE":  "This feedback is about",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_CHECKBOX_LIST_OPTIONS_OPTION_1": "Explain Code",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_CHECKBOX_LIST_OPTIONS_OPTION_2": "Generate SuiteScript Code",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_CHECKBOX_LIST_OPTIONS_OPTION_3": "Generate SDF Objects",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_CHECKBOX_LIST_OPTIONS_OPTION_4": "Unit Testing",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_CHECKBOX_LIST_OPTIONS_OPTION_5": "Other",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_RATING_SUBTITLE": "Rating (1-5)",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_BUTTON_SEND": "Send",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_BUTTON_CANCEL": "Cancel",
+
+
 	"DEVASSIST_SERVICE_IS_DISABLED_NOTIFICATION": "SuiteCloud Developer Assistant service has been disabled.",
 	"DEVASSIST_SERVICE_IS_DISABLED_OUTPUT": "SuiteCloud Developer Assistant service has been disabled.",
 	"DEVASSIST_SERVICE_IS_RUNNING_NOTIFICATION": "SuiteCloud Developer Assistant service is running. Use Cline Base URL to: {0}",

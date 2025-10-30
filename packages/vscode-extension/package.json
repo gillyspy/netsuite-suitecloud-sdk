@@ -111,7 +111,13 @@
 				"title": "Open DevAssist settings",
 				"category": "SuiteCloud",
 				"enablement": "false"
-			}
+			},
+            {
+              "command": "suitecloud.opendevassistfeedbackform",
+              "title": "Open DevAssist Feedback Forms",
+              "category": "SuiteCloud",
+              "enablement": "true"
+            }
 		],
 		"keybindings": [
 			{
