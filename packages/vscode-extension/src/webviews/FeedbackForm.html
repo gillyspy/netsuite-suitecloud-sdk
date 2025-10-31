@@ -3,81 +3,96 @@
 <head>
 	<meta charset="UTF-8">
 	<title>DevAssist Feedback</title>
-	<link rel="stylesheet" href="feedbackForm.css">
+	<link rel="stylesheet" href="${cssUri}">
 </head>
 <body>
-<div class="container">
-	<h1>DevAssist Feedback</h1>
-	<h2>Share quick feedback about an AI answer. Works fully offline - no data leaves this page</h2>
-	<form id="feedback-form">
-		<label for="feedback-text">Your feedback</label>
-		<textarea id="feedback-text" name="feedback" rows="4" required></textarea>
+<div class="card" role="region" aria-labelledby="title">
+	<header>
+		<h1 id="title">${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.TITLE)}</h1>
+		<p class="note">${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBTITLE)}</p>
+	</header>
+	<form class="content" id="feedbackForm">
+		<div class="row">
+			<label
+				for="feedback">${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.TEXTAREA_SUBTITLE)}</label>
+			<textarea id="feedback" name="feedback"
+					  placeholder="${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.TEXTAREA_HINT)}"
+					  required></textarea>
+		</div>
 
-		<div class="checkbox-group">
-			<label>This feedback is about:</label>
-			<div>
-				<input type="checkbox" id="unit-testing" name="topics" value="Unit Testing">
-				<label for="unit-testing">Unit Testing</label>
+		<fieldset>
+			<legend>${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.CHECKBOX_LIST_SUBTITLE)}</legend>
+			<div class="checks">
+				${getCheckboxesHTMLContent()}
 			</div>
-			<div>
-				<input type="checkbox" id="generate-code" name="topics" value="Generate Code">
-				<label for="generate-code">Generate Code</label>
-			</div>
-			<div>
-				<input type="checkbox" id="explain-code" name="topics" value="Explain Code">
-				<label for="explain-code">Explain Code</label>
-			</div>
-			<div>
-				<input type="checkbox" id="other" name="topics" value="Other">
-				<label for="other">Other</label>
+		</fieldset>
+
+		<div class="row" aria-labelledby="ratingLabel">
+			<label id="ratingLabel">
+				${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.RATING_SUBTITLE)} </label>
+			<div class="stars" role="radiogroup" aria-label="Star rating">
+				<!-- 5 on the left down to 1 on the right for natural fill effect -->
+				<input type="radio" id="star5" name="rating" value="5" required>
+				<label class="star" for="star5" aria-label="5 stars"></label>
+				<input type="radio" id="star4" name="rating" value="4">
+				<label class="star" for="star4" aria-label="4 stars"></label>
+				<input type="radio" id="star3" name="rating" value="3">
+				<label class="star" for="star3" aria-label="3 stars"></label>
+				<input type="radio" id="star2" name="rating" value="2">
+				<label class="star" for="star2" aria-label="2 stars"></label>
+				<input type="radio" id="star1" name="rating" value="1">
+				<label class="star" for="star1" aria-label="1 star"></label>
 			</div>
 		</div>
 
-		<div class="rating-group">
-			<label>Rating (1 - 5):</label>
-			<div class="stars" id="star-rating">
-				<span data-value="1">&#9733;</span>
-				<span data-value="2">&#9733;</span>
-				<span data-value="3">&#9733;</span>
-				<span data-value="4">&#9733;</span>
-				<span data-value="5">&#9733;</span>
-			</div>
+		<div class="actions">
+			<button type="button" class="secondary" id="copyBtn" title="Copy JSON to clipboard">Copy JSON</button>
+			<button type="reset" class="secondary">Reset</button>
+			<button type="submit">Preview</button>
 		</div>
 
-		<div class="button-group">
-			<button type="button" id="cancel-button">Cancel</button>
-			<button type="submit" id="send-button">Send Feedback</button>
-		</div>
+		<details>
+			<summary class="note">See payload</summary>
+			<pre id="result" class="hidden" aria-live="polite"></pre>
+		</details>
 	</form>
 </div>
 <script>
-	// Star rating functionality
-	const stars = document.querySelectorAll('#star-rating span');
-	let rating = 0;
+	const form = document.getElementById('feedbackForm');
+	const result = document.getElementById('result');
+	const copyBtn = document.getElementById('copyBtn');
 
-	stars.forEach(star => {
-		star.addEventListener('click', () => {
-			rating = parseInt(star.getAttribute('data-value'));
-			stars.forEach((s, i) => {
-				s.classList.toggle('selected', i < rating);
-			});
-		});
+	function collect() {
+		const data = {
+			feedback: document.getElementById('feedback').value.trim(),
+			topics: Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(el => el.value),
+			rating: Number((document.querySelector('input[name="rating"]:checked') || {}).value || 0),
+			timestamp: new Date().toISOString(),
+		};
+		return data;
+	}
+
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const data = collect();
+		const json = JSON.stringify(data, null, 2);
+		result.textContent = json;
+		result.classList.remove('hidden');
 	});
 
-	document.getElementById('feedback-form').addEventListener('submit', event => {
-		event.preventDefault();
-		const feedback = document.getElementById('feedback-text').value;
-		const topics = Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(cb => cb.value);
-		// Send data to extension host
-		vscode.postMessage({ type: 'submit', feedback, topics, rating });
+	copyBtn.addEventListener('click', async () => {
+		const data = collect();
+		const json = JSON.stringify(data, null, 2);
+		try {
+			await navigator.clipboard.writeText(json);
+			copyBtn.textContent = 'Copied!';
+			setTimeout(() => (copyBtn.textContent = 'Copy JSON'), 1200);
+		} catch (err) {
+			// Fallback: show in pane if clipboard blocked
+			result.textContent = json + '\\n\\n(Clipboard blocked by browser)';
+			result.classList.remove('hidden');
+		}
 	});
-
-	document.getElementById('cancel-button').addEventListener('click', () => {
-		vscode.postMessage({ type: 'cancel' });
-	});
-
-	// VS Code API communication
-	const vscode = acquireVsCodeApi();
 </script>
 </body>
 </html>

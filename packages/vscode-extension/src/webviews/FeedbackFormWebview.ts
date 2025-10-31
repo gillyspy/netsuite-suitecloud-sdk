@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { VSTranslationService } from '../service/VSTranslationService';
-import { DEVASSIST_SERVICE, STATUS_BARS } from '../service/TranslationKeys';
+import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
 
 const translationService = new VSTranslationService();
+const cssFileName = 'feedbackForm.css';
+const cssFilePath = './src/webviews/' + cssFileName;
 
 let feedbackFormPanel: vscode.WebviewPanel | undefined;
 
-export const openDevAssistFeedbackForm = (context : vscode.ExtensionContext) => {
+export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// if one FeedbackForm is already open, reveal it instead of creating a new one
 	if (feedbackFormPanel) {
@@ -22,19 +24,22 @@ export const openDevAssistFeedbackForm = (context : vscode.ExtensionContext) => 
 		{
 			enableScripts: true,
 			localResourceRoots: [
-				vscode.Uri.file(path.join(context.extensionPath, 'media'))
-			]
-		}
+				vscode.Uri.file(path.join(context.extensionPath, 'src/webviews')),
+			],
+		},
 	);
 
 	// Read HTML and inject the correct webview resource URIs for the CSS file
-	feedbackFormPanel.webview.html = getFeedbackFormHTMLContent();
+	const cssUri = feedbackFormPanel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, cssFilePath)));
+	feedbackFormPanel.webview.html = getFeedbackFormHTMLContent(cssUri);
 
 	// Clean up the reference when the panel is closed
 	feedbackFormPanel.onDidDispose(
-		() => { feedbackFormPanel = undefined; },
+		() => {
+			feedbackFormPanel = undefined;
+		},
 		null,
-		context.subscriptions
+		context.subscriptions,
 	);
 
 	// Handle messages sent from the webview
@@ -52,90 +57,117 @@ export const openDevAssistFeedbackForm = (context : vscode.ExtensionContext) => 
 			}
 		},
 		undefined,
-		context.subscriptions
+		context.subscriptions,
 	);
-}
+};
 
 const getCheckboxesHTMLContent = () => {
 	const optionsList = Object.values(DEVASSIST_SERVICE.FEEDBACK_FORM.CHECKBOX_LIST_OPTIONS);
 	return optionsList.map(option => {
 		const optionValue = translationService.getMessage(option);
 		const optionID = optionValue.toLowerCase().replace(/\s+/g, '-');
-		return `<div>
-           <input type="checkbox" id="${optionID}" name="topics" value="${optionValue}">
-           <label for="${optionID}">${optionValue}</label>
-        </div>`; }).join('');
-}
+		return `<label><input type="checkbox" name="topics" value="${optionID}"> ${optionValue} </label>`;
+	}).join('');
+};
 
-const getFeedbackFormHTMLContent = () => {
+const getFeedbackFormHTMLContent = (cssUri: any) => {
+
 	return `<!DOCTYPE html>
 		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
 			<title>DevAssist Feedback</title>
-			<link rel="stylesheet" href="./feedbackForm.css">
+			<link rel="stylesheet" href="${cssUri}">
 		</head>
 		<body>
-			<div class="container">
-				<h1>${DEVASSIST_SERVICE.FEEDBACK_FORM.TITLE}</h1>
-				<h2>${DEVASSIST_SERVICE.FEEDBACK_FORM.SUBTITLE}</h2>
-				<form id="feedback-form">
-					<label for="feedback-text">${DEVASSIST_SERVICE.FEEDBACK_FORM.TEXTAREA_SUBTITLE}</label>
-					<textarea id="feedback-text" name="feedback" rows="4" required></textarea>
-					
-					<div class="checkbox-group">
-						<label>${DEVASSIST_SERVICE.FEEDBACK_FORM.CHECKBOX_LIST_SUBTITLE}</label>
-						${getCheckboxesHTMLContent}
+		<div class="card" role="region" aria-labelledby="title">
+			<header>
+				<h1 id="title">${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.TITLE)}</h1>
+				<p class="note">${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBTITLE)}</p>
+			</header>
+			<form class="content" id="feedbackForm">
+				<div class="row">
+					<label
+						for="feedback">${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.TEXTAREA_SUBTITLE)}</label>
+					<textarea id="feedback" name="feedback"
+							  placeholder="${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.TEXTAREA_HINT)}"
+							  required></textarea>
+				</div>
+		
+				<fieldset>
+					<legend>${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.CHECKBOX_LIST_SUBTITLE)}</legend>
+					<div class="checks">
+						${getCheckboxesHTMLContent()}
 					</div>
-					
-					<div class="rating-group">
-						<label>${DEVASSIST_SERVICE.FEEDBACK_FORM.RATING_SUBTITLE}</label>
-						<div class="stars" id="star-rating">
-							<span data-value="1">&#9733;</span>
-							<span data-value="2">&#9733;</span>
-							<span data-value="3">&#9733;</span>
-							<span data-value="4">&#9733;</span>
-							<span data-value="5">&#9733;</span>
-						</div>
+				</fieldset>
+		
+				<div class="row" aria-labelledby="ratingLabel">
+					<label id="ratingLabel">
+						${translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.RATING_SUBTITLE)} </label>
+					<div class="stars" role="radiogroup" aria-label="Star rating">
+						<!-- 5 on the left down to 1 on the right for natural fill effect -->
+						<input type="radio" id="star5" name="rating" value="5" required>
+						<label class="star" for="star5" aria-label="5 stars"></label>
+						<input type="radio" id="star4" name="rating" value="4">
+						<label class="star" for="star4" aria-label="4 stars"></label>
+						<input type="radio" id="star3" name="rating" value="3">
+						<label class="star" for="star3" aria-label="3 stars"></label>
+						<input type="radio" id="star2" name="rating" value="2">
+						<label class="star" for="star2" aria-label="2 stars"></label>
+						<input type="radio" id="star1" name="rating" value="1">
+						<label class="star" for="star1" aria-label="1 star"></label>
 					</div>
-					
-					<div class="button-group">
-						<button type="button" id="cancel-button">${DEVASSIST_SERVICE.FEEDBACK_FORM.BUTTON.CANCEL}</button>
-						<button type="submit" id="send-button">${DEVASSIST_SERVICE.FEEDBACK_FORM.BUTTON.SEND}</button>
-					</div>
-				</form>
-			</div>
-			<script>
-				// Star rating functionality
-				const stars = document.querySelectorAll('#star-rating span');
-				let rating = 0;
+				</div>
 		
-				stars.forEach(star => {
-					star.addEventListener('click', () => {
-						rating = parseInt(star.getAttribute('data-value'));
-						stars.forEach((s, i) => {
-							s.classList.toggle('selected', i < rating);
-						});
-					});
-				});
+				<div class="actions">
+					<button type="button" class="secondary" id="copyBtn" title="Copy JSON to clipboard">Copy JSON</button>
+					<button type="reset" class="secondary">Reset</button>
+					<button type="submit">Preview</button>
+				</div>
 		
-				// submit button
-				document.getElementById('feedback-form').addEventListener('submit', event => {
-					event.preventDefault();
-					const feedback = document.getElementById('feedback-text').value;
-					const topics = Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(cb => cb.value);
-					// Send data to extension host
-					vscode.postMessage({ type: 'submit', feedback, topics, rating });
-				});
+				<details>
+					<summary class="note">See payload</summary>
+					<pre id="result" class="hidden" aria-live="polite"></pre>
+				</details>
+			</form>
+		</div>
+		<script>
+			const form = document.getElementById('feedbackForm');
+			const result = document.getElementById('result');
+			const copyBtn = document.getElementById('copyBtn');
 		
-				// cancel button
-				document.getElementById('cancel-button').addEventListener('click', () => {
-					vscode.postMessage({ type: 'cancel' });
-				});
+			function collect() {
+				const data = {
+					feedback: document.getElementById('feedback').value.trim(),
+					topics: Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(el => el.value),
+					rating: Number((document.querySelector('input[name="rating"]:checked') || {}).value || 0),
+					timestamp: new Date().toISOString(),
+				};
+				return data;
+			}
 		
-				// VS Code API communication
-				const vscode = acquireVsCodeApi();
-			</script>
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				const data = collect();
+				const json = JSON.stringify(data, null, 2);
+				result.textContent = json;
+				result.classList.remove('hidden');
+			});
+		
+			copyBtn.addEventListener('click', async () => {
+				const data = collect();
+				const json = JSON.stringify(data, null, 2);
+				try {
+					await navigator.clipboard.writeText(json);
+					copyBtn.textContent = 'Copied!';
+					setTimeout(() => (copyBtn.textContent = 'Copy JSON'), 1200);
+				} catch (err) {
+					// Fallback: show in pane if clipboard blocked
+					result.textContent = json + '\\n\\n(Clipboard blocked by browser)';
+					result.classList.remove('hidden');
+				}
+			});
+		</script>
 		</body>
 		</html>`;
-}
+};
