@@ -29,7 +29,7 @@ import { VSTranslationService } from './service/VSTranslationService';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
 import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
 import { createAuthIDStatusBar, createDevAssistStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
-import { openDevAssistFeedbackForm } from './webviews/FeedbackFormWebview';
+import { openDevAssistFeedbackForm, debugCall } from './webviews/FeedbackFormWebview';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
@@ -99,7 +99,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('suitecloud.opendevassistfeedbackform',
 			() => openDevAssistFeedbackForm(context)
-		)
+		),
+		vscode.commands.registerCommand('suitecloud.debugCall',
+			() => debugCall()
+		),
 	);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)

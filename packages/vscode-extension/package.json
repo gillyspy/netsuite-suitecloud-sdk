@@ -117,7 +117,13 @@
               "title": "Open DevAssist Feedback Forms",
               "category": "SuiteCloud",
               "enablement": "true"
-            }
+            },
+			{
+				"command": "suitecloud.debugCall",
+				"title": "DevAssist Feedback Forms: Debug Call",
+				"category": "SuiteCloud",
+				"enablement": "true"
+			}
 		],
 		"keybindings": [
 			{
