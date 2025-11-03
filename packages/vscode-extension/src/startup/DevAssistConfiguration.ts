@@ -33,7 +33,6 @@ const devAssistConfigStatus: { current: devAssistConfig, previous: devAssistConf
 const PROXY_SERVICE_EVENTS = {
     REAUTHORIZE: 'authRefreshManual',
     SERVER_ERROR: 'serverError',
-    ALREADY_USED_PORT: 'alreadyUsedPort',
     PROXY_ERROR: 'proxyError'
 }
 

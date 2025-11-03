@@ -29,7 +29,7 @@ const {
 /** Message literal service method */
 const NodeTranslationService = require('./NodeTranslationService');
 const {
-	DEV_ASSIST_PROXY_SERVICE,
+	SUITECLOUD_AUTH_PROXY_SERVICE,
 } = require('./TranslationKeys');
 
 const MAX_RETRY_ATTEMPTS = 1;
@@ -104,8 +104,8 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 		this._localProxy.on('error', (error) => {
 			const errorMessage = (error.code === 'EADDRINUSE') ?
-				NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '')
-				: NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
+				NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '')
+				: NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
 			this._handleListeningErrors(errorMessage, EVENTS.PROXY_ERROR);
 		});
 	}
@@ -146,15 +146,15 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 */
 	_evalInputParameters(authId, proxyPort) {
 		if (!authId) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.MISSING_AUTH_ID);
 		}
 
 		if (!proxyPort) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.MISSING_PORT);
 		}
 
 		if (isNaN(proxyPort)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
 		}
 	}
 
@@ -171,7 +171,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		}
 
 		if (!authIDActionResult.data.hasOwnProperty(this._authId)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NOT_EXISTING_AUTH_ID, this._authId);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.NOT_EXISTING_AUTH_ID, this._authId);
 		}
 		return {
 			accessToken: authIDActionResult.data[this._authId].token.accessToken,
@@ -272,7 +272,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		//Needs manual reauthorization
 		const inspectAuthData = inspectAuthOperationResult.data;
 		if (inspectAuthData[AUTHORIZATION_PROPERTIES_KEYS.NEEDS_REAUTHORIZATION]) {
-			const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
+			const errorMsg = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
 
 			refreshInfo.emitEventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
 			refreshInfo.errorMessage = errorMsg;
