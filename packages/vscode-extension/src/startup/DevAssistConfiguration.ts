@@ -208,7 +208,7 @@ const updateDevAssistConfigStatus = (): void => {
     devAssistConfigStatus.previous = previousConfig;
 }
 
-const getDevAssistCurrentSettings = (): devAssistConfig => {
+export const getDevAssistCurrentSettings = (): devAssistConfig => {
     const devAssistConfigSection = vscode.workspace.getConfiguration(DEVASSIST.CONFIG_KEYS.devAssistSection);
 
     //  * The *effective* value (returned by {@linkcode WorkspaceConfiguration.get get}) is computed by overriding or merging the values in the following order:

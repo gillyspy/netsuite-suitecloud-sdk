@@ -3,6 +3,7 @@ import * as path from 'path';
 import MessageService from '../service/MessageService';
 import { VSTranslationService } from '../service/VSTranslationService';
 import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
+import { getDevAssistCurrentSettings } from '../startup/DevAssistConfiguration';
 
 const messageService = new MessageService();
 const translationService = new VSTranslationService();
@@ -52,8 +53,10 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 					console.log(message);
 					vscode.window.showInformationMessage('Thanks for your feedback!');
 					feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'success' });
+
+					const currentProxySettings = getDevAssistCurrentSettings();
 					try {
-						const response = await fetch('http://127.0.0.1:8181/api/internal/devassist', {
+						const response = await fetch(`http://127.0.0.1:$${currentProxySettings.localPort}/api/internal/devassist`, {
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
 							body: message.data
@@ -86,7 +89,8 @@ export const debugCall = () => {
 
 	// Send a message to our webview.
 	// You can send any JSON serializable data.
-	feedbackFormPanel.webview.postMessage({ type: 'status', value: 'success' });
+	feedbackFormPanel.webview.postMessage({ type: 'spawnAlertEvent', value: 'info', message: 'Random test message info / error' });
+	feedbackFormPanel.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: 'Random test message info / error'});
 };
 
 const getCheckboxesHTMLContent = () => {
@@ -148,10 +152,9 @@ const getFeedbackFormHTMLContent = (cssUri: any) => {
 				</div>
 		
 				<div class="actions">
-					<button type="button" class="secondary" id="copyBtn" title="Copy JSON to clipboard">Copy JSON</button>
 					<button type="reset" class="secondary">Reset</button>
-					<!--button type="button" class="secondary" id="cancelBtn" title="Close this Feedback form page without sending feedback">Cancel</button-->
-					<button type="submit">Preview</button>
+					<button type="button" class="secondary" id="cancelBtn" title="Close this Feedback form page without sending feedback">Cancel</button>
+					<button type="submit">Submit</button>
 				</div>
 		
 				<details>
@@ -160,12 +163,12 @@ const getFeedbackFormHTMLContent = (cssUri: any) => {
 				</details>
 			</form>
 		</div>
+		<div id="alert-container"></div>
 		<script>
 			console.log("Hello World");
 			const form = document.getElementById('feedbackForm');
 			const result = document.getElementById('result');
-			const copyBtn = document.getElementById('copyBtn');
-			// const cancelBtn = document.getElementById('cancelBtn');
+			const cancelBtn = document.getElementById('cancelBtn');
 		
 			function collect() {
 				const data = {
@@ -176,6 +179,33 @@ const getFeedbackFormHTMLContent = (cssUri: any) => {
 				};
 				return data;
 			}
+			
+			function spawnAlert(message, type = "info", timeout = 4000) {
+				const container = document.getElementById('alert-container');
+				if (!container) return;
+				const alertDiv = document.createElement('div');
+				alertDiv.className = "toast-alert toast-" + type;
+				alertDiv.setAttribute('role', 'alert');
+				alertDiv.setAttribute('aria-live', 'polite');
+				alertDiv.innerHTML =
+					\`<span style="flex:1">\${message}</span>
+					<button class="toast-close" aria-label="Close" tabindex="0">&times;</button>\`;
+				const closeBtn = alertDiv.querySelector('.toast-close');
+				let dismissed = false;
+				function removeAlert() {
+					if (dismissed) return;
+					dismissed = true;
+					alertDiv.style.transition = "opacity 180ms";
+					alertDiv.style.opacity = 0;
+					setTimeout(() => container.removeChild(alertDiv), 180);
+				}
+				closeBtn.addEventListener('click', removeAlert);
+				alertDiv.addEventListener('keydown', e => {
+					if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') removeAlert();
+				});
+				container.appendChild(alertDiv);
+				setTimeout(removeAlert, timeout);
+			}
 		
 			// VS Code API
 			const vscode = acquireVsCodeApi();
@@ -185,19 +215,6 @@ const getFeedbackFormHTMLContent = (cssUri: any) => {
 
 				const checkedTopics = document.querySelectorAll('input[name="topics"]:checked');
 				const ratingChecked = document.querySelector('input[name="rating"]:checked');
-
-				if (checkedTopics.length === 0) {
-					alert('Please select at least one topic.');
-					// If you want, focus the first checkbox (optional):
-					document.querySelector('input[name="topics"]')?.focus();
-					return;
-				}
-				if (!ratingChecked) {
-					alert('Please select a rating.');
-					// Focus first radio button (optional):
-					document.querySelector('input[name="rating"]')?.focus();
-					return;
-				}
 
 				const data = collect();
 				const json = JSON.stringify(data, null, 2);
@@ -213,32 +230,16 @@ const getFeedbackFormHTMLContent = (cssUri: any) => {
 				
 				vscode.postMessage({ type: 'submit', data: json });
 			});
-		
-			copyBtn.addEventListener('click', async () => {
-				const data = collect();
-				const json = JSON.stringify(data, null, 2);
-				try {
-					await navigator.clipboard.writeText(json);
-					copyBtn.textContent = 'Copied!';
-					setTimeout(() => (copyBtn.textContent = 'Copy JSON'), 1200);
-				} catch (err) {
-					// Fallback: show in pane if clipboard blocked
-					result.textContent = json + '\\n\\n(Clipboard blocked by browser)';
-					result.classList.remove('hidden');
-				}
+			
+			cancelBtn.addEventListener('click', () => {
+				vscode.postMessage({ type: 'cancel' });
 			});
 			
-			// cancelBtn.addEventListener('click', () => {
-			// 	vscode.postMessage({ type: 'cancel' });
-			// });
-			
-			// TODO: It would be nice to recieve callbacks from VSCode but unfortunately this doesn't work either. window is null
 			window.addEventListener('message', event => {
-				const { type, value } = event.data;
-				if (type === 'status') {
-					if (value === 'sending') alert('Sending feedback to server...');
-					else if (value === 'success') alert('Feedback was received successfully!');
-					else if (value === 'error') alert('An unexpected error occurred. Please try again later');
+				const { type, value, message } = event.data;
+				if (type === 'spawnAlertEvent') {
+					if (value === 'info') spawnAlert(message, 'info', 10000);
+					else if (value === 'error') spawnAlert(message, 'error', 10000);
 				}
 			});
 		</script>
