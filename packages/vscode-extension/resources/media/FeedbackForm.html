@@ -6,144 +6,144 @@
 	<link rel="stylesheet" href="{{CSS_FILE.css}}">
 </head>
 <body>
-<div class="card" role="region" aria-labelledby="title">
-	<header>
-		<h1 id="title">SuiteCloud Developer Assistant Feedback</h1>
-		<p class="note">
-			Take a moment to share your thoughts on the SuiteCloud Developer Assistant. Any data you provide
-			will remain anonymous.</p>
-	</header>
-	<form class="content" id="feedbackForm">
-		<div class="row">
-			<label for="feedback">Your Feedback</label>
-			<textarea id="feedback" name="feedback"
-					  placeholder="What worked well? What should be improved? Any suggestions?"
-					  required></textarea>
-		</div>
-
-		<fieldset>
-			<legend>This Feedback is about</legend>
-			<div class="checks">
-				<label><input type="checkbox" name="topics" value="code-explanation">Code Explanation</label>
-				<label><input type="checkbox" name="topics" value="sdf-objects-generation">SDF Objects Generation </label>
-				<label><input type="checkbox" name="topics" value="suitescript-code-generation">SuiteScript Code Generation</label>
-				<label><input type="checkbox" name="topics" value="unit-testing">Unit Testing</label>
-				<label><input type="checkbox" name="topics" value="other">Other</label>
+	<div class="card" role="region" aria-labelledby="title">
+		<header>
+			<h1 id="title">SuiteCloud Developer Assistant Feedback</h1>
+			<p class="note">
+				Take a moment to share your thoughts on the SuiteCloud Developer Assistant. Any data you provide
+				will remain anonymous.</p>
+		</header>
+		<form class="content" id="feedbackForm">
+			<div class="row">
+				<label for="feedback">Your Feedback</label>
+				<textarea id="feedback" name="feedback"
+						  placeholder="What worked well? What should be improved? Any suggestions?"
+						  required></textarea>
 			</div>
-		</fieldset>
 
-		<div class="row" aria-labelledby="ratingLabel">
-			<label id="ratingLabel">
-				Rate Your Overall Satisfaction (1-5)</label>
-			<div class="stars" role="radiogroup" aria-label="Star rating">
-				<input type="radio" id="star5" name="rating" value="5" required />
-				<label class="star" for="star5" aria-label="5 stars"></label>
-				<input type="radio" id="star4" name="rating" value="4" />
-				<label class="star" for="star4" aria-label="4 stars"></label>
-				<input type="radio" id="star3" name="rating" value="3" />
-				<label class="star" for="star3" aria-label="3 stars"></label>
-				<input type="radio" id="star2" name="rating" value="2" />
-				<label class="star" for="star2" aria-label="2 stars"></label>
-				<input type="radio" id="star1" name="rating" value="1" />
-				<label class="star" for="star1" aria-label="1 star"></label>
+			<fieldset>
+				<legend>This Feedback is about</legend>
+				<div class="checks">
+					<label><input type="checkbox" name="topics" value="code-explanation">Code Explanation</label>
+					<label><input type="checkbox" name="topics" value="sdf-objects-generation">SDF Objects Generation </label>
+					<label><input type="checkbox" name="topics" value="suitescript-code-generation">SuiteScript Code Generation</label>
+					<label><input type="checkbox" name="topics" value="unit-testing">Unit Testing</label>
+					<label><input type="checkbox" name="topics" value="other">Other</label>
+				</div>
+			</fieldset>
+
+			<div class="row" aria-labelledby="ratingLabel">
+				<label id="ratingLabel">
+					Rate Your Overall Satisfaction (1-5)</label>
+				<div class="stars" role="radiogroup" aria-label="Star rating">
+					<input type="radio" id="star5" name="rating" value="5" required />
+					<label class="star" for="star5" aria-label="5 stars"></label>
+					<input type="radio" id="star4" name="rating" value="4" />
+					<label class="star" for="star4" aria-label="4 stars"></label>
+					<input type="radio" id="star3" name="rating" value="3" />
+					<label class="star" for="star3" aria-label="3 stars"></label>
+					<input type="radio" id="star2" name="rating" value="2" />
+					<label class="star" for="star2" aria-label="2 stars"></label>
+					<input type="radio" id="star1" name="rating" value="1" />
+					<label class="star" for="star1" aria-label="1 star"></label>
+				</div>
 			</div>
-		</div>
 
-		<div class="actions">
-			<button type="reset" class="secondary">Reset</button>
-			<button type="button" class="secondary" id="cancelBtn"
-					title="Close this Feedback form page without sending feedback">Cancel
-			</button>
-			<button type="submit">Submit</button>
-		</div>
+			<div class="actions">
+				<button type="reset" class="secondary">Reset</button>
+				<button type="button" class="secondary" id="cancelBtn"
+						title="Close this Feedback form page without sending feedback">Cancel
+				</button>
+				<button type="submit">Submit</button>
+			</div>
 
-		<details>
-			<summary class="note">See payload</summary>
-			<pre id="result" class="hidden" aria-live="polite"></pre>
-		</details>
-	</form>
-</div>
-<div id="alert-container"></div>
-<script>
-	const form = document.getElementById('feedbackForm');
-	const result = document.getElementById('result');
-	const cancelBtn = document.getElementById('cancelBtn');
+			<details>
+				<summary class="note">See payload</summary>
+				<pre id="result" class="hidden" aria-live="polite"></pre>
+			</details>
+		</form>
+	</div>
+	<div id="alert-container"></div>
+	<script>
+		const form = document.getElementById('feedbackForm');
+		const result = document.getElementById('result');
+		const cancelBtn = document.getElementById('cancelBtn');
 
-	function collect() {
-		const data = {
-			feedback: document.getElementById('feedback').value.trim(),
-			topics: Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(el => el.value),
-			rating: Number((document.querySelector('input[name="rating"]:checked') || {}).value || 0),
-			timestamp: new Date().toISOString(),
-		};
-		return data;
-	}
-
-	function spawnAlert(message, type = 'info', timeout = 0) {
-		const container = document.getElementById('alert-container');
-		if (!container) return;
-		const alertDiv = document.createElement('div');
-		alertDiv.className = 'toast-alert toast-' + type;
-		alertDiv.setAttribute('role', 'alert');
-		alertDiv.setAttribute('aria-live', 'polite');
-		alertDiv.innerHTML =
-			`<span style="flex:1">${message}</span>
-				<button class="toast-close" aria-label="Close" tabindex="0">&times;</button>`;
-		const closeBtn = alertDiv.querySelector('.toast-close');
-		let dismissed = false;
-
-		function removeAlert() {
-			if (dismissed) return;
-			dismissed = true;
-			alertDiv.style.transition = 'opacity 180ms';
-			alertDiv.style.opacity = 0;
-			setTimeout(() => container.removeChild(alertDiv), 180);
+		function collect() {
+			const data = {
+				feedback: document.getElementById('feedback').value.trim(),
+				topics: Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(el => el.value),
+				rating: Number((document.querySelector('input[name="rating"]:checked') || {}).value || 0),
+				timestamp: new Date().toISOString(),
+			};
+			return data;
 		}
 
-		closeBtn.addEventListener('click', removeAlert);
-		alertDiv.addEventListener('keydown', e => {
-			if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') removeAlert();
+		function spawnAlert(message, type = 'info', timeout = 0) {
+			const container = document.getElementById('alert-container');
+			if (!container) return;
+			const alertDiv = document.createElement('div');
+			alertDiv.className = 'toast-alert toast-' + type;
+			alertDiv.setAttribute('role', 'alert');
+			alertDiv.setAttribute('aria-live', 'polite');
+			alertDiv.innerHTML =
+				`<span style="flex:1">${message}</span>
+					<button class="toast-close" aria-label="Close" tabindex="0">&times;</button>`;
+			const closeBtn = alertDiv.querySelector('.toast-close');
+			let dismissed = false;
+
+			function removeAlert() {
+				if (dismissed) return;
+				dismissed = true;
+				alertDiv.style.transition = 'opacity 180ms';
+				alertDiv.style.opacity = 0;
+				setTimeout(() => container.removeChild(alertDiv), 180);
+			}
+
+			closeBtn.addEventListener('click', removeAlert);
+			alertDiv.addEventListener('keydown', e => {
+				if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') removeAlert();
+			});
+			container.appendChild(alertDiv);
+			if (timeout !== 0) setTimeout(removeAlert, timeout);
+		}
+
+		// VS Code API
+		const vscode = acquireVsCodeApi();
+
+		form.addEventListener('submit', (e) => {
+			e.preventDefault();
+
+			const checkedTopics = document.querySelectorAll('input[name="topics"]:checked');
+			const ratingChecked = document.querySelector('input[name="rating"]:checked');
+
+			const data = collect();
+			const json = JSON.stringify(data, null, 2);
+			result.textContent = json;
+			result.classList.remove('hidden');
+
+			// TODO: VSCode Security forbids FETCHing content directly from within the Webview.
+			// const response = await fetch("http://127.0.0.1:8181/api/internal/devassist", {
+			//    method: "POST",
+			//    headers: { "Content-Type": "application/json" },
+			//    body: json
+			// });
+
+			vscode.postMessage({ type: 'SUBMIT_FEEDBACK', data: json });
 		});
-		container.appendChild(alertDiv);
-		if (timeout !== 0) setTimeout(removeAlert, timeout);
-	}
 
-	// VS Code API
-	const vscode = acquireVsCodeApi();
+		cancelBtn.addEventListener('click', () => {
+			vscode.postMessage({ type: 'CLOSE_WEBVIEW' });
+		});
 
-	form.addEventListener('submit', (e) => {
-		e.preventDefault();
-
-		const checkedTopics = document.querySelectorAll('input[name="topics"]:checked');
-		const ratingChecked = document.querySelector('input[name="rating"]:checked');
-
-		const data = collect();
-		const json = JSON.stringify(data, null, 2);
-		result.textContent = json;
-		result.classList.remove('hidden');
-
-		// TODO: VSCode Security forbids FETCHing content directly from within the Webview.
-		// const response = await fetch("http://127.0.0.1:8181/api/internal/devassist", {
-		//    method: "POST",
-		//    headers: { "Content-Type": "application/json" },
-		//    body: json
-		// });
-
-		vscode.postMessage({ type: 'submit', data: json });
-	});
-
-	cancelBtn.addEventListener('click', () => {
-		vscode.postMessage({ type: 'cancel' });
-	});
-
-	// Listen to VSCode Events
-	window.addEventListener('message', event => {
-		const { type, value, message } = event.data;
-		if (type === 'spawnAlertEvent') {
-			if (value === 'info') spawnAlert(message, 'info', 0);
-			else if (value === 'error') spawnAlert(message, 'error', 10000);
-		}
-	});
-</script>
+		// Listen to VSCode Events
+		window.addEventListener('message', event => {
+			const { type, value, message } = event.data;
+			if (type === 'spawnAlertEvent') {
+				if (value === 'info') spawnAlert(message, 'info', 0);
+				else if (value === 'error') spawnAlert(message, 'error', 10000);
+			}
+		});
+	</script>
 </body>
 </html>

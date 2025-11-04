@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DevAssist Feedback</title>
+	<link rel="stylesheet" href="{{CSS_FILE.css}}">
+</head>
+<body>
+	<div class="card" role="region" aria-labelledby="title">
+		<header>
+			<h1 id="title">SuiteCloud Developer Assistant Feedback</h1>
+			<p class="note">
+				Take a moment to share your thoughts on the SuiteCloud Developer Assistant. Any data you provide
+				will remain anonymous.</p>
+		</header>
+		<div class="content">
+			<label>Woah! Something went wrong when submitting your feedback.</label>
+			<label>Please try again later.</label>
+		</div>
+	</div>
+	<div class="actions">
+		<button type="button" class="secondary" id="closeBtn">Close</button>
+	</div>
+	<script>
+		const closeBtn = document.getElementById('closeBtn');
+		const vscode = acquireVsCodeApi();
+
+		/* Button Actions */
+		closeBtn.addEventListener('click', () => {
+			vscode.postMessage({ type: 'CLOSE_WEBVIEW' });
+		});
+	</script>
+</body>
+</html>
