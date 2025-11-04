@@ -47,11 +47,10 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// Handle messages sent from the webview
 	feedbackFormPanel.webview.onDidReceiveMessage(
-		async (message) => {
-			switch (message.type) {
+		async (webviewMessage) => {
+			switch (webviewMessage.type) {
 				case 'submit':
-					console.log(message);
-					vscode.window.showInformationMessage('Thanks for your feedback!');
+					console.log(webviewMessage);
 					feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'success' });
 
 					const currentProxySettings = getDevAssistCurrentSettings();
@@ -59,7 +58,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 						const response = await fetch(`http://127.0.0.1:$${currentProxySettings.localPort}/api/internal/devassist`, {
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
-							body: message.data
+							body: webviewMessage.data
 						});
 						if (response.ok) {
 							feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'success' });
@@ -82,6 +81,13 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 	);
 };
 
+// TODO: define a FormData structure instead of using 'any'
+const validateFormData = (formData : any) => {
+
+
+}
+
+
 export const debugCall = () => {
 	if (!feedbackFormPanel) {
 		return;
@@ -101,6 +107,11 @@ const getCheckboxesHTMLContent = () => {
 		return `<label><input type="checkbox" name="topics" value="${optionID}"> ${optionValue} </label>`;
 	}).join('');
 };
+
+// Submitting feedback
+
+// Thank you for your feedback! You can close this window\n [Close Window, write another feedback BUTTON]
+// Woah! Something went wrong when submitting your feedback.\n Please try again later
 
 const getFeedbackFormHTMLContent = (cssUri: any) => {
 
@@ -235,6 +246,7 @@ const getFeedbackFormHTMLContent = (cssUri: any) => {
 				vscode.postMessage({ type: 'cancel' });
 			});
 			
+			// Listen to VSCode Events
 			window.addEventListener('message', event => {
 				const { type, value, message } = event.data;
 				if (type === 'spawnAlertEvent') {
