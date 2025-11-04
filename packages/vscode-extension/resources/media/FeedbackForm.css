@@ -88,53 +88,51 @@ legend {
 
 .stars {
     display: inline-flex;
-    /* flex-direction: row-reverse;*/
-    gap: 6px
+    flex-direction: row-reverse; /* shows stars in correct LTR order */
+    gap: 6px;
+    width: fit-content;
 }
-
 .stars input {
-    display: none
+    display: none;
 }
-
 .star {
     cursor: pointer;
     font-size: 28px;
     line-height: 1;
     filter: grayscale(.6);
-    transition: transform .05s ease
+    transition: transform .05s ease;
 }
-
 .star::before {
-    content: "☆"
+    content: "☆";
 }
-
+/* On hover, fill all stars to the left (and including hovered) */
 .stars label.star:hover,
 .stars label.star:hover ~ label.star {
-    transform: scale(1.05)
+    transform: scale(1.25);
 }
-
-/* Fill stars up to the selected one */
-.stars input:checked + label.star::before,
-.stars input:checked + label.star ~ label.star::before {
-    content: "★"
-}
-
-.stars input:checked + label.star,
-.stars input:checked + label.star ~ label.star {
+.stars label.star:hover::before,
+.stars label.star:hover ~ label.star::before {
+    content: "★";
+    color: #f59e0b;
     filter: none;
-    color: #f59e0b
+}
+.stars label.star:hover,
+.stars label.star:hover ~ label.star {
+    color: #f59e0b;
+    filter: none;
+}
+
+/* On checked, fill all stars to the left (and including selected) */
+.stars input:checked ~ label.star::before,
+.stars input:checked ~ label.star {
+    content: "★";
+    color: #f59e0b;
+    filter: none;
 }
 
 .row {
     display: grid;
     gap: 6px
-}
-
-.actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 8px
 }
 
 button {
@@ -169,6 +167,13 @@ pre {
 
 .hidden {
     display: none
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px
 }
 
 #alert-container {

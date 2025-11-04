@@ -65,7 +65,12 @@ export class SuiteCloudAuthProxyService extends SuiteCloudAuthProxyServiceTypedJ
 export const AccountCredentialsFormatter: {
 	getInfoString(accountCredentials: any): string;
 } = require('@oracle/suitecloud-cli/src/utils/AccountCredentialsFormatter');
-export const FileUtils = require('@oracle/suitecloud-cli/src/utils/FileUtils');
+export const FileUtils : {
+	readAsJson(filePath: string) : any;
+	readAsString(fileName: string) : string;
+	exists(fileName: string) : boolean;
+	createDirectory(dirPath: string) : void;
+} = require('@oracle/suitecloud-cli/src/utils/FileUtils');
 
 export const InteractiveAnswersValidator: {
 	showValidationResults(value: string, ...funcs: Function[]): string | boolean;
