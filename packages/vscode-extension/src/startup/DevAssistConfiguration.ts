@@ -3,7 +3,7 @@ import { DEVASSIST, VSCODE_PLATFORM } from '../ApplicationConstants';
 import { getSdkPath } from '../core/sdksetup/SdkProperties';
 import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
-import { DEVASSIST_SERVICE, REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
+import { BUTTONS, DEVASSIST_SERVICE, REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
 import { VSTranslationService } from '../service/VSTranslationService';
 import { AuthenticationUtils, ExecutionEnvironmentContext, SuiteCloudAuthProxyService } from '../util/ExtensionUtil';
 import { output } from '../suitecloud';
@@ -137,7 +137,21 @@ const startDevAssistService = async (devAssistAuthID: string, localPort: number,
 
     setSuccessDevAssistStausBarMessage(devAssistStatusBar);
     const proxyUrl = getProxyUrl(localPort);
-    vsNotificationService.showCommandInfo(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl));
+	const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl);
+	const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+		{
+			buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
+			buttonAction: vsNotificationService.showOutput
+		},
+		{
+			buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION_BUTTON),
+			buttonAction: () => {
+				vscode.commands.executeCommand('suitecloud.opendevassistfeedbackform')
+			}
+		},
+	];
+	vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
+
     vsLogger.printTimestamp();
     vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.OUTPUT, getProxyUrlWithoutPath(localPort), devAssistAuthID, proxyUrl));
 }

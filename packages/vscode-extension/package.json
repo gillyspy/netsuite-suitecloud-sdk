@@ -114,13 +114,13 @@
 			},
             {
               "command": "suitecloud.opendevassistfeedbackform",
-              "title": "Open DevAssist Feedback Forms",
+              "title": "Open DevAssist Feedback Forms  //TODO: Remove",
               "category": "SuiteCloud",
               "enablement": "true"
             },
 			{
 				"command": "suitecloud.debugCall",
-				"title": "DevAssist Feedback Forms: Debug Call",
+				"title": "DevAssist Feedback Forms: Debug Call //TODO: Remove",
 				"category": "SuiteCloud",
 				"enablement": "true"
 			}

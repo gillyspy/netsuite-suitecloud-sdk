@@ -5,9 +5,10 @@ import { VSTranslationService } from '../service/VSTranslationService';
 import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
 import { getDevAssistCurrentSettings } from '../startup/DevAssistConfiguration';
 import { FileUtils } from '../util/ExtensionUtil';
+import VSConsoleLogger from '../loggers/VSConsoleLogger';
 
-const messageService = new MessageService();
 const translationService = new VSTranslationService();
+const vsLogger = new VSConsoleLogger();
 
 const MEDIA_DIR = 'resources/media'
 const WEBVIEW_FILE_NAMES = {
@@ -23,11 +24,11 @@ const WEBVIEW_FILE_NAMES = {
 const WEBVIEW_EVENTS = {
 	CLOSE : "CLOSE_WEBVIEW",
 	SUBMIT_FEEDBACK : "SUBMIT_FEEDBACK",
-	OPEN_NEW_FEEDBACK_FORM : "OPEN_NEW_FEEDBACK_FORM"
+	OPEN_NEW_FEEDBACK_FORM : "OPEN_NEW_FEEDBACK_FORM",
 }
 
 let feedbackFormPanel: vscode.WebviewPanel | undefined;
-let extensionMediaPath : string;
+let vscodeExtensionMediaPath : string;
 export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// if one FeedbackForm is already open, reveal it instead of creating a new one
@@ -36,7 +37,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 		return;
 	}
 
-	extensionMediaPath = context.extensionPath;
+	vscodeExtensionMediaPath = path.join(context.extensionPath, MEDIA_DIR);
 	feedbackFormPanel = vscode.window.createWebviewPanel(
 		'devassistfeedbackform',
 		'SuiteCloud Developer Assistant Feedback',
@@ -44,16 +45,15 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 		{
 			enableScripts: true,
 			localResourceRoots: [
-				vscode.Uri.file(path.join(extensionMediaPath, MEDIA_DIR)),
+				vscode.Uri.file(vscodeExtensionMediaPath),
 			],
 		},
 	);
 
 	// Read HTML and inject the correct webview resource URIs for the CSS file
-	const fullMediaPath = path.join(extensionMediaPath, MEDIA_DIR);
-    const feedbackFormHTMLFilePath = path.join(fullMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
-    const feedbackFormCSSFilePath = path.join(fullMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.CSS);
-	feedbackFormPanel.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath.toString());
+    const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
+    const feedbackFormCSSFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.CSS);
+	feedbackFormPanel.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
 
 
 	// Clean up the reference when the WebviewPanel is closed
@@ -67,7 +67,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// Handle messages sent from the webview
 	feedbackFormPanel.webview.onDidReceiveMessage(
-		(webviewMessage) => handleWebviewMessage(webviewMessage),
+		(webviewMessage) => handleWebviewMessage(webviewMessage, feedbackFormCSSFilePath),
 		undefined,
 		context.subscriptions,
 	);
@@ -96,32 +96,56 @@ export const debugCall = () => {
 // Thank you for your feedback! You can close this window\n [Close Window, write another feedback BUTTON]
 // Woah! Something went wrong when submitting your feedback.\n Please try again later
 
-const handleWebviewMessage = async (webviewMessage : any) : Promise<void> => {
+const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePath : string) : Promise<void> => {
 	switch (webviewMessage.type) {
-
 		case WEBVIEW_EVENTS.SUBMIT_FEEDBACK:
 			console.log(webviewMessage);
 			feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'success' });
 
+			const submittingHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.SUBMITTING_HTML);
+			feedbackFormPanel!.webview.html = getWebviewHTMLContent(submittingHTMLFilePath, feedbackFormCSSFilePath);
+
 			const currentProxySettings = getDevAssistCurrentSettings();
 			try {
-				const response = await fetch(`http://127.0.0.1:$${currentProxySettings.localPort}/api/internal/devassist`, {
+				const response = await fetch(`http://127.0.0.1:${currentProxySettings.localPort}/api/internal/devassist/feedback`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: webviewMessage.data
 				});
-				if (response.ok) {
-					feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'success' });
-				} else {
-					feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'error' });
+				// TODO: this 404 shouldn't be here, so remove it once development/testing is finished
+				if (response.ok || response.status === 404) {
+					vsLogger.printTimestamp();
+					vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText);
+					vsLogger.info('');
+					const successHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.SUCCESS_HTML);
+					feedbackFormPanel!.webview.html = getWebviewHTMLContent(successHTMLFilePath, feedbackFormCSSFilePath);
+				}
+				else {
+					vsLogger.printTimestamp();
+					vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText);
+					vsLogger.error('');
+					const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
+					feedbackFormPanel!.webview.html = getWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
 				}
 			} catch (e) {
-				feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'error' });
+				vsLogger.printTimestamp();
+				vsLogger.error("Feedback Form Internal Failure: " + e);
+				vsLogger.error('');
+				
+				const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
+				feedbackFormPanel!.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
+				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR)});
+				// const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
+				// feedbackFormPanel!.webview.html = getWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
 			}
 			// Handle/store feedback as needed
 			// feedbackFormPanel?.dispose();
 			break;
 
+		case WEBVIEW_EVENTS.OPEN_NEW_FEEDBACK_FORM:
+			const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
+			feedbackFormPanel!.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
+			break;
 
 		case WEBVIEW_EVENTS.CLOSE:
 			feedbackFormPanel?.dispose();
