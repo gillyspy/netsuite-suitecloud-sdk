@@ -12,6 +12,7 @@ const EventEmitter = require('events');
 /** Events */
 const EVENTS = {
 	SERVER_ERROR: 'serverError',
+	SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
 	PROXY_ERROR: 'proxyError'
 };
@@ -134,8 +135,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 	_handleListeningErrors(errorMsg, event) {
 		console.error(errorMsg);
-		const emitObject = { message: errorMsg, authId: this._authId };
-		this.emit(event, emitObject);
+		this.emit(event, this._buildEmitObject(errorMsg));
 	}
 
 	/**
@@ -219,8 +219,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 					newProxyRequest.write(body);
 					newProxyRequest.end();
 				} else {
-					const emitObject = { message: refreshOperationResult.errorMessage, authId: this._authId };
-					this.emit(refreshOperationResult.emitEventName, emitObject);
+					this.emit(refreshOperationResult.emitEventName, this._buildEmitObject(refreshOperationResult.errorMessage));
 					//Message shown to cline
 					this._writeResponseMessage(response, refreshOperationResult.responseStatusCode, refreshOperationResult.errorMessage);
 					proxyResponse.pipe(response, { end: true });
@@ -235,6 +234,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		proxyRequest.on('error', (err) => {
 			console.error('Proxy request error:', err);
 			response.writeHead(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
+			this.emit(EVENTS.SERVER_ERROR, this._buildEmitObject(err.message));
 			//TODO Review this message and see confluence error pages and review with the tech writers
 			response.end('SuiteCloud Proxy error: ' + err.message);
 		});
@@ -262,7 +262,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (!inspectAuthOperationResult.isSuccess()) {
 			const errorMsg = this._cleanText(inspectAuthOperationResult.errorMessages.join('. '));
 
-			refreshInfo.emitEventName = EVENTS.SERVER_ERROR;
+			refreshInfo.emitEventName = EVENTS.SERVER_ERROR_ON_REFRESH;
 			refreshInfo.errorMessage = errorMsg;
 			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
@@ -300,6 +300,17 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 			return Object.freeze(refreshInfo);
 		}
+	}
+
+	/**
+	 * This method is created in order to have centralized the structure of the
+	 * emit object in case it should be changed into the future
+	 * @param errorMsg
+	 * @returns {{message, authId}}
+	 * @private
+	 */
+	_buildEmitObject(errorMsg) {
+		return { message: errorMsg, authId: this._authId };
 	}
 
 	/**

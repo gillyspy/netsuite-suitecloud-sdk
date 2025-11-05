@@ -33,7 +33,8 @@ const devAssistConfigStatus: { current: devAssistConfig, previous: devAssistConf
 const PROXY_SERVICE_EVENTS = {
     REAUTHORIZE: 'authRefreshManual',
     SERVER_ERROR: 'serverError',
-    PROXY_ERROR: 'proxyError'
+    PROXY_ERROR: 'proxyError',
+    SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh'
 }
 
 const executionEnvironmentContext = new ExecutionEnvironmentContext({
@@ -133,6 +134,12 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.PROXY_ERROR, (emitParams: { authId: string, message: string }) => {
 		const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PROXY_ERROR, emitParams.message);
         showDevAssistEmitProblemNotification(PROXY_SERVICE_EVENTS.PROXY_ERROR, errorMessage, devAssistStatusBar);
+        vsLogger.error('');
+    });
+
+    devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR_ON_REFRESH, (emitParams: { authId: string, message: string }) => {
+        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.SERVER_ERROR_ON_REFRESH, emitParams.message);
+        showDevAssistEmitProblemNotification(PROXY_SERVICE_EVENTS.SERVER_ERROR_ON_REFRESH, errorMessage, devAssistStatusBar);
         vsLogger.error('');
     });
 
