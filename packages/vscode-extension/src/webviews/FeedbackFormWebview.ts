@@ -65,7 +65,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 		context.subscriptions,
 	);
 
-	// Handle messages sent from the webview
+	// Handle messages/events sent from the webview
 	feedbackFormPanel.webview.onDidReceiveMessage(
 		(webviewMessage) => handleWebviewMessage(webviewMessage, feedbackFormCSSFilePath),
 		undefined,
@@ -75,7 +75,6 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 // TODO: define a FormData structure instead of using 'any'
 const validateFormData = (formData : any) => {
-
 
 }
 
@@ -131,15 +130,14 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 				vsLogger.printTimestamp();
 				vsLogger.error("Feedback Form Internal Failure: " + e);
 				vsLogger.error('');
-				
+
+				// TODO: Find a way to not delete the user input when
 				const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
 				feedbackFormPanel!.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
 				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR)});
 				// const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
 				// feedbackFormPanel!.webview.html = getWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
 			}
-			// Handle/store feedback as needed
-			// feedbackFormPanel?.dispose();
 			break;
 
 		case WEBVIEW_EVENTS.OPEN_NEW_FEEDBACK_FORM:

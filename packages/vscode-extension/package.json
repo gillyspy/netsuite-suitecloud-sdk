@@ -120,7 +120,7 @@
             },
 			{
 				"command": "suitecloud.debugCall",
-				"title": "DevAssist Feedback Forms: Debug Call //TODO: Remove",
+				"title": "DevAssist Feedback Forms: Debug Call //TODO: enablement -> false",
 				"category": "SuiteCloud",
 				"enablement": "true"
 			}
