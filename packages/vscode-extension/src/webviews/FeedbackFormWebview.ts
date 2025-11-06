@@ -48,7 +48,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// if one FeedbackForm is already open, reveal it instead of creating a new one
 	if (feedbackFormPanel) {
-		feedbackFormPanel.reveal(vscode.ViewColumn.One);
+		feedbackFormPanel.reveal();
 		return;
 	}
 
@@ -177,7 +177,6 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 					headers: { 'Content-Type': 'application/json' },
 					body: webviewMessage.data
 				});
-				// TODO: this 404 shouldn't be here, so remove it once development/testing is finished
 				if (response.ok) {
 					vsLogger.printTimestamp();
 					vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText);
@@ -197,7 +196,8 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 				vsLogger.error("Feedback Form Internal Failure: " + e);
 				vsLogger.error('');
 
-				// TODO: Find a way to not delete the user input when
+				// TODO: Find a way to not delete the user input when swaping HTML / clicking out
+				// 	-> https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
 				const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
 				feedbackFormPanel!.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
 				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR)});
