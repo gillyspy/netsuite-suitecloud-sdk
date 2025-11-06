@@ -117,13 +117,7 @@
               "title": "Open DevAssist Feedback Forms  //TODO: enablement -> false",
               "category": "SuiteCloud",
               "enablement": "true"
-            },
-			{
-				"command": "suitecloud.debugCall",
-				"title": "DevAssist Feedback Forms: Debug Call //TODO: Remove",
-				"category": "SuiteCloud",
-				"enablement": "true"
-			}
+            }
 		],
 		"keybindings": [
 			{
