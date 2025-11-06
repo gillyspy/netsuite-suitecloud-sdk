@@ -54,7 +54,13 @@
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_CANCEL_PROCESS": "Cancel the deployment process",
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_DISPLAY_WARNING": "Display a warning and continue the deployment process",
 
-    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_VALIDATION_ERROR": "Field Validation Error:<br>{0}",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_VALIDATION_ERROR": "There are feedback validation errors:<br>{0}",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_VALIDATION_ERROR": "{0}: {1}",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_EMPTY": "This field must not be empty. Please provide a value from the ones available",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_TOO_LONG": "This field cannot exceed {0} characters in length",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_HAVE_REPEATED_VALUES": "Please select unique and not repeating values (provided: {0}).",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_MUST_HAVE_BE_A_VALID_NUMBER": "Please provide a valid integer rating from {0} to {1}.",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_MUST_HAVE_SPECIFIC_VALUES": "Please select a valid value from the ones available: {0}.",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_ERROR": "Unable to connect to the Developer Assistant Service...<br>Is it running?",
 
 	"DEVASSIST_SERVICE_IS_DISABLED_NOTIFICATION": "SuiteCloud Developer Assistant service has been disabled.",

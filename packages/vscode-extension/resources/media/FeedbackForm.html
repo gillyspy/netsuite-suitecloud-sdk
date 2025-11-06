@@ -17,8 +17,7 @@
 			<div class="row">
 				<label for="feedback">Your Feedback</label>
 				<textarea id="feedback" name="feedback"
-						  placeholder="What worked well? What should be improved? Any suggestions?"
-						  required></textarea>
+						  placeholder="What worked well? What should be improved? Any suggestions?"></textarea>
 			</div>
 
 			<fieldset>
@@ -36,7 +35,7 @@
 				<label id="ratingLabel">
 					Rate Your Overall Satisfaction (1-5)</label>
 				<div class="stars" role="radiogroup" aria-label="Star rating">
-					<input type="radio" id="star5" name="rating" value="5" required />
+					<input type="radio" id="star5" name="rating" value="5"/>
 					<label class="star" for="star5" aria-label="5 stars"></label>
 					<input type="radio" id="star4" name="rating" value="4" />
 					<label class="star" for="star4" aria-label="4 stars"></label>
@@ -114,9 +113,6 @@
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
 
-			const checkedTopics = document.querySelectorAll('input[name="topics"]:checked');
-			const ratingChecked = document.querySelector('input[name="rating"]:checked');
-
 			const data = collect();
 			const json = JSON.stringify(data, null, 2);
 			result.textContent = json;
@@ -129,7 +125,7 @@
 			//    body: json
 			// });
 
-			vscode.postMessage({ type: 'SUBMIT_FEEDBACK', data: json });
+			vscode.postMessage({ type: 'SUBMIT_FEEDBACK', data: data });
 		});
 
 		cancelBtn.addEventListener('click', () => {

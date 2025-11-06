@@ -4,13 +4,14 @@ import MessageService from '../service/MessageService';
 import { VSTranslationService } from '../service/VSTranslationService';
 import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
 import { getDevAssistCurrentSettings } from '../startup/DevAssistConfiguration';
-import { FileUtils } from '../util/ExtensionUtil';
+import { FileUtils, InteractiveAnswersValidator } from '../util/ExtensionUtil';
 import VSConsoleLogger from '../loggers/VSConsoleLogger';
 
 const translationService = new VSTranslationService();
 const vsLogger = new VSConsoleLogger();
 
 const MEDIA_DIR = 'resources/media'
+
 const WEBVIEW_FILE_NAMES = {
 	FEEDBACK_FORM : {
 		HTML : 'FeedbackForm.html',
@@ -26,6 +27,20 @@ const WEBVIEW_EVENTS = {
 	SUBMIT_FEEDBACK : "SUBMIT_FEEDBACK",
 	OPEN_NEW_FEEDBACK_FORM : "OPEN_NEW_FEEDBACK_FORM",
 }
+
+type FeedbackFormData = {
+	feedback: string;
+	topics: string[];
+	rating: number;
+};
+
+const VALID_FEEDBACK_TOPICS = [
+	"CodeExplanation",
+	"SDFObjectGeneration",
+	"SuiteScriptCodeGeneration",
+	"UnitTesting",
+	"Other"
+]
 
 let feedbackFormPanel: vscode.WebviewPanel | undefined;
 let vscodeExtensionMediaPath : string;
@@ -73,9 +88,53 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 	);
 };
 
-// TODO: define a FormData structure instead of using 'any'
-const validateFormData = (formData : any) => {
+const validateFormData = (formData : FeedbackFormData) => {
 
+	// validate feedback field (textArea)
+	if (!formData.feedback || formData.feedback.trim().length === 0) {
+		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+			"Your Feedback TextArea",
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
+	} else if (formData.feedback.length > 1000) {
+		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+			"Your Feedback TextArea",
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_TOO_LONG, "1000"));
+	}
+
+	// validate selectedTopic field
+	if (!formData.topics || !Array.isArray(formData.topics) || formData.topics.length === 0) {
+		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+			"Your Feedback Topic",
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
+	} else {
+		const uniqueTopics = new Set(formData.topics);
+		if (uniqueTopics.size !== formData.topics.length) {
+			return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+				"Your Feedback Topic",
+				translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_HAVE_REPEATED_VALUES, formData.topics.toString()));
+		}
+		for (const topic of formData.topics) {
+			if (VALID_FEEDBACK_TOPICS.includes(topic)) {
+				return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+					"Your Feedback Topic",
+					translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.MUST_HAVE_SPECIFIC_VALUES, VALID_FEEDBACK_TOPICS.toString()));
+			}
+		}
+	}
+
+	// validate rating field (integer 0 < x <= 5)
+	if (!formData.rating || formData.rating === 0) {
+		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+			"Rating Field",
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
+	}
+	if (!Number.isInteger(formData.rating) || formData.rating < 1 || formData.rating > 5) {
+		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
+			"Rating Field",
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.MUST_HAVE_SPECIFIC_VALUES, "1", "5"));
+	}
+
+	return true;
 }
 
 
@@ -99,11 +158,18 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 	switch (webviewMessage.type) {
 		case WEBVIEW_EVENTS.SUBMIT_FEEDBACK:
 			console.log(webviewMessage);
-			feedbackFormPanel?.webview.postMessage({ type: 'status', value: 'success' });
+
+			// validate Feedback Form Data
+			const validationResult = validateFormData(webviewMessage.data);
+			if (typeof validationResult === 'string') {
+				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.VALIDATION_ERROR, validationResult)});
+				return;
+			}
 
 			const submittingHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.SUBMITTING_HTML);
 			feedbackFormPanel!.webview.html = getWebviewHTMLContent(submittingHTMLFilePath, feedbackFormCSSFilePath);
 
+			// Send request to NetSuite Backend through Proxy
 			const currentProxySettings = getDevAssistCurrentSettings();
 			try {
 				const response = await fetch(`http://127.0.0.1:${currentProxySettings.localPort}/api/internal/devassist/feedback`, {
@@ -112,7 +178,7 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 					body: webviewMessage.data
 				});
 				// TODO: this 404 shouldn't be here, so remove it once development/testing is finished
-				if (response.ok || response.status === 404) {
+				if (response.ok) {
 					vsLogger.printTimestamp();
 					vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText);
 					vsLogger.info('');
