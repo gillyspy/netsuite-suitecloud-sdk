@@ -99,8 +99,8 @@ const validateFormData = (formData : FeedbackFormData) => {
 	let validationResult = validateTextAreaField("Your Feedback (textarea)", formData.feedback, 1000);
 	if (typeof validationResult === 'string') return validationResult;
 
-	// validate topics field
-	validationResult = validateMultipleOptionField("Your Feedback (topic)", formData.topics, VALID_FEEDBACK_TOPICS);
+	// validate selectedTopic field
+	validationResult = validateMultipleOptionField("Your Feedback (topic multi-choice selector)", formData.topics, VALID_FEEDBACK_TOPICS);
 	if (typeof validationResult === 'string') return validationResult;
 
 	// validate rating field (integer 0 < x <= 5)
@@ -108,6 +108,12 @@ const validateFormData = (formData : FeedbackFormData) => {
 	if (typeof validationResult === 'string') return validationResult;
 	return true;
 }
+
+
+// Submitting feedback
+
+// Thank you for your feedback! You can close this window\n [Close Window, write another feedback BUTTON]
+// Woah! Something went wrong when submitting your feedback.\n Please try again later
 
 const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePath : string) : Promise<void> => {
 	switch (webviewMessage.type) {

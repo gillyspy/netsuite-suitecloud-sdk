@@ -8,7 +8,7 @@ export const validateTextAreaField = (fieldName : string, textContent : string, 
 	{
 		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
 			fieldName,
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY_TEXT));
 	}
 	else if (textContent.length > maxLength) {
 		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
@@ -23,7 +23,7 @@ export const validateMultipleOptionField = (fieldName : string, selectedOptions 
 	if (!selectedOptions || selectedOptions.length === 0) {
 		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
 			fieldName,
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY_MULTIPLE_OPTION));
 	}
 	else {
 		const uniqueSelectedOptions = new Set(selectedOptions);
@@ -48,7 +48,7 @@ export const validateIntegerWithinInterval = (fieldName : string, nValue : numbe
 	if (!nValue || nValue === 0) {
 		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
 			fieldName,
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
+			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY_NUMERIC));
 	}
 	else if (!Number.isInteger(nValue) || nValue < lowerBound || nValue > upperBound) {
 		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
