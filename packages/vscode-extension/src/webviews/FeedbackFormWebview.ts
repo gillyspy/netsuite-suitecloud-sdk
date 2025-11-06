@@ -6,6 +6,11 @@ import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
 import { getDevAssistCurrentSettings } from '../startup/DevAssistConfiguration';
 import { FileUtils, InteractiveAnswersValidator } from '../util/ExtensionUtil';
 import VSConsoleLogger from '../loggers/VSConsoleLogger';
+import {
+	validateIntegerWithinInterval,
+	validateMultipleOptionField,
+	validateTextAreaField,
+} from './WebviewFieldValidationUtils';
 
 const translationService = new VSTranslationService();
 const vsLogger = new VSConsoleLogger();
@@ -91,68 +96,18 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 const validateFormData = (formData : FeedbackFormData) => {
 
 	// validate feedback field (textArea)
-	if (!formData.feedback || formData.feedback.trim().length === 0) {
-		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-			"Your Feedback TextArea",
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
-	} else if (formData.feedback.length > 1000) {
-		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-			"Your Feedback TextArea",
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_TOO_LONG, "1000"));
-	}
+	let validationResult = validateTextAreaField("Your Feedback (textarea)", formData.feedback, 1000);
+	if (typeof validationResult === 'string') return validationResult;
 
-	// validate selectedTopic field
-	if (!formData.topics || !Array.isArray(formData.topics) || formData.topics.length === 0) {
-		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-			"Your Feedback Topic",
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
-	} else {
-		const uniqueTopics = new Set(formData.topics);
-		if (uniqueTopics.size !== formData.topics.length) {
-			return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-				"Your Feedback Topic",
-				translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_HAVE_REPEATED_VALUES, formData.topics.toString()));
-		}
-		for (const topic of formData.topics) {
-			if (VALID_FEEDBACK_TOPICS.includes(topic)) {
-				return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-					"Your Feedback Topic",
-					translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.MUST_HAVE_SPECIFIC_VALUES, VALID_FEEDBACK_TOPICS.toString()));
-			}
-		}
-	}
+	// validate topics field
+	validationResult = validateMultipleOptionField("Your Feedback (topic)", formData.topics, VALID_FEEDBACK_TOPICS);
+	if (typeof validationResult === 'string') return validationResult;
 
 	// validate rating field (integer 0 < x <= 5)
-	if (!formData.rating || formData.rating === 0) {
-		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-			"Rating Field",
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_BE_EMPTY));
-	}
-	if (!Number.isInteger(formData.rating) || formData.rating < 1 || formData.rating > 5) {
-		return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
-			"Rating Field",
-			translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.MUST_HAVE_SPECIFIC_VALUES, "1", "5"));
-	}
-
+	validationResult = validateIntegerWithinInterval("Rating", formData.rating, 1, 5);
+	if (typeof validationResult === 'string') return validationResult;
 	return true;
 }
-
-
-export const debugCall = () => {
-	if (!feedbackFormPanel) {
-		return;
-	}
-
-	// Send a message to our webview.
-	// You can send any JSON serializable data.
-	feedbackFormPanel.webview.postMessage({ type: 'spawnAlertEvent', value: 'info', message: 'Random test message info / error' });
-	feedbackFormPanel.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: 'Random test message info / error'});
-};
-
-// Submitting feedback
-
-// Thank you for your feedback! You can close this window\n [Close Window, write another feedback BUTTON]
-// Woah! Something went wrong when submitting your feedback.\n Please try again later
 
 const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePath : string) : Promise<void> => {
 	switch (webviewMessage.type) {
