@@ -73,8 +73,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 	// Read HTML and inject the correct webview resource URIs for the CSS file
     const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
     const feedbackFormCSSFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.CSS);
-	feedbackFormPanel.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
-
+	feedbackFormPanel.webview.html = generateWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
 
 	// Clean up the reference when the WebviewPanel is closed
 	feedbackFormPanel.onDidDispose(
@@ -109,12 +108,6 @@ const validateFormData = (formData : FeedbackFormData) => {
 	return true;
 }
 
-
-// Submitting feedback
-
-// Thank you for your feedback! You can close this window\n [Close Window, write another feedback BUTTON]
-// Woah! Something went wrong when submitting your feedback.\n Please try again later
-
 const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePath : string) : Promise<void> => {
 	switch (webviewMessage.type) {
 		case WEBVIEW_EVENTS.SUBMIT_FEEDBACK:
@@ -128,11 +121,11 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 			}
 
 			const submittingHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.SUBMITTING_HTML);
-			feedbackFormPanel!.webview.html = getWebviewHTMLContent(submittingHTMLFilePath, feedbackFormCSSFilePath);
+			feedbackFormPanel!.webview.html = generateWebviewHTMLContent(submittingHTMLFilePath, feedbackFormCSSFilePath);
 
 			// Send request to NetSuite Backend through Proxy
-			const currentProxySettings = getDevAssistCurrentSettings();
 			try {
+				const currentProxySettings = getDevAssistCurrentSettings();
 				const response = await fetch(`http://127.0.0.1:${currentProxySettings.localPort}/api/internal/devassist/feedback`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -143,14 +136,14 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 					vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText);
 					vsLogger.info('');
 					const successHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.SUCCESS_HTML);
-					feedbackFormPanel!.webview.html = getWebviewHTMLContent(successHTMLFilePath, feedbackFormCSSFilePath);
+					feedbackFormPanel!.webview.html = generateWebviewHTMLContent(successHTMLFilePath, feedbackFormCSSFilePath);
 				}
 				else {
 					vsLogger.printTimestamp();
 					vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText);
 					vsLogger.error('');
 					const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
-					feedbackFormPanel!.webview.html = getWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
+					feedbackFormPanel!.webview.html = generateWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
 				}
 			} catch (e) {
 				vsLogger.printTimestamp();
@@ -160,16 +153,14 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 				// TODO: Find a way to not delete the user input when swaping HTML / clicking out
 				// 	-> https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
 				const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
-				feedbackFormPanel!.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
+				feedbackFormPanel!.webview.html = generateWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
 				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR)});
-				// const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
-				// feedbackFormPanel!.webview.html = getWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
 			}
 			break;
 
 		case WEBVIEW_EVENTS.OPEN_NEW_FEEDBACK_FORM:
 			const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
-			feedbackFormPanel!.webview.html = getWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
+			feedbackFormPanel!.webview.html = generateWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
 			break;
 
 		case WEBVIEW_EVENTS.CLOSE:
@@ -178,7 +169,7 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 	}
 }
 
-const getWebviewHTMLContent = (htmlFilePath : string, cssFilePath : string): string  => {
+const generateWebviewHTMLContent = (htmlFilePath : string, cssFilePath : string): string  => {
 	let htmlFileContent = FileUtils.readAsString(htmlFilePath);
 	const cssUri = feedbackFormPanel?.webview.asWebviewUri(vscode.Uri.file(cssFilePath));
 	htmlFileContent = htmlFileContent.replace('{{CSS_FILE.css}}', cssUri!.toString());
