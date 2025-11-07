@@ -165,10 +165,6 @@ pre {
     max-height: 240px
 }
 
-.hidden {
-    display: none
-}
-
 .actions {
     display: flex;
     gap: 10px;

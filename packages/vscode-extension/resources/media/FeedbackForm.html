@@ -49,33 +49,24 @@
 			</div>
 
 			<div class="actions">
-				<button type="reset" class="secondary">Reset</button>
+				<button type="submit">Submit</button>
 				<button type="button" class="secondary" id="cancelBtn"
 						title="Close this Feedback form page without sending feedback">Cancel
 				</button>
-				<button type="submit">Submit</button>
 			</div>
-
-			<details>
-				<summary class="note">See Payload</summary>
-				<pre id="result" class="hidden" aria-live="polite"></pre>
-			</details>
 		</form>
 	</div>
 	<div id="alert-container"></div>
 	<script>
 		const form = document.getElementById('feedbackForm');
-		const result = document.getElementById('result');
 		const cancelBtn = document.getElementById('cancelBtn');
 
 		function collect() {
-			const data = {
+			return {
 				feedback: document.getElementById('feedback').value.trim(),
 				topics: Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(el => el.value),
-				rating: Number((document.querySelector('input[name="rating"]:checked') || {}).value || 0),
-				timestamp: new Date().toISOString(),
+				rating: Number((document.querySelector('input[name="rating"]:checked') || {}).value || 0)
 			};
-			return data;
 		}
 
 		function spawnAlert(message, type = 'info', timeout = 0) {
@@ -113,18 +104,14 @@
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
 
-			const data = collect();
-			const json = JSON.stringify(data, null, 2);
-			result.textContent = json;
-			result.classList.remove('hidden');
-
-			// TODO: VSCode Security forbids FETCHing content directly from within the Webview.
+			// TODO (for Reviewers): VSCode Security forbids FETCHing content directly from within the Webview.
 			// const response = await fetch("http://127.0.0.1:8181/api/internal/devassist", {
 			//    method: "POST",
 			//    headers: { "Content-Type": "application/json" },
 			//    body: json
 			// });
 
+			const data = collect();
 			vscode.postMessage({ type: 'SUBMIT_FEEDBACK', data: data });
 		});
 
