@@ -57,7 +57,7 @@
 			</div>
 
 			<details>
-				<summary class="note">See payload</summary>
+				<summary class="note">See Payload</summary>
 				<pre id="result" class="hidden" aria-live="polite"></pre>
 			</details>
 		</form>
@@ -137,7 +137,7 @@
 			const { type, value, message } = event.data;
 			if (type === 'spawnAlertEvent') {
 				if (value === 'info') spawnAlert(message, 'info', 0);
-				else if (value === 'error') spawnAlert(message, 'error', 10000);
+				else if (value === 'error') spawnAlert(message, 'error', 0);
 			}
 		});
 	</script>
