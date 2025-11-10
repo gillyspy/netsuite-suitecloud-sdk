@@ -180,7 +180,8 @@ pre {
     display: flex;
     flex-direction: column-reverse; /* new alerts on top */
     gap: 12px;
-    max-width: 340px;
+    max-width: 860px;
+    margin-left: 64px;
     pointer-events: none;
 }
 .toast-alert {
@@ -196,6 +197,7 @@ pre {
     font-size: 15px;
     position: relative;
     min-width: 220px;
+    max-width: 100%;
     pointer-events: auto;
 }
 .toast-alert.toast-info {
@@ -204,7 +206,7 @@ pre {
     color: #155577;
 }
 .toast-alert.toast-error {
-    background: #fff1f0;
+    background: #ffceca;
     border-color: #ff4d4f;
     color: #a8071a;
 }
