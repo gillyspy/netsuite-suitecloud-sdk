@@ -142,8 +142,17 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 					vsLogger.printTimestamp();
 					vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText);
 					vsLogger.error('');
-					const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
-					feedbackFormPanel!.webview.html = generateWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
+
+					if (response.status === 403) {
+						const responseBody : any = await response.json();
+						const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
+						feedbackFormPanel!.webview.html = generateWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);
+						feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: `Error 403: "${responseBody.error}"`});
+					}
+					else {
+						const failureHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FAILURE_HTML);
+						feedbackFormPanel!.webview.html = generateWebviewHTMLContent(failureHTMLFilePath, feedbackFormCSSFilePath);
+					}
 				}
 			} catch (e) {
 				vsLogger.printTimestamp();
