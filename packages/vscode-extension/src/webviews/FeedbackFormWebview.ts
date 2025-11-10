@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import MessageService from '../service/MessageService';
 import { VSTranslationService } from '../service/VSTranslationService';
 import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
 import { getDevAssistCurrentSettings } from '../startup/DevAssistConfiguration';
-import { FileUtils, InteractiveAnswersValidator } from '../util/ExtensionUtil';
+import { FileUtils } from '../util/ExtensionUtil';
 import VSConsoleLogger from '../loggers/VSConsoleLogger';
 import {
 	validateIntegerWithinInterval,
