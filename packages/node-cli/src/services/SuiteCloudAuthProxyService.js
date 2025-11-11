@@ -12,7 +12,9 @@ const EventEmitter = require('events');
 /** Events */
 const EVENTS = {
 	SERVER_ERROR: 'serverError',
+	SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
+	PROXY_ERROR: 'proxyError'
 };
 
 /** Authentication methods */
@@ -28,7 +30,7 @@ const {
 /** Message literal service method */
 const NodeTranslationService = require('./NodeTranslationService');
 const {
-	DEV_ASSIST_PROXY_SERVICE,
+	SUITECLOUD_AUTH_PROXY_SERVICE,
 } = require('./TranslationKeys');
 
 const MAX_RETRY_ATTEMPTS = 1;
@@ -84,7 +86,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 			//Save body
 			const bodyChunks = [];
-			request.on('data', function(chunk) {
+			request.on('data', function (chunk) {
 				bodyChunks.push(chunk);
 			});
 
@@ -99,6 +101,13 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		this._localProxy.listen(proxyPort, LOCAL_HOSTNAME, () => {
 			const localURL = `http://${LOCAL_HOSTNAME}:${proxyPort}`;
 			console.log(`SuiteCloud Proxy server listening on ${localURL}`);
+		});
+
+		this._localProxy.on('error', (error) => {
+			const errorMessage = (error.code === 'EADDRINUSE') ?
+				NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '')
+				: NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
+			this._handleListeningErrors(errorMessage, EVENTS.PROXY_ERROR);
 		});
 	}
 
@@ -124,6 +133,11 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		console.log('access token refreshed');
 	}
 
+	_handleListeningErrors(errorMsg, event) {
+		console.error(errorMsg);
+		this.emit(event, this._buildEmitObject(errorMsg));
+	}
+
 	/**
 	 * It validates the input parameters
 	 * @param authId
@@ -132,15 +146,15 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 */
 	_evalInputParameters(authId, proxyPort) {
 		if (!authId) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_AUTH_ID);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.MISSING_AUTH_ID);
 		}
 
 		if (!proxyPort) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.MISSING_PORT);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.MISSING_PORT);
 		}
 
 		if (isNaN(proxyPort)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
 		}
 	}
 
@@ -157,7 +171,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		}
 
 		if (!authIDActionResult.data.hasOwnProperty(this._authId)) {
-			throw NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NOT_EXISTING_AUTH_ID, this._authId);
+			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.NOT_EXISTING_AUTH_ID, this._authId);
 		}
 		return {
 			accessToken: authIDActionResult.data[this._authId].token.accessToken,
@@ -205,12 +219,10 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 					newProxyRequest.write(body);
 					newProxyRequest.end();
 				} else {
-					const emitObject = { message: refreshOperationResult.errorMessage, authId: this._authId };
-					this.emit(refreshOperationResult.emitEventName, emitObject);
+					this.emit(refreshOperationResult.emitEventName, this._buildEmitObject(refreshOperationResult.errorMessage));
 					//Message shown to cline
 					this._writeResponseMessage(response, refreshOperationResult.responseStatusCode, refreshOperationResult.errorMessage);
 					proxyResponse.pipe(response, { end: true });
-
 				}
 			} else {
 				response.writeHead(proxyResponse.statusCode || HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR, proxyResponse.headers);
@@ -222,6 +234,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		proxyRequest.on('error', (err) => {
 			console.error('Proxy request error:', err);
 			response.writeHead(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
+			this.emit(EVENTS.SERVER_ERROR, this._buildEmitObject(err.message));
 			//TODO Review this message and see confluence error pages and review with the tech writers
 			response.end('SuiteCloud Proxy error: ' + err.message);
 		});
@@ -249,7 +262,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (!inspectAuthOperationResult.isSuccess()) {
 			const errorMsg = this._cleanText(inspectAuthOperationResult.errorMessages.join('. '));
 
-			refreshInfo.emitEventName = EVENTS.SERVER_ERROR;
+			refreshInfo.emitEventName = EVENTS.SERVER_ERROR_ON_REFRESH;
 			refreshInfo.errorMessage = errorMsg;
 			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
@@ -259,7 +272,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		//Needs manual reauthorization
 		const inspectAuthData = inspectAuthOperationResult.data;
 		if (inspectAuthData[AUTHORIZATION_PROPERTIES_KEYS.NEEDS_REAUTHORIZATION]) {
-			const errorMsg = NodeTranslationService.getMessage(DEV_ASSIST_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
+			const errorMsg = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
 
 			refreshInfo.emitEventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
 			refreshInfo.errorMessage = errorMsg;
@@ -290,13 +303,24 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	}
 
 	/**
+	 * This method is created in order to have centralized the structure of the
+	 * emit object in case it should be changed into the future
+	 * @param errorMsg
+	 * @returns {{message, authId}}
+	 * @private
+	 */
+	_buildEmitObject(errorMsg) {
+		return { message: errorMsg, authId: this._authId };
+	}
+
+	/**
 	 * Method to clear output messages.
 	 * The reason for this is the output do not show properly \n and \r
 	 * So they are replaced by . and made some extra adjustments.
 	 * @param input
 	 * @returns {*}
 	 */
-	_cleanText(input){
+	_cleanText(input) {
 		let result = input.replace(/\r/g, '');   // Remove \r
 		result = result.replace(/\n/g, '. ');  // Replace \n with ". "
 		result = result.replace(/,\./g, '.');  // Replace ",." with "."
@@ -336,4 +360,4 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 }
 
-module.exports = { SuiteCloudAuthProxyService: SuiteCloudAuthProxyService, EVENTS };
+module.exports = { SuiteCloudAuthProxyService, EVENTS };
