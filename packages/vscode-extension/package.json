@@ -114,9 +114,9 @@
 			},
             {
               "command": "suitecloud.opendevassistfeedbackform",
-              "title": "Open DevAssist Feedback Forms  //TODO: enablement -> false",
+              "title": "Open DevAssist Feedback Form",
               "category": "SuiteCloud",
-              "enablement": "true"
+              "enablement": "false"
             }
 		],
 		"keybindings": [
