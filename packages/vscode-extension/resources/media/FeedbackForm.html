@@ -122,8 +122,12 @@
 		window.addEventListener('message', event => {
 			const { type, value, message } = event.data;
 			if (type === 'spawnAlertEvent') {
-				if (value === 'info') spawnAlert(message, 'info', 0);
-				else if (value === 'error') spawnAlert(message, 'error', 0);
+				if (value === 'info') {
+					spawnAlert(message, 'info', 0);
+				}
+				else if (value === 'error') {
+					spawnAlert(message, 'error', 0);
+				}
 			}
 		});
 	</script>
