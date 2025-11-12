@@ -170,7 +170,7 @@ const startDevAssistService = async (devAssistAuthID: string, localPort: number,
 }
 
 const PROXY_URL = DEVASSIST.PROXY_URL;
-const getProxyUrl = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}${PROXY_URL.PATH}`;
+const getProxyUrl = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}${PROXY_URL.BASE_PATH}`;
 const getProxyUrlWithoutPath = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}`;
 
 const stopDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {

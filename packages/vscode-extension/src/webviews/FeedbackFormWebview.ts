@@ -3,18 +3,20 @@ import * as path from 'path';
 import { VSTranslationService } from '../service/VSTranslationService';
 import { DEVASSIST_SERVICE } from '../service/TranslationKeys';
 import { getDevAssistCurrentSettings } from '../startup/DevAssistConfiguration';
-import { FileUtils } from '../util/ExtensionUtil';
+import { ApplicationConstants, FileUtils } from '../util/ExtensionUtil';
 import VSConsoleLogger from '../loggers/VSConsoleLogger';
 import {
 	validateIntegerWithinInterval,
 	validateMultipleOptionField,
 	validateTextAreaField,
 } from './WebviewFieldValidationUtils';
+import { DEVASSIST } from '../ApplicationConstants';
 
 const translationService = new VSTranslationService();
 const vsLogger = new VSConsoleLogger();
 
 const MEDIA_DIR = 'resources/media'
+const PROXY_URL = DEVASSIST.PROXY_URL;
 
 const WEBVIEW_FILE_NAMES = {
 	FEEDBACK_FORM : {
@@ -22,7 +24,7 @@ const WEBVIEW_FILE_NAMES = {
 		CSS : 'FeedbackForm.css'
 	},
 	SUBMITTING_HTML : 'FeedbackFormSubmitting.html',
-	SUCCESS_HTML : 'FeedbackFormSucess.html',
+	SUCCESS_HTML : 'FeedbackFormSuccess.html',
 	FAILURE_HTML : 'FeedbackFormFailure.html',
 }
 
@@ -115,7 +117,7 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 			// validate Feedback Form Data
 			const validationResult = validateFormData(webviewMessage.data);
 			if (typeof validationResult === 'string') {
-				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.VALIDATION_ERROR, validationResult)});
+				feedbackFormPanel!.webview.postMessage({ type: 'spawnAlertEvent', value: 'error', message: translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.GENERIC_VALIDATION_ERROR_WRAPPER, validationResult)});
 				return;
 			}
 
@@ -125,7 +127,7 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 			// Send request to NetSuite Backend through Proxy
 			try {
 				const currentProxySettings = getDevAssistCurrentSettings();
-				const response = await fetch(`http://127.0.0.1:${currentProxySettings.localPort}/api/internal/devassist/feedback`, {
+				const response = await fetch(`${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${currentProxySettings.localPort}${PROXY_URL.FEEDBACK_PATH}`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: webviewMessage.data
@@ -142,7 +144,8 @@ const handleWebviewMessage = async (webviewMessage : any, feedbackFormCSSFilePat
 					vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText);
 					vsLogger.error('');
 
-					if (response.status === 403) {
+					// "Manual reauthentication is needed" proxy event
+					if (response.status === ApplicationConstants.HTTP_RESPONSE_CODE.FORBIDDEN) {
 						const responseBody : any = await response.json();
 						const feedbackFormHTMLFilePath = path.join(vscodeExtensionMediaPath, WEBVIEW_FILE_NAMES.FEEDBACK_FORM.HTML);
 						feedbackFormPanel!.webview.html = generateWebviewHTMLContent(feedbackFormHTMLFilePath, feedbackFormCSSFilePath);

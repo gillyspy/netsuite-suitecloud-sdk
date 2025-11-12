@@ -54,11 +54,11 @@
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_CANCEL_PROCESS": "Cancel the deployment process",
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_DISPLAY_WARNING": "Display a warning and continue the deployment process",
 
-    "DEVASSIST_SERVICE_FEEDBACK_FORM_VALIDATION_ERROR": "Some fields have validation errors.<br>{0}",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_GENERIC_VALIDATION_ERROR_WRAPPER": "Some fields have validation errors.<br>{0}",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_VALIDATION_ERROR": "{0}: {1}",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_EMPTY_TEXT": "This field cannot not be empty.",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_EMPTY_MULTIPLE_OPTION": "At least one of the available options must be selected.",
-    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_EMPTY_NUMERIC": "Chose a satisfaction level (for example, 3 out of 5 stars).",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_EMPTY_NUMERIC": "Choose a satisfaction level (for example, 3 out of 5 stars).",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_BE_TOO_LONG": "This field can only contain up to {0} characters.",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_CANNOT_HAVE_REPEATED_VALUES": "Select unique values (provided:  {0}).",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_MUST_HAVE_BE_A_VALID_NUMBER": "Choose a natural number between {0} and {1}.",
