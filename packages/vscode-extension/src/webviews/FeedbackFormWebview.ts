@@ -97,15 +97,22 @@ const validateFormData = (formData : FeedbackFormData) => {
 
 	// validate feedback field (textArea)
 	let validationResult = validateTextAreaField("Your feedback (text area)", formData.feedback, 1000);
-	if (typeof validationResult === 'string') return validationResult;
+	if (typeof validationResult === 'string') {
+		return validationResult;
+	}
 
 	// validate selectedTopic field
 	validationResult = validateMultipleOptionField("Your feedback (topic multi-choice selector)", formData.topics, VALID_FEEDBACK_TOPICS);
-	if (typeof validationResult === 'string') return validationResult;
+	if (typeof validationResult === 'string') {
+		return validationResult;
+	}
 
 	// validate rating field (integer 0 < x <= 5)
 	validationResult = validateIntegerWithinInterval("Rating", formData.rating, 1, 5);
-	if (typeof validationResult === 'string') return validationResult;
+	if (typeof validationResult === 'string') {
+		return validationResult;
+	}
+
 	return true;
 }
 
