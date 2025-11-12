@@ -211,26 +211,6 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
     vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
 }
 
-
-const showDevAssistEmitProblemNotification2 = (errorStage: string, emitError: string, devAssistStatusBar: vscode.StatusBarItem) => {
-    // console.log(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`)
-   // setErrorDevAssistStausBarMessage(devAssistStatusBar)
-    vsLogger.printTimestamp();
-    vsLogger.error(emitError);
-    const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
-    const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
-        {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON),
-            buttonAction: () => {
-                // show suitecloud output and devassist settings
-                output.show()
-                openDevAssistSettings();
-            },
-        },
-    ];
-    vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
-}
-
 const showDevAssistEmitProblemLog = (emitError: string) => {
 	vsLogger.printTimestamp();
 	vsLogger.error(emitError);
