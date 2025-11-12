@@ -127,7 +127,7 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     // adding listener to forward ServerError from SuiteCloudAuthProxy to vscode suitecloud output
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR, (emitParams: { authId: string, message: string }) => {
 		const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.SERVER_ERROR, emitParams.message);
-		showDevAssistEmitProblemNotification(PROXY_SERVICE_EVENTS.SERVER_ERROR, errorMessage, devAssistStatusBar);
+		showDevAssistEmitProblemLog(errorMessage);
         vsLogger.error('');
 	});
 
@@ -209,6 +209,31 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
         },
     ];
     vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
+}
+
+
+const showDevAssistEmitProblemNotification2 = (errorStage: string, emitError: string, devAssistStatusBar: vscode.StatusBarItem) => {
+    // console.log(`There was a problem when starting DevAssist service. (${errorStage})\n${error}`)
+   // setErrorDevAssistStausBarMessage(devAssistStatusBar)
+    vsLogger.printTimestamp();
+    vsLogger.error(emitError);
+    const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
+    const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+        {
+            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION_BUTTON),
+            buttonAction: () => {
+                // show suitecloud output and devassist settings
+                output.show()
+                openDevAssistSettings();
+            },
+        },
+    ];
+    vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
+}
+
+const showDevAssistEmitProblemLog = (emitError: string) => {
+	vsLogger.printTimestamp();
+	vsLogger.error(emitError);
 }
 
 const showDevAssistEmitProblemNotification = (errorStage: string, emitError: string, devAssistStatusBar: vscode.StatusBarItem) => {
