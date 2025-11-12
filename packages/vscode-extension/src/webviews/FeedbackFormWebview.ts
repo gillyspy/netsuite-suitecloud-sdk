@@ -96,11 +96,11 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 const validateFormData = (formData : FeedbackFormData) => {
 
 	// validate feedback field (textArea)
-	let validationResult = validateTextAreaField("Your Feedback (textarea)", formData.feedback, 1000);
+	let validationResult = validateTextAreaField("Your feedback (text area)", formData.feedback, 1000);
 	if (typeof validationResult === 'string') return validationResult;
 
 	// validate selectedTopic field
-	validationResult = validateMultipleOptionField("Your Feedback (topic multi-choice selector)", formData.topics, VALID_FEEDBACK_TOPICS);
+	validationResult = validateMultipleOptionField("Your feedback (topic multi-choice selector)", formData.topics, VALID_FEEDBACK_TOPICS);
 	if (typeof validationResult === 'string') return validationResult;
 
 	// validate rating field (integer 0 < x <= 5)

@@ -13,26 +13,26 @@
 		</header>
 		<form class="content" id="feedbackForm">
 			<div class="row">
-				<label for="feedback">Your Feedback</label>
+				<label for="feedback">Your feedback</label>
 				<!--TODO: Ask UX designer what's better: enforce maxLength via the standard HTML property (here) or in the FeedbackFormFieldValidation (VSCode Layer) -->
 				<textarea id="feedback" name="feedback"
 						  placeholder="What worked well? What should be improved? Any suggestions?"></textarea>
 			</div>
 
 			<fieldset>
-				<legend>This Feedback Is About</legend>
+				<legend>This feedback is about</legend>
 				<div class="checks">
-					<label><input type="checkbox" name="topics" value="code-explanation">Code Explanation</label>
-					<label><input type="checkbox" name="topics" value="sdf-objects-generation">SDF Objects Generation </label>
-					<label><input type="checkbox" name="topics" value="suitescript-code-generation">SuiteScript Code Generation</label>
-					<label><input type="checkbox" name="topics" value="unit-testing">Unit Testing</label>
+					<label><input type="checkbox" name="topics" value="code-explanation">Code explanation</label>
+					<label><input type="checkbox" name="topics" value="sdf-objects-generation">SDF custom objects generation </label>
+					<label><input type="checkbox" name="topics" value="suitescript-code-generation">SuiteScript code generation</label>
+					<label><input type="checkbox" name="topics" value="unit-testing">Unit testing</label>
 					<label><input type="checkbox" name="topics" value="other">Other</label>
 				</div>
 			</fieldset>
 
 			<div class="row" aria-labelledby="ratingLabel">
 				<label id="ratingLabel">
-					Rate Your Overall Satisfaction (1-5)</label>
+					Rate your overall satisfaction (1-5)</label>
 				<div class="stars" role="radiogroup" aria-label="Star rating">
 					<input type="radio" id="star5" name="rating" value="5"/>
 					<label class="star" for="star5" aria-label="5 stars"></label>
