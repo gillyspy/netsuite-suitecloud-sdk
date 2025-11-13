@@ -148,22 +148,9 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
 const startDevAssistService = async (devAssistAuthID: string, localPort: number, devAssistStatusBar: vscode.StatusBarItem) => {
     await devAssistProxyService.start(devAssistAuthID, localPort);
 
+	const proxyUrl = getProxyUrl(localPort);
     setSuccessDevAssistStausBarMessage(devAssistStatusBar);
-    const proxyUrl = getProxyUrl(localPort);
-	const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl);
-	const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
-		{
-			buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
-			buttonAction: vsNotificationService.showOutput
-		},
-		{
-			buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION_BUTTON),
-			buttonAction: () => {
-				vscode.commands.executeCommand('suitecloud.opendevassistfeedbackform')
-			}
-		},
-	];
-	vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
+	showDevAssistIsRunningNotification(proxyUrl);
 
     vsLogger.printTimestamp();
     vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.OUTPUT, getProxyUrlWithoutPath(localPort), devAssistAuthID, proxyUrl));
@@ -204,6 +191,23 @@ const showDevAssistStartUpNotification = () => {
         }
     ];
     vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
+}
+
+const showDevAssistIsRunningNotification = (proxyUrl : string) => {
+	const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl);
+	const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+		{
+			buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
+			buttonAction: vsNotificationService.showOutput
+		},
+		{
+			buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION_BUTTON),
+			buttonAction: () => {
+				vscode.commands.executeCommand('suitecloud.opendevassistfeedbackform')
+			}
+		},
+	];
+	vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
 }
 
 const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistStatusBar: vscode.StatusBarItem) => {

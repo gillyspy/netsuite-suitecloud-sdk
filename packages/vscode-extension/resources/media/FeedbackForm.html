@@ -111,22 +111,24 @@
 			// });
 
 			const data = collect();
-			vscode.postMessage({ type: 'SUBMIT_FEEDBACK', data: data });
+			vscode.postMessage({ eventType: 'SUBMIT_FEEDBACK', eventData: data });
 		});
 
 		cancelBtn.addEventListener('click', () => {
-			vscode.postMessage({ type: 'CLOSE_WEBVIEW' });
+			vscode.postMessage({ eventType: 'CLOSE_WEBVIEW' });
 		});
 
 		// Listen to VSCode Events
-		window.addEventListener('message', event => {
-			const { type, value, message } = event.data;
-			if (type === 'spawnAlertEvent') {
-				if (value === 'info') {
-					spawnAlert(message, 'info', 0);
+		window.addEventListener('message', message => {
+			console.log(message);
+			const { eventType, eventData } = message.data;
+			if (eventType === 'SPAWN_ALERT_MESSAGE') {
+				console.log(eventData);
+				if (eventData.alertLevel === 'info') {
+					spawnAlert(eventData.alertMessage, 'info', 0);
 				}
-				else if (value === 'error') {
-					spawnAlert(message, 'error', 0);
+				else if (eventData.alertLevel === 'error') {
+					spawnAlert(eventData.alertMessage, 'error', 0);
 				}
 			}
 		});

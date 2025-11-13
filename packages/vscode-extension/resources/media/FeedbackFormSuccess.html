@@ -27,11 +27,11 @@
 
 		/* Button Actions */
 		closeBtn.addEventListener('click', () => {
-			vscode.postMessage({ type: 'CLOSE_WEBVIEW' });
+			vscode.postMessage({ eventType: 'CLOSE_WEBVIEW' });
 		});
 
 		newFeedbackFormBtn.addEventListener('click', () => {
-			vscode.postMessage({ type: 'OPEN_NEW_FEEDBACK_FORM' });
+			vscode.postMessage({ eventType: 'OPEN_NEW_FEEDBACK_FORM' });
 		});
 	</script>
 </body>

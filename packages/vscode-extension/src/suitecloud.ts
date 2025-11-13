@@ -88,18 +88,18 @@ export async function activate(context: vscode.ExtensionContext) {
 		() => vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', DEVASSIST.CONFIG_KEYS.devAssistSection))
 	);
 
-	// add watchers needed to update the status bars
-	context.subscriptions.push(
-		vscode.window.onDidChangeActiveTextEditor((textEditor) => updateStatusBars(textEditor, suitecloudProjectStatusBar, authIDStatusBar)),
-		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar)),
-		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent, devAssistStatusBar)))
-	);
-
 	// DevAssist Feedback Form WebView
 	context.subscriptions.push(
 		vscode.commands.registerCommand('suitecloud.opendevassistfeedbackform',
 			() => openDevAssistFeedbackForm(context)
 		)
+	);
+
+	// add watchers needed to update the status bars
+	context.subscriptions.push(
+		vscode.window.onDidChangeActiveTextEditor((textEditor) => updateStatusBars(textEditor, suitecloudProjectStatusBar, authIDStatusBar)),
+		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar)),
+		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent, devAssistStatusBar)))
 	);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
