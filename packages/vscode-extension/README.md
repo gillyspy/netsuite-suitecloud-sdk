@@ -43,7 +43,7 @@ See more details about installation in <a href="https://docs.oracle.com/en/cloud
 ### How to Trigger the Command Palette
 Interact through the Command Palette to use SuiteCloud Extension for Visual Studio Code. To trigger it, click **View** > **Command Palette** or use the relevant shortcut:
 * Ctrl+Shift+P if you are using Windows or Linux.
-* Cmd+Shift+P if you are using Mac OS. 
+* Cmd+Shift+P if you are using macOS. 
 
 <p align="center"><a href="#"><img src="resources/CommandPalette.png" alt="Command Palette" width="500" height="600"></a></p>
 
@@ -84,7 +84,7 @@ To set an account as default for a project, follow these steps:
 The selected account is set as default for the project.
 
 <p align="center">
-  <img src="resources/SetUpAccount.gif"alt="animated" />
+  <img src="resources/SetUpAccount.gif" alt="animated" />
 </p>
 
 ### SuiteCloud Commands
