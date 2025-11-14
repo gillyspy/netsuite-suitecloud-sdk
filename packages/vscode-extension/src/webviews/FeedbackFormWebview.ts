@@ -30,6 +30,11 @@ const WEBVIEW_EVENTS = {
 	SPAWN_ALERT_MESSAGE : "SPAWN_ALERT_MESSAGE",
 }
 
+type WebviewEventMessage = {
+	eventType: string;
+	eventData?: FeedbackFormData
+};
+
 type FeedbackFormData = {
 	feedback: string;
 	topics: string[];
@@ -67,7 +72,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 		},
 	);
 
-	// Read HTML and inject the correct webview resource URIs for the CSS file
+	// calculate cssUri as a proper Webview File Path and generate HTML content with it
 	const cssFilePath = mediaService.getMediaFileFullPath(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.CSS);
 	const cssWebviewUri = feedbackFormPanel?.webview.asWebviewUri(vscode.Uri.file(cssFilePath)).toString();
 	feedbackFormPanel.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
@@ -81,7 +86,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 		context.subscriptions,
 	);
 
-	// Handle messages/events sent from the webview
+	// Handle messages/events sent from the webview page
 	feedbackFormPanel.webview.onDidReceiveMessage(
 		(webviewEvent) => handleWebviewEventMessage(webviewEvent, cssWebviewUri),
 		undefined,
@@ -89,10 +94,10 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 	);
 };
 
-const handleWebviewEventMessage = async (webviewEvent : any, cssWebviewUri : string) : Promise<void> => {
+const handleWebviewEventMessage = async (webviewEvent : WebviewEventMessage, cssWebviewUri : string) : Promise<void> => {
 	switch (webviewEvent.eventType) {
 		case WEBVIEW_EVENTS.SUBMIT_FEEDBACK:
-			handleSubmitFeedbackFormEvent(webviewEvent.eventData, cssWebviewUri);
+			await handleSubmitFeedbackFormEvent(webviewEvent.eventData!, cssWebviewUri);
 			break;
 
 		case WEBVIEW_EVENTS.OPEN_NEW_FEEDBACK_FORM:
