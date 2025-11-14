@@ -179,11 +179,11 @@ const showDevAssistStartUpNotification = () => {
     const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.STARTUP.MESSAGE);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.OPEN_SETTINGS),
+            buttonMessage: translationService.getMessage(BUTTONS.OPEN_SETTINGS),
             buttonAction: openDevAssistSettings
         },
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.DONT_SHOW_AGAIN),
+            buttonMessage: translationService.getMessage(BUTTONS.DONT_SHOW_AGAIN),
             buttonAction: () => {
                 const devAssistConfigSection = vscode.workspace.getConfiguration(DEVASSIST.CONFIG_KEYS.devAssistSection);
                 devAssistConfigSection.update(DEVASSIST.CONFIG_KEYS.startupNotificationDisabled, true);
@@ -201,7 +201,7 @@ const showDevAssistIsRunningNotification = (proxyUrl : string) => {
 			buttonAction: vsNotificationService.showOutput
 		},
 		{
-			buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION_BUTTON),
+			buttonMessage: translationService.getMessage(BUTTONS.GIVE_FEEDBACK),
 			buttonAction: () => {
 				vscode.commands.executeCommand('suitecloud.opendevassistfeedbackform')
 			}
@@ -218,7 +218,7 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.SEE_DETAILS_BUTTON),
+            buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
             buttonAction: () => {
                 // show suitecloud output and devassist settings
                 output.show();
@@ -235,7 +235,7 @@ const showDevAssistEmitProblemLog = (errorStage: string, emitError: string, devA
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.SEE_DETAILS_BUTTON),
+            buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
             buttonAction: () => output.show(),
         },
     ];
@@ -250,7 +250,7 @@ const showDevAssistEmitProblemNotification = (errorStage: string, emitError: str
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.SEE_DETAILS_BUTTON),
+            buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
             buttonAction: () => {
                 // show suitecloud output and devassist settings
                 output.show()
