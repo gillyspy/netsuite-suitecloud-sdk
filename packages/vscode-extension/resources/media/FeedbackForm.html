@@ -97,18 +97,12 @@
 			if (timeout !== 0) setTimeout(removeAlert, timeout);
 		}
 
-		// VS Code API
+		// necessary initialization of VSCode API (establish a communication flow)
 		const vscode = acquireVsCodeApi();
 
+		// Internal PageEvent Handlers (generated within the HTML and handled here)
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
-
-			// TODO (for Reviewers): VSCode Security forbids FETCHing content directly from within the Webview.
-			// const response = await fetch("http://127.0.0.1:8181/api/internal/devassist", {
-			//    method: "POST",
-			//    headers: { "Content-Type": "application/json" },
-			//    body: json
-			// });
 
 			const data = collect();
 			vscode.postMessage({ eventType: 'SUBMIT_FEEDBACK', eventData: data });
@@ -118,7 +112,7 @@
 			vscode.postMessage({ eventType: 'CLOSE_WEBVIEW' });
 		});
 
-		// Listen to VSCode Events
+		// External VSCodeEvent Handler (generated on the Extension code via webview.postMessage)
 		window.addEventListener('message', message => {
 			console.log(message);
 			const { eventType, eventData } = message.data;

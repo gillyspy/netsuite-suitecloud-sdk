@@ -83,16 +83,16 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// Handle messages/events sent from the webview
 	feedbackFormPanel.webview.onDidReceiveMessage(
-		(webviewMessage) => handleWebviewMessage(webviewMessage, cssWebviewUri),
+		(webviewEvent) => handleWebviewEventMessage(webviewEvent, cssWebviewUri),
 		undefined,
 		context.subscriptions,
 	);
 };
 
-const handleWebviewMessage = async (webviewMessage : any, cssWebviewUri : string) : Promise<void> => {
-	switch (webviewMessage.eventType) {
+const handleWebviewEventMessage = async (webviewEvent : any, cssWebviewUri : string) : Promise<void> => {
+	switch (webviewEvent.eventType) {
 		case WEBVIEW_EVENTS.SUBMIT_FEEDBACK:
-			handleSubmitFeedbackFormEvent(webviewMessage.eventData, cssWebviewUri);
+			handleSubmitFeedbackFormEvent(webviewEvent.eventData, cssWebviewUri);
 			break;
 
 		case WEBVIEW_EVENTS.OPEN_NEW_FEEDBACK_FORM:
@@ -126,7 +126,7 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 			body: requestBody
 		});
 
-		if (response.ok || response.status === 463) {
+		if (response.ok) {
 			vsLogger.printTimestamp();
 			vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText);
 			vsLogger.info('');
