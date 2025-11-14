@@ -21,16 +21,20 @@
 		</div>
 	</div>
 	<script>
-		const closeBtn = document.getElementById('closeBtn');
-		const newFeedbackFormBtn = document.getElementById('newFeedbackFormBtn');
 		const vscode = acquireVsCodeApi();
 
-		/* Button Actions */
+		// Internal PageEvent Handlers (generated within the HTML and handled here)
+		const closeBtn = document.getElementById('closeBtn');
 		closeBtn.addEventListener('click', () => {
+
+			// send Close Page event, from HTML to Webview controller
 			vscode.postMessage({ eventType: 'CLOSE_WEBVIEW' });
 		});
 
+		const newFeedbackFormBtn = document.getElementById('newFeedbackFormBtn');
 		newFeedbackFormBtn.addEventListener('click', () => {
+
+			// send OpenNewFeedbackFormPage event, from HTML to Webview controller
 			vscode.postMessage({ eventType: 'OPEN_NEW_FEEDBACK_FORM' });
 		});
 	</script>

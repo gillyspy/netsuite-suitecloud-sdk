@@ -26,9 +26,9 @@
 		// Thinking animation ('' -> '.' -> '..' -> '...' -> '')
 		feedbackLabel.textContent = pageText;
 		setInterval(() => {
-			feedbackLabel.textContent = pageText + dots[idx];
-			idx = (idx + 1) % dots.length;
-		}, msBetweenAnimationFrames);
+				feedbackLabel.textContent = pageText + dots[idx];
+				idx = (idx + 1) % dots.length;
+			}, msBetweenAnimationFrames);
 	</script>
 </body>
 </html>

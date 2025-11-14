@@ -23,11 +23,15 @@ const vsLogger = new VSConsoleLogger();
 
 const PROXY_URL = DEVASSIST.PROXY_URL;
 
-const WEBVIEW_EVENTS = {
-	CLOSE : "CLOSE_WEBVIEW",
-	SUBMIT_FEEDBACK : "SUBMIT_FEEDBACK",
-	OPEN_NEW_FEEDBACK_FORM : "OPEN_NEW_FEEDBACK_FORM",
-	SPAWN_ALERT_MESSAGE : "SPAWN_ALERT_MESSAGE",
+const FEEDBACK_FORM_EVENTS = {
+	WEBVIEW_CONTROLLER: {
+		CLOSE : "CLOSE_WEBVIEW",
+		SUBMIT_FEEDBACK : "SUBMIT_FEEDBACK",
+		OPEN_NEW_FEEDBACK_FORM : "OPEN_NEW_FEEDBACK_FORM",
+	},
+	HTML_PAGE: {
+		RENDER_TOAST_MESSAGE : "RENDER_TOAST_MESSAGE",
+	}
 }
 
 type WebviewEventMessage = {
@@ -86,7 +90,7 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 		context.subscriptions,
 	);
 
-	// Handle messages/events sent from the webview page
+	// Handle messages/events sent from HTML to this Webview controller
 	feedbackFormPanel.webview.onDidReceiveMessage(
 		(webviewEvent) => handleWebviewEventMessage(webviewEvent, cssWebviewUri),
 		undefined,
@@ -96,15 +100,15 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 const handleWebviewEventMessage = async (webviewEvent : WebviewEventMessage, cssWebviewUri : string) : Promise<void> => {
 	switch (webviewEvent.eventType) {
-		case WEBVIEW_EVENTS.SUBMIT_FEEDBACK:
+		case FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.SUBMIT_FEEDBACK:
 			await handleSubmitFeedbackFormEvent(webviewEvent.eventData!, cssWebviewUri);
 			break;
 
-		case WEBVIEW_EVENTS.OPEN_NEW_FEEDBACK_FORM:
+		case FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.OPEN_NEW_FEEDBACK_FORM:
 			feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
 			break;
 
-		case WEBVIEW_EVENTS.CLOSE:
+		case FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.CLOSE:
 			feedbackFormPanel?.dispose();
 			break;
 	}
@@ -115,7 +119,7 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 	// validate Feedback Form Data
 	const validationResult = validateFormData(formData);
 	if (typeof validationResult === 'string') {
-		await spawnErrorMessageOnWebview(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.GENERIC_VALIDATION_ERROR_WRAPPER, validationResult));
+		await sendErrorEventToWebview(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.GENERIC_VALIDATION_ERROR_WRAPPER, validationResult));
 		return;
 	}
 
@@ -146,7 +150,7 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 			if (response.status === ApplicationConstants.HTTP_RESPONSE_CODE.FORBIDDEN) {
 				const responseBody : any = await response.json();
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
-				await spawnErrorMessageOnWebview(`Error 403: "${responseBody.error}"`);
+				await sendErrorEventToWebview(`Error 403: "${responseBody.error}"`);
 			}
 			else {
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.FAILURE_HTML, cssWebviewUri);
@@ -160,17 +164,17 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 		// TODO: Find a way to not delete the user input when swaping HTML / clicking out
 		// 	-> https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
 		feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
-		await spawnErrorMessageOnWebview(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR));
+		await sendErrorEventToWebview(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR));
 	}
 }
 
 
-const spawnErrorMessageOnWebview = async (message: string) => {
+const sendErrorEventToWebview = async (message: string) => {
 	await feedbackFormPanel!.webview.postMessage({
-		eventType: WEBVIEW_EVENTS.SPAWN_ALERT_MESSAGE,
+		eventType: FEEDBACK_FORM_EVENTS.HTML_PAGE.RENDER_TOAST_MESSAGE,
 		eventData: {
-			alertLevel : 'error',
-			alertMessage: message}
+			toastMessageLevel : 'error',
+			toastMessageContent: message}
 	});
 }
 

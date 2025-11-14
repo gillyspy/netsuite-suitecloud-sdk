@@ -22,11 +22,13 @@
 		</div>
 	</div>
 	<script>
-		const closeBtn = document.getElementById('closeBtn');
 		const vscode = acquireVsCodeApi();
 
-		/* Button Actions */
+		// Internal PageEvent Handlers (generated within the HTML and handled here)
+		const closeBtn = document.getElementById('closeBtn');
 		closeBtn.addEventListener('click', () => {
+
+			// send Close Page event, from HTML to Webview controller
 			vscode.postMessage({ eventType: 'CLOSE_WEBVIEW' });
 		});
 	</script>
