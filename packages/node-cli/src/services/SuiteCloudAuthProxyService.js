@@ -14,7 +14,8 @@ const EVENTS = {
 	SERVER_ERROR: 'serverError',
 	SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
-	PROXY_ERROR: 'proxyError'
+	PROXY_ERROR: 'proxyError',
+	PROXY_SETTINGS_ERROR: 'proxySettingsError'
 };
 
 /** Authentication methods */
@@ -81,6 +82,12 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		this._localProxy = http.createServer();
 
 		this._localProxy.addListener('request', async (request, response) => {
+
+			if (!this._matchesDevAssistPath(request.url)) {
+				const errorMessage = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INVALID_CLINE_BASE_URL_ERROR);
+				this._handleListeningErrors(errorMessage, EVENTS.PROXY_SETTINGS_ERROR);
+				return;
+			}
 
 			const requestOptions = this._buildRequestOptions(request);
 
@@ -156,6 +163,18 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (isNaN(proxyPort)) {
 			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
 		}
+	}
+
+	/**
+	 * Matches /api/internal/devassist/ followed by one or more valid URL path characters
+	 * @param path
+	 * @returns {boolean}
+	 * @private
+	 */
+	_matchesDevAssistPath(path) {
+		// This regex matches any string that starts with "/api/internal/devassist/" followed by anything
+		const regex = /^\/api\/internal\/devassist\/[A-Za-z0-9\-._~\/]+$/;
+		return regex.test(path);
 	}
 
 	/**
