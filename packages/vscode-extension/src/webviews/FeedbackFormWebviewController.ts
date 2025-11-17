@@ -143,17 +143,19 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 			// SERVER_ERROR (but proxy is running, a response was received)
 			vsLogger.printTimestamp();
 			vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_EXTERNAL_ERROR, response.status.toString(), response.statusText));
-			vsLogger.error('');
 
 			// "Manual reauthentication is needed" proxy event
 			if (response.status === ApplicationConstants.HTTP_RESPONSE_CODE.FORBIDDEN) {
 				const responseBody : any = await response.json();
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
 				await sendErrorEventToHtml(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR_REAUTHORIZE_TOAST, responseBody.error));
+				vsLogger.error(responseBody.error);
+
 			}
 			else {
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.FAILURE_HTML, cssWebviewUri);
 			}
+			vsLogger.error('');
 		}
 	} catch (error) {
 		// VSCODE ERROR, PROXY_NOT_LOADED, PROXY_ERROR, REQUEST_FORMATING_ERROR (Not even a response received)
