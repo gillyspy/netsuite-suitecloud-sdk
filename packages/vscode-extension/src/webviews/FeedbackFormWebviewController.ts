@@ -135,37 +135,36 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 
 		if (response.ok) {
 			vsLogger.printTimestamp();
-			vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText); // no need for status + statusText
+			vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMIT_SUCCESS));
 			vsLogger.info('');
 			feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.SUCCESS_HTML, cssWebviewUri);
 		}
 		else {
 			// SERVER_ERROR (but proxy is running, a response was received)
 			vsLogger.printTimestamp();
-			vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText); // try catch response body (if obtained print).
+			vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_EXTERNAL_ERROR, response.status.toString(), response.statusText));
 			vsLogger.error('');
 
 			// "Manual reauthentication is needed" proxy event
 			if (response.status === ApplicationConstants.HTTP_RESPONSE_CODE.FORBIDDEN) {
 				const responseBody : any = await response.json();
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
-				await sendErrorEventToHtml(`Error 403: "${responseBody.error}"`);
+				await sendErrorEventToHtml(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR_REAUTHORIZE_TOAST, responseBody.error));
 			}
 			else {
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.FAILURE_HTML, cssWebviewUri);
 			}
 		}
-	} catch (e) {
-			// https://corpjira.netsuitecorp.com/browse/PDPDEVTOOL-6307?filter=-2
-			// VSCODE ERROR && PROXY_NOT_LOADED && PROXY_ERROR, REQUEST ERROR (Not even a response received)
+	} catch (error) {
+		// VSCODE ERROR, PROXY_NOT_LOADED, PROXY_ERROR, REQUEST_FORMATING_ERROR (Not even a response received)
 		vsLogger.printTimestamp();
-		vsLogger.error("Feedback Form Internal Failure: " + 'Timestamp' + e);
+		vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR_TOAST, error ? '\n' + error : ''));
 		vsLogger.error('');
 
 		// TODO: Find a way to not delete the user input when swaping HTML / clicking out
 		// 	-> https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
 		feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
-		await sendErrorEventToHtml(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR));
+		await sendErrorEventToHtml(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR_TOAST));
 	}
 }
 
