@@ -67,9 +67,9 @@
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_MUST_HAVE_BE_A_VALID_NUMBER": "Choose a natural number between {0} and {1}.",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_FIELD_MUST_HAVE_SPECIFIC_VALUES": "Select any values from the ones available: {0}.",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_ERROR_REAUTHORIZE_TOAST": "Error 403: {0}",
-    "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_ERROR_TOAST": "Unable to connect to the SuiteCloud Developer Assistant service. Is it running?{0}",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_ERROR_TOAST": "Unable to connect to the SuiteCloud Developer Assistant service. Is it running?",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_EXTERNAL_ERROR": "A server error has occurred while submitting feedback for the SuiteCloud Developer Assistant (Error {0}: {1}).",
-    "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_INTERNAL_ERROR": "There was a problem while submitting feedback for the SuiteCloud Developer Assistant. Is it running?",
+    "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMITTING_INTERNAL_ERROR": "There was a problem while submitting feedback for the SuiteCloud Developer Assistant. Is it running?{0}",
     "DEVASSIST_SERVICE_FEEDBACK_FORM_SUBMIT_SUCCESS": "Your feedback for the SuiteCloud Developer Assistant was successfully submitted.",
 
 	"DEVASSIST_SERVICE_OUTPUT_PROXY_ERROR": "There was a problem while running SuiteCloud Developer Assistant service.\n{0}",

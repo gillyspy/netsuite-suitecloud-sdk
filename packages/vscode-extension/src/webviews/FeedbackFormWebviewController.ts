@@ -158,7 +158,7 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 	} catch (error) {
 		// VSCODE ERROR, PROXY_NOT_LOADED, PROXY_ERROR, REQUEST_FORMATING_ERROR (Not even a response received)
 		vsLogger.printTimestamp();
-		vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR_TOAST, error ? '\n' + error : ''));
+		vsLogger.error(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_INTERNAL_ERROR, error ? '\n' + error : ''));
 		vsLogger.error('');
 
 		// TODO: Find a way to not delete the user input when swaping HTML / clicking out

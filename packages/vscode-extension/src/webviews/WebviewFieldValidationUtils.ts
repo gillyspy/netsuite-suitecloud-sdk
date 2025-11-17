@@ -38,7 +38,7 @@ export const validateMultipleOptionField = (fieldName : string, selectedOptions 
 				translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.CANNOT_HAVE_REPEATED_VALUES, selectedOptions.toString()));
 		}
 		for (const option of selectedOptions) {
-			if (acceptableOptions.includes(option)) {
+			if (!acceptableOptions.includes(option)) {
 				return translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.VALIDATION_ERROR,
 					fieldName,
 					translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.FIELD.MUST_HAVE_SPECIFIC_VALUES, acceptableOptions.toString()));
