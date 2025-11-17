@@ -29,7 +29,7 @@ import { VSTranslationService } from './service/VSTranslationService';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
 import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
 import { createAuthIDStatusBar, createDevAssistStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
-import { openDevAssistFeedbackForm } from './webviews/FeedbackFormWebview';
+import { openDevAssistFeedbackForm } from './webviews/FeedbackFormWebviewController';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';

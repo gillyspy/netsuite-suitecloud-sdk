@@ -24,17 +24,17 @@ const vsLogger = new VSConsoleLogger();
 const PROXY_URL = DEVASSIST.PROXY_URL;
 
 const FEEDBACK_FORM_EVENTS = {
-	WEBVIEW_CONTROLLER: {
+	HTML_PAGE: {
 		CLOSE : "CLOSE_WEBVIEW",
 		SUBMIT_FEEDBACK : "SUBMIT_FEEDBACK",
 		OPEN_NEW_FEEDBACK_FORM : "OPEN_NEW_FEEDBACK_FORM",
 	},
-	HTML_PAGE: {
+	WEBVIEW_CONTROLLER: {
 		RENDER_TOAST_MESSAGE : "RENDER_TOAST_MESSAGE",
 	}
 }
 
-type WebviewEventMessage = {
+type HtmlEventMessage = {
 	eventType: string;
 	eventData?: FeedbackFormData
 };
@@ -83,32 +83,30 @@ export const openDevAssistFeedbackForm = (context: vscode.ExtensionContext) => {
 
 	// Clean up the reference when the WebviewPanel is closed
 	feedbackFormPanel.onDidDispose(
-		() => {
-			feedbackFormPanel = undefined;
-		},
+		() => { feedbackFormPanel = undefined; },
 		null,
 		context.subscriptions,
 	);
 
 	// Handle messages/events sent from HTML to this Webview controller
 	feedbackFormPanel.webview.onDidReceiveMessage(
-		(webviewEvent) => handleWebviewEventMessage(webviewEvent, cssWebviewUri),
+		(htmlEventMessage) => handleHtmlEventMessage(htmlEventMessage, cssWebviewUri),
 		undefined,
 		context.subscriptions,
 	);
 };
 
-const handleWebviewEventMessage = async (webviewEvent : WebviewEventMessage, cssWebviewUri : string) : Promise<void> => {
-	switch (webviewEvent.eventType) {
-		case FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.SUBMIT_FEEDBACK:
-			await handleSubmitFeedbackFormEvent(webviewEvent.eventData!, cssWebviewUri);
+const handleHtmlEventMessage = async (htmlEventMessage : HtmlEventMessage, cssWebviewUri : string) : Promise<void> => {
+	switch (htmlEventMessage.eventType) {
+		case FEEDBACK_FORM_EVENTS.HTML_PAGE.SUBMIT_FEEDBACK:
+			await handleSubmitFeedbackFormEvent(htmlEventMessage.eventData!, cssWebviewUri);
 			break;
 
-		case FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.OPEN_NEW_FEEDBACK_FORM:
+		case FEEDBACK_FORM_EVENTS.HTML_PAGE.OPEN_NEW_FEEDBACK_FORM:
 			feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
 			break;
 
-		case FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.CLOSE:
+		case FEEDBACK_FORM_EVENTS.HTML_PAGE.CLOSE:
 			feedbackFormPanel?.dispose();
 			break;
 	}
@@ -119,7 +117,7 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 	// validate Feedback Form Data
 	const validationResult = validateFormData(formData);
 	if (typeof validationResult === 'string') {
-		await sendErrorEventToWebview(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.GENERIC_VALIDATION_ERROR_WRAPPER, validationResult));
+		await sendErrorEventToHtml(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.GENERIC_VALIDATION_ERROR_WRAPPER, validationResult));
 		return;
 	}
 
@@ -137,41 +135,44 @@ const handleSubmitFeedbackFormEvent = async (formData : FeedbackFormData, cssWeb
 
 		if (response.ok) {
 			vsLogger.printTimestamp();
-			vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText);
+			vsLogger.info("Feedback Form Success: " + response.status + ' ' + response.statusText); // no need for status + statusText
 			vsLogger.info('');
 			feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.SUCCESS_HTML, cssWebviewUri);
 		}
 		else {
+			// SERVER_ERROR (but proxy is running, a response was received)
 			vsLogger.printTimestamp();
-			vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText);
+			vsLogger.error("Feedback Form External Failure: " + response.status + ' ' + response.statusText); // try catch response body (if obtained print).
 			vsLogger.error('');
 
 			// "Manual reauthentication is needed" proxy event
 			if (response.status === ApplicationConstants.HTTP_RESPONSE_CODE.FORBIDDEN) {
 				const responseBody : any = await response.json();
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
-				await sendErrorEventToWebview(`Error 403: "${responseBody.error}"`);
+				await sendErrorEventToHtml(`Error 403: "${responseBody.error}"`);
 			}
 			else {
 				feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.FAILURE_HTML, cssWebviewUri);
 			}
 		}
 	} catch (e) {
+			// https://corpjira.netsuitecorp.com/browse/PDPDEVTOOL-6307?filter=-2
+			// VSCODE ERROR && PROXY_NOT_LOADED && PROXY_ERROR, REQUEST ERROR (Not even a response received)
 		vsLogger.printTimestamp();
-		vsLogger.error("Feedback Form Internal Failure: " + e);
+		vsLogger.error("Feedback Form Internal Failure: " + 'Timestamp' + e);
 		vsLogger.error('');
 
 		// TODO: Find a way to not delete the user input when swaping HTML / clicking out
 		// 	-> https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
 		feedbackFormPanel!.webview.html = mediaService.generateHTMLContentFromMediaFile(FEEDBACK_FORM_FILE_NAMES.MAIN_PAGE.HTML, cssWebviewUri);
-		await sendErrorEventToWebview(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR));
+		await sendErrorEventToHtml(translationService.getMessage(DEVASSIST_SERVICE.FEEDBACK_FORM.SUBMITTING_ERROR));
 	}
 }
 
 
-const sendErrorEventToWebview = async (message: string) => {
+const sendErrorEventToHtml = async (message: string) => {
 	await feedbackFormPanel!.webview.postMessage({
-		eventType: FEEDBACK_FORM_EVENTS.HTML_PAGE.RENDER_TOAST_MESSAGE,
+		eventType: FEEDBACK_FORM_EVENTS.WEBVIEW_CONTROLLER.RENDER_TOAST_MESSAGE,
 		eventData: {
 			toastMessageLevel : 'error',
 			toastMessageContent: message}
