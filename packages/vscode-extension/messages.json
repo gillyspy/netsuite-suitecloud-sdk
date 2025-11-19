@@ -55,7 +55,7 @@
 	"DEPLOY_QUESTIONS_CHOICES_ACCOUNT_SPECIFIC_VALUES_DISPLAY_WARNING": "Display a warning and continue the deployment process",
 
 	"DEVASSIST_SERVICE_OUTPUT_PROXY_ERROR": "There was a problem while running SuiteCloud Developer Assistant service.\n{0}",
-	"DEVASSIST_SERVICE_OUTPUT_PROXY_SETTINGS_ERROR": "There was a problem while running SuiteCloud Developer Assistant service.\n{0}",
+	"DEVASSIST_SERVICE_OUTPUT_NOT_ALLOWED_PATH_ERROR": "There was a problem while processing your SuiteCloud Developer Assistant request. Check your CLINE base URL extension configuration.\n{0}",
 	"DEVASSIST_SERVICE_OUTPUT_SERVER_ERROR": "There was a server error while running SuiteCloud Developer Assistant service.\n{0}",
 	"DEVASSIST_SERVICE_OUTPUT_SERVER_ERROR_ON_REFRESH": "There was a problem refreshing credentials while running SuiteCloud Developer Assistant service.\n{0}",
 	"DEVASSIST_SERVICE_IS_DISABLED_NOTIFICATION": "SuiteCloud Developer Assistant service has been disabled.",

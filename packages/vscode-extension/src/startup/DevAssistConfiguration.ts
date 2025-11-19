@@ -35,7 +35,7 @@ const PROXY_SERVICE_EVENTS = {
     SERVER_ERROR: 'serverError',
     PROXY_ERROR: 'proxyError',
     SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
-    PROXY_SETTINGS_ERROR: 'proxySettingsError'
+    NOT_ALLOWED_PATH_ERROR: 'notAllowedPathError'
 }
 
 const executionEnvironmentContext = new ExecutionEnvironmentContext({
@@ -138,10 +138,10 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
         vsLogger.error('');
     });
 
-    devAssistProxyService.on(PROXY_SERVICE_EVENTS.PROXY_SETTINGS_ERROR, (emitParams: { authId: string, message: string }) => {
-        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PROXY_SETTINGS_ERROR, emitParams.message);
-        showDevAssistEmitProblemLog(PROXY_SERVICE_EVENTS.PROXY_SETTINGS_ERROR, errorMessage, devAssistStatusBar);
-        vsLogger.error('');
+    devAssistProxyService.on(PROXY_SERVICE_EVENTS.NOT_ALLOWED_PATH_ERROR, (emitParams: { authId: string, message: string }) => {
+       const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.NOT_ALLOWED_PATH_ERROR, emitParams.message);
+       showDevAssistEmitProblemLog(PROXY_SERVICE_EVENTS.NOT_ALLOWED_PATH_ERROR, errorMessage, devAssistStatusBar);
+       vsLogger.error('');
     });
 
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.SERVER_ERROR_ON_REFRESH, (emitParams: { authId: string, message: string }) => {

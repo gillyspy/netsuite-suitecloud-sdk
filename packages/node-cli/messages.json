@@ -293,7 +293,7 @@
 	"SUITECLOUD_AUTH_PROXY_SERVICE_NEED_TO_REAUTHENTICATE" : "Manual authentication is needed. Sign in again to continue.",
 	"SUITECLOUD_AUTH_PROXY_SERVICE_ALREADY_USED_PORT" : "Port {0} is already being used. Choose a different port and try again.\n{1}",
 	"SUITECLOUD_AUTH_PROXY_SERVICE_INTERNAL_PROXY_SERVER_ERROR" : "There was an internal problem in the SuiteCloud client server while listening on the port {0}.\n{1}",
-	"SUITECLOUD_AUTH_PROXY_SERVICE_INVALID_CLINE_BASE_URL_ERROR" : "Cline Base URL is invalid. Valid format may be http://127.0.0.1:[port]/api/internal/devassist",
+	"SUITECLOUD_AUTH_PROXY_SERVICE_INVALID_BASE_URL_ERROR" : "Request denied: External URLs are not allowed. Use only the internal endpoint (http://127.0.0.1:[port]/api/internal/devassist).",
 
 	"UNIT_TEST_TEST_FAILED": "The tests failed.",
 	"UNIT_TEST_TEST_FAILURES_PRESENT": "There are some Test failures. The deployment will not continue.",
