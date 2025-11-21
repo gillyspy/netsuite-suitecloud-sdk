@@ -49,10 +49,11 @@ const HTTP_RESPONSE_CODE = {
 };
 
 class SuiteCloudAuthProxyService extends EventEmitter {
-	constructor(sdkPath, executionEnvironmentContext) {
+	constructor(sdkPath, executionEnvironmentContext, proxyUrl) {
 		super();
 		this._sdkPath = sdkPath;
 		this._executionEnvironmentContext = executionEnvironmentContext;
+		this._proxyUrl = proxyUrl;
 		/** These are the variables we are going to use to store instance data */
 		this._accessToken = undefined;
 		this._localProxy = undefined;
@@ -84,9 +85,12 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		this._localProxy.addListener('request', async (request, response) => {
 
 			if (!this._matchesDevAssistPath(request.url)) {
-				const errorMessage = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INVALID_BASE_URL_ERROR);
+				//path for the error message: /api/internal/devassist/*
+				const path = this._proxyUrl.PATH.endsWith('/') ? this._proxyUrl.PATH : this._proxyUrl.PATH.concat('/');
+				const errorMessage = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INVALID_BASE_URL_ERROR, path);
 				this._writeResponseMessage(response, HTTP_RESPONSE_CODE.FORBIDDEN, errorMessage);
-				this._handleListeningErrors(errorMessage, EVENTS.NOT_ALLOWED_PATH_ERROR);
+				//We do not send the error message because in this case vscode will not use it.
+				this._handleListeningErrors('', EVENTS.NOT_ALLOWED_PATH_ERROR);
 				return;
 			}
 
@@ -174,8 +178,11 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 */
 	_matchesDevAssistPath(path) {
 		// This regex matches any string that starts with "/api/internal/devassist/" followed by anything
-		const regex = /^\/api\/internal\/devassist(\/[A-Za-z0-9\-._~!$&'()*+,;=:@\/?]*)?$/;
-		return regex.test(path);
+		let validRequest = this._proxyUrl.PATH;
+		if (!validRequest.endsWith('/')) {
+			validRequest = validRequest.concat('/');
+		}
+		return path.startsWith(validRequest);
 	}
 
 	/**
