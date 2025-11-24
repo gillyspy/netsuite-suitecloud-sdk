@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DEVASSIST, VSCODE_PLATFORM } from '../ApplicationConstants';
+import { DEVASSIST, VSCODE_PLATFORM, PROXY_SERVER_ALLOWED_URL } from '../ApplicationConstants';
 import { getSdkPath } from '../core/sdksetup/SdkProperties';
 import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
@@ -35,7 +35,7 @@ const PROXY_SERVICE_EVENTS = {
     SERVER_ERROR: 'serverError',
     PROXY_ERROR: 'proxyError',
     SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
-    NOT_ALLOWED_PATH_ERROR: 'notAllowedPathError'
+    PATH_NOT_ALLOWED_ERROR: 'pathNotAllowedError'
 }
 
 const executionEnvironmentContext = new ExecutionEnvironmentContext({
@@ -104,7 +104,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
 };
 
 const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
-    devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext, DEVASSIST.PROXY_URL);
+    devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext, PROXY_SERVER_ALLOWED_URL);
 
     // adding listener to trigger manual reauthentication from vscode
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.REAUTHORIZE, async (emitParams: { authId: string, message: string }) => {
@@ -138,13 +138,13 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
         vsLogger.error('');
     });
 
-    devAssistProxyService.on(PROXY_SERVICE_EVENTS.NOT_ALLOWED_PATH_ERROR, (emitParams: { authId: string, message: string }) => {
+    devAssistProxyService.on(PROXY_SERVICE_EVENTS.PATH_NOT_ALLOWED_ERROR, (emitParams: { authId: string, message: string }) => {
         //path for the error message: http://127.0.0.1:[port]/api/internal/devassist/
         let path = `${DEVASSIST.PROXY_URL.SCHEME}${DEVASSIST.PROXY_URL.LOCALHOST_IP}:[port]${DEVASSIST.PROXY_URL.PATH}`;
         path = path.endsWith('/') ? path : path.concat('/');
 
-        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.NOT_ALLOWED_PATH_ERROR, path);
-        showDevAssistEmitProblemLog(PROXY_SERVICE_EVENTS.NOT_ALLOWED_PATH_ERROR, errorMessage, devAssistStatusBar);
+        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PATH_NOT_ALLOWED_ERROR, path);
+        showDevAssistEmitProblemLog(PROXY_SERVICE_EVENTS.PATH_NOT_ALLOWED_ERROR, errorMessage, devAssistStatusBar);
         vsLogger.error('');
     });
 

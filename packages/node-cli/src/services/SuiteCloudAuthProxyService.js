@@ -15,7 +15,7 @@ const EVENTS = {
 	SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
 	PROXY_ERROR: 'proxyError',
-	NOT_ALLOWED_PATH_ERROR: 'notAllowedPathError'
+	PATH_NOT_ALLOWED_ERROR: 'pathNotAllowedError'
 };
 
 /** Authentication methods */
@@ -49,11 +49,11 @@ const HTTP_RESPONSE_CODE = {
 };
 
 class SuiteCloudAuthProxyService extends EventEmitter {
-	constructor(sdkPath, executionEnvironmentContext, proxyUrl) {
+	constructor(sdkPath, executionEnvironmentContext, allowedUrl) {
 		super();
 		this._sdkPath = sdkPath;
 		this._executionEnvironmentContext = executionEnvironmentContext;
-		this._proxyUrl = proxyUrl;
+		this._allowedPathPrefix = this._extractPathPrefix(allowedUrl);
 		/** These are the variables we are going to use to store instance data */
 		this._accessToken = undefined;
 		this._localProxy = undefined;
@@ -84,13 +84,14 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 		this._localProxy.addListener('request', async (request, response) => {
 
-			if (!this._matchesDevAssistPath(request.url)) {
-				//path for the error message: /api/internal/devassist/*
-				const path = this._proxyUrl.PATH.endsWith('/') ? this._proxyUrl.PATH : this._proxyUrl.PATH.concat('/');
-				const errorMessage = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INVALID_BASE_URL_ERROR, path);
+			if (!this._requestPathPatternValid(request.url)) {
+				const errorMessage = NodeTranslationService.
+				getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.REQUEST_PATH_NOT_ALLOWED_ERROR, this._allowedPathPrefix);
+
 				this._writeResponseMessage(response, HTTP_RESPONSE_CODE.FORBIDDEN, errorMessage);
+
 				//We do not send the error message because in this case vscode will not use it.
-				this._handleListeningErrors('', EVENTS.NOT_ALLOWED_PATH_ERROR);
+				this._handleListeningErrors('', EVENTS.PATH_NOT_ALLOWED_ERROR);
 				return;
 			}
 
@@ -145,6 +146,19 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		console.log('access token refreshed');
 	}
 
+	/**
+	 * The format of the allowedUrl is http(s)://host:[PORT]/requestPath/
+	 * We have to extract the request path (included both /)
+	 * @param allowedUrl
+	 * @returns {string}
+	 * @private
+	 */
+	_extractPathPrefix(allowedUrl) {
+		const portPlaceholder = '[PORT]';
+		return allowedUrl.substring(allowedUrl.indexOf(portPlaceholder)+portPlaceholder.length);
+	}
+
+
 	_handleListeningErrors(errorMsg, event) {
 		console.error(errorMsg);
 		this.emit(event, this._buildEmitObject(errorMsg));
@@ -176,13 +190,8 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	 * @returns {boolean}
 	 * @private
 	 */
-	_matchesDevAssistPath(path) {
-		// This regex matches any string that starts with "/api/internal/devassist/" followed by anything
-		let validRequest = this._proxyUrl.PATH;
-		if (!validRequest.endsWith('/')) {
-			validRequest = validRequest.concat('/');
-		}
-		return path.startsWith(validRequest);
+	_requestPathPatternValid(path) {
+		return path.startsWith(this._allowedPathPrefix);
 	}
 
 	/**
