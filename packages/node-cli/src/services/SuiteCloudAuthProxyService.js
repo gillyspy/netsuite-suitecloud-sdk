@@ -49,11 +49,11 @@ const HTTP_RESPONSE_CODE = {
 };
 
 class SuiteCloudAuthProxyService extends EventEmitter {
-	constructor(sdkPath, executionEnvironmentContext, allowedUrl) {
+	constructor(sdkPath, executionEnvironmentContext, allowedPathPrefix) {
 		super();
 		this._sdkPath = sdkPath;
 		this._executionEnvironmentContext = executionEnvironmentContext;
-		this._allowedPathPrefix = this._extractPathPrefix(allowedUrl);
+		this._allowedPathPrefix = allowedPathPrefix;
 		/** These are the variables we are going to use to store instance data */
 		this._accessToken = undefined;
 		this._localProxy = undefined;
@@ -84,14 +84,13 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 		this._localProxy.addListener('request', async (request, response) => {
 
-			if (!this._requestPathPatternValid(request.url)) {
+			if (!this._isPathAllowed(request.url)) {
 				const errorMessage = NodeTranslationService.
 				getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.REQUEST_PATH_NOT_ALLOWED_ERROR, this._allowedPathPrefix);
 
 				this._writeResponseMessage(response, HTTP_RESPONSE_CODE.FORBIDDEN, errorMessage);
 
-				//We do not send the error message because in this case vscode will not use it.
-				this._handleListeningErrors('', EVENTS.PATH_NOT_ALLOWED_ERROR);
+				this._handleListeningErrors(errorMessage, EVENTS.PATH_NOT_ALLOWED_ERROR);
 				return;
 			}
 
@@ -146,19 +145,6 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		console.log('access token refreshed');
 	}
 
-	/**
-	 * The format of the allowedUrl is http(s)://host:[PORT]/requestPath/
-	 * We have to extract the request path (included both /)
-	 * @param allowedUrl
-	 * @returns {string}
-	 * @private
-	 */
-	_extractPathPrefix(allowedUrl) {
-		const portPlaceholder = '[PORT]';
-		return allowedUrl.substring(allowedUrl.indexOf(portPlaceholder)+portPlaceholder.length);
-	}
-
-
 	_handleListeningErrors(errorMsg, event) {
 		console.error(errorMsg);
 		this.emit(event, this._buildEmitObject(errorMsg));
@@ -185,13 +171,14 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	}
 
 	/**
-	 * Matches /api/internal/devassist/ followed by one or more valid URL path characters
+	 * Makes sure the request path is valid.
+	 * If _allowedPathPrefix is not defined it will return valid
 	 * @param path
 	 * @returns {boolean}
 	 * @private
 	 */
-	_requestPathPatternValid(path) {
-		return path.startsWith(this._allowedPathPrefix);
+	_isPathAllowed(path) {
+		return this._allowedPathPrefix ? path.startsWith(this._allowedPathPrefix) : true;
 	}
 
 	/**

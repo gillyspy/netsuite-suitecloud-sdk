@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DEVASSIST, VSCODE_PLATFORM, PROXY_SERVER_ALLOWED_URL } from '../ApplicationConstants';
+import { DEVASSIST, VSCODE_PLATFORM } from '../ApplicationConstants';
 import { getSdkPath } from '../core/sdksetup/SdkProperties';
 import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
@@ -104,7 +104,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
 };
 
 const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
-    devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext, PROXY_SERVER_ALLOWED_URL);
+    devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext, DEVASSIST.ALLOWED_PROXY_PATH_PREFIX);
 
     // adding listener to trigger manual reauthentication from vscode
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.REAUTHORIZE, async (emitParams: { authId: string, message: string }) => {
@@ -139,11 +139,8 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     });
 
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.PATH_NOT_ALLOWED_ERROR, (emitParams: { authId: string, message: string }) => {
-        //path for the error message: http://127.0.0.1:[port]/api/internal/devassist/
-        let path = `${DEVASSIST.PROXY_URL.SCHEME}${DEVASSIST.PROXY_URL.LOCALHOST_IP}:[port]${DEVASSIST.PROXY_URL.PATH}`;
-        path = path.endsWith('/') ? path : path.concat('/');
-
-        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PATH_NOT_ALLOWED_ERROR, path);
+        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PATH_NOT_ALLOWED_ERROR,
+            getProxyUrl(devAssistConfigStatus.current.localPort));
         showDevAssistEmitProblemLog(PROXY_SERVICE_EVENTS.PATH_NOT_ALLOWED_ERROR, errorMessage, devAssistStatusBar);
         vsLogger.error('');
     });

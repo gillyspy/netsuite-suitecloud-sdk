@@ -49,8 +49,5 @@ export const DEVASSIST = {
 		LOCALHOST_IP: '127.0.0.1',
 		PATH: '/api/internal/devassist'
 	},
+	ALLOWED_PROXY_PATH_PREFIX: '/api/internal/devassist/'
 };
-
-// Allowed prefix for proxy server validation and error messaging.
-// The format is http(s)://host:[PORT]/requestPath  [PORT] should be replaced by the current port.
-export const PROXY_SERVER_ALLOWED_URL: string ='http://127.0.0.1:[PORT]/api/internal/devassist/';
