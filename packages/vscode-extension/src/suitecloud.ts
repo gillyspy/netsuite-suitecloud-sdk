@@ -29,6 +29,7 @@ import { VSTranslationService } from './service/VSTranslationService';
 import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
 import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
 import { createAuthIDStatusBar, createDevAssistStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
+import { openDevAssistFeedbackForm } from './webviews/FeedbackFormWebviewController';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
@@ -85,6 +86,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	// this command is used to open devAssist settings by clicking on devAssistStatusBar
 	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.opensettings',
 		() => vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', DEVASSIST.CONFIG_KEYS.devAssistSection))
+	);
+
+	// DevAssist Feedback Form WebView
+	context.subscriptions.push(
+		vscode.commands.registerCommand('suitecloud.opendevassistfeedbackform',
+			() => openDevAssistFeedbackForm(context)
+		)
 	);
 
 	// add watchers needed to update the status bars

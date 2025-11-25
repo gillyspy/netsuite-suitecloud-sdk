@@ -47,7 +47,8 @@ export const DEVASSIST = {
 	PROXY_URL: {
 		SCHEME: 'http://',
 		LOCALHOST_IP: '127.0.0.1',
-		PATH: '/api/internal/devassist'
+		BASE_PATH: '/api/internal/devassist',
+		FEEDBACK_PATH: '/api/internal/devassist/feedback',
 	},
 	ALLOWED_PROXY_PATH_PREFIX: '/api/internal/devassist/'
 };

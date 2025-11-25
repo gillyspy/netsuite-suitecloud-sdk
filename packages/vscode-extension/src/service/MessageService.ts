@@ -138,8 +138,12 @@ export default class MessageService {
 
 	private showOutputIfClicked = (message?: string) => {
 		if (message) {
-			output.show();
+			this.showOutput();
 		}
+	}
+
+	public showOutput = () => {
+		output.show();
 	}
 
 }

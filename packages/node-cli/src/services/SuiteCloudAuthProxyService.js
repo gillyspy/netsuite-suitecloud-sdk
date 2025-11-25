@@ -26,6 +26,7 @@ const {
 } = require('../utils/AuthenticationUtils');
 const {
 	AUTHORIZATION_PROPERTIES_KEYS,
+	HTTP_RESPONSE_CODE,
 } = require('../ApplicationConstants');
 
 /** Message literal service method */
@@ -39,14 +40,6 @@ const LOCAL_HOSTNAME = '127.0.0.1';
 
 /** Target server port */
 const TARGET_SERVER_PORT = 443;
-
-/** Http codes */
-const HTTP_RESPONSE_CODE = {
-	UNAUTHORIZED: 401,
-	FORBIDDEN: 403,
-	INTERNAL_SERVER_ERROR: 500,
-	SERVICE_UNAVAILABLE: 503,
-};
 
 class SuiteCloudAuthProxyService extends EventEmitter {
 	constructor(sdkPath, executionEnvironmentContext, allowedPathPrefix) {

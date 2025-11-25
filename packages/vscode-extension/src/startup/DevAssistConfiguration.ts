@@ -3,7 +3,7 @@ import { DEVASSIST, VSCODE_PLATFORM } from '../ApplicationConstants';
 import { getSdkPath } from '../core/sdksetup/SdkProperties';
 import VSConsoleLogger from "../loggers/VSConsoleLogger";
 import MessageService from '../service/MessageService';
-import { DEVASSIST_SERVICE, REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
+import { BUTTONS, DEVASSIST_SERVICE, REFRESH_AUTHORIZATION } from '../service/TranslationKeys';
 import { VSTranslationService } from '../service/VSTranslationService';
 import { AuthenticationUtils, ExecutionEnvironmentContext, SuiteCloudAuthProxyService } from '../util/ExtensionUtil';
 import { output } from '../suitecloud';
@@ -156,15 +156,16 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
 const startDevAssistService = async (devAssistAuthID: string, localPort: number, devAssistStatusBar: vscode.StatusBarItem) => {
     await devAssistProxyService.start(devAssistAuthID, localPort);
 
+	const proxyUrl = getProxyUrl(localPort);
     setSuccessDevAssistStausBarMessage(devAssistStatusBar);
-    const proxyUrl = getProxyUrl(localPort);
-    vsNotificationService.showCommandInfo(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl));
+	showDevAssistIsRunningNotification(proxyUrl);
+
     vsLogger.printTimestamp();
     vsLogger.info(translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.OUTPUT, getProxyUrlWithoutPath(localPort), devAssistAuthID, proxyUrl));
 }
 
 const PROXY_URL = DEVASSIST.PROXY_URL;
-const getProxyUrl = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}${PROXY_URL.PATH}`;
+const getProxyUrl = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}${PROXY_URL.BASE_PATH}`;
 const getProxyUrlWithoutPath = (port: number) => `${PROXY_URL.SCHEME}${PROXY_URL.LOCALHOST_IP}:${port}`;
 
 const stopDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
@@ -186,11 +187,11 @@ const showDevAssistStartUpNotification = () => {
     const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.STARTUP.MESSAGE);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.OPEN_SETTINGS),
+            buttonMessage: translationService.getMessage(BUTTONS.OPEN_SETTINGS),
             buttonAction: openDevAssistSettings
         },
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.STARTUP.BUTTON.DONT_SHOW_AGAIN),
+            buttonMessage: translationService.getMessage(BUTTONS.DONT_SHOW_AGAIN),
             buttonAction: () => {
                 const devAssistConfigSection = vscode.workspace.getConfiguration(DEVASSIST.CONFIG_KEYS.devAssistSection);
                 devAssistConfigSection.update(DEVASSIST.CONFIG_KEYS.startupNotificationDisabled, true);
@@ -198,6 +199,23 @@ const showDevAssistStartUpNotification = () => {
         }
     ];
     vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
+}
+
+const showDevAssistIsRunningNotification = (proxyUrl : string) => {
+	const infoMessage: string = translationService.getMessage(DEVASSIST_SERVICE.IS_RUNNING.NOTIFICATION, proxyUrl);
+	const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
+		{
+			buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
+			buttonAction: vsNotificationService.showOutput
+		},
+		{
+			buttonMessage: translationService.getMessage(BUTTONS.GIVE_FEEDBACK),
+			buttonAction: () => {
+				vscode.commands.executeCommand('suitecloud.opendevassistfeedbackform')
+			}
+		},
+	];
+	vsNotificationService.showCommandInfoWithSpecificButtonsAndActions(infoMessage, buttonsAndActions);
 }
 
 const showStartDevAssistProblemNotification = (errorStage: string, error: string, devAssistStatusBar: vscode.StatusBarItem) => {
@@ -208,7 +226,7 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.SEE_DETAILS_BUTTON),
+            buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
             buttonAction: () => {
                 // show suitecloud output and devassist settings
                 output.show();
@@ -225,7 +243,7 @@ const showDevAssistEmitProblemLog = (errorStage: string, outputError: string, de
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.SEE_DETAILS_BUTTON),
+            buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
             buttonAction: () => output.show(),
         },
     ];
@@ -240,7 +258,7 @@ const showDevAssistEmitProblemNotification = (errorStage: string, emitError: str
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
-            buttonMessage: translationService.getMessage(DEVASSIST_SERVICE.SEE_DETAILS_BUTTON),
+            buttonMessage: translationService.getMessage(BUTTONS.SEE_DETAILS),
             buttonAction: () => {
                 // show suitecloud output and devassist settings
                 output.show()
@@ -267,7 +285,7 @@ const updateDevAssistConfigStatus = (): void => {
     devAssistConfigStatus.previous = previousConfig;
 }
 
-const getDevAssistCurrentSettings = (): devAssistConfig => {
+export const getDevAssistCurrentSettings = (): devAssistConfig => {
     const devAssistConfigSection = vscode.workspace.getConfiguration(DEVASSIST.CONFIG_KEYS.devAssistSection);
 
     //  * The *effective* value (returned by {@linkcode WorkspaceConfiguration.get get}) is computed by overriding or merging the values in the following order:
