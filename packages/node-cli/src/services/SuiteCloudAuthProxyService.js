@@ -14,7 +14,8 @@ const EVENTS = {
 	SERVER_ERROR: 'serverError',
 	SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
 	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
-	PROXY_ERROR: 'proxyError'
+	PROXY_ERROR: 'proxyError',
+	PATH_NOT_ALLOWED_ERROR: 'pathNotAllowedError'
 };
 
 /** Authentication methods */
@@ -41,10 +42,11 @@ const LOCAL_HOSTNAME = '127.0.0.1';
 const TARGET_SERVER_PORT = 443;
 
 class SuiteCloudAuthProxyService extends EventEmitter {
-	constructor(sdkPath, executionEnvironmentContext) {
+	constructor(sdkPath, executionEnvironmentContext, allowedPathPrefix) {
 		super();
 		this._sdkPath = sdkPath;
 		this._executionEnvironmentContext = executionEnvironmentContext;
+		this._allowedPathPrefix = allowedPathPrefix;
 		/** These are the variables we are going to use to store instance data */
 		this._accessToken = undefined;
 		this._localProxy = undefined;
@@ -74,6 +76,16 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		this._localProxy = http.createServer();
 
 		this._localProxy.addListener('request', async (request, response) => {
+
+			if (!this._isPathAllowed(request.url)) {
+				const errorMessage = NodeTranslationService.
+				getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.REQUEST_PATH_NOT_ALLOWED_ERROR, this._allowedPathPrefix);
+
+				this._writeResponseMessage(response, HTTP_RESPONSE_CODE.FORBIDDEN, errorMessage);
+
+				this._handleListeningErrors(errorMessage, EVENTS.PATH_NOT_ALLOWED_ERROR);
+				return;
+			}
 
 			const requestOptions = this._buildRequestOptions(request);
 
@@ -149,6 +161,17 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (isNaN(proxyPort)) {
 			throw NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.PORT_MUST_BE_NUMBER);
 		}
+	}
+
+	/**
+	 * Makes sure the request path is valid.
+	 * If _allowedPathPrefix is not defined it will return valid
+	 * @param path
+	 * @returns {boolean}
+	 * @private
+	 */
+	_isPathAllowed(path) {
+		return this._allowedPathPrefix ? path.startsWith(this._allowedPathPrefix) : true;
 	}
 
 	/**

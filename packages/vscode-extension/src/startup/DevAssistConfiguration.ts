@@ -34,7 +34,8 @@ const PROXY_SERVICE_EVENTS = {
     REAUTHORIZE: 'authRefreshManual',
     SERVER_ERROR: 'serverError',
     PROXY_ERROR: 'proxyError',
-    SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh'
+    SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
+    PATH_NOT_ALLOWED_ERROR: 'pathNotAllowedError'
 }
 
 const executionEnvironmentContext = new ExecutionEnvironmentContext({
@@ -103,7 +104,7 @@ export const devAssistConfigurationChangeHandler = async (configurationChangeEve
 };
 
 const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) => {
-    devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext);
+    devAssistProxyService = new SuiteCloudAuthProxyService(getSdkPath(), executionEnvironmentContext, DEVASSIST.ALLOWED_PROXY_PATH_PREFIX);
 
     // adding listener to trigger manual reauthentication from vscode
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.REAUTHORIZE, async (emitParams: { authId: string, message: string }) => {
@@ -134,6 +135,13 @@ const initializeDevAssistService = (devAssistStatusBar: vscode.StatusBarItem) =>
     devAssistProxyService.on(PROXY_SERVICE_EVENTS.PROXY_ERROR, (emitParams: { authId: string, message: string }) => {
 		const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PROXY_ERROR, emitParams.message);
         showDevAssistEmitProblemNotification(PROXY_SERVICE_EVENTS.PROXY_ERROR, errorMessage, devAssistStatusBar);
+        vsLogger.error('');
+    });
+
+    devAssistProxyService.on(PROXY_SERVICE_EVENTS.PATH_NOT_ALLOWED_ERROR, (emitParams: { authId: string, message: string }) => {
+        const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.EMIT_ERROR.OUTPUT.PATH_NOT_ALLOWED_ERROR,
+            getProxyUrl(devAssistConfigStatus.current.localPort));
+        showDevAssistEmitProblemLog(PROXY_SERVICE_EVENTS.PATH_NOT_ALLOWED_ERROR, errorMessage, devAssistStatusBar);
         vsLogger.error('');
     });
 
@@ -229,9 +237,9 @@ const showStartDevAssistProblemNotification = (errorStage: string, error: string
     vsNotificationService.showCommandErrorWithSpecificButtonsAndActions(errorMessage, buttonsAndActions);
 }
 
-const showDevAssistEmitProblemLog = (errorStage: string, emitError: string, devAssistStatusBar: vscode.StatusBarItem) => {
+const showDevAssistEmitProblemLog = (errorStage: string, outputError: string, devAssistStatusBar: vscode.StatusBarItem) => {
     vsLogger.printTimestamp();
-    vsLogger.error(emitError);
+    vsLogger.error(outputError);
     const errorMessage = translationService.getMessage(DEVASSIST_SERVICE.IS_STOPPED.NOTIFICATION);
     const buttonsAndActions: { buttonMessage: string, buttonAction: () => void }[] = [
         {
