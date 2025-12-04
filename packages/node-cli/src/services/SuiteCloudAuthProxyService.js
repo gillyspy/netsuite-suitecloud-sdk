@@ -11,12 +11,19 @@ const EventEmitter = require('events');
 
 /** Events */
 const EVENTS = {
-	SERVER_ERROR: 'serverError',
-	SERVER_ERROR_ON_REFRESH: 'serverErrorOnRefresh',
-	AUTH_REFRESH_MANUAL_EVENT: 'authRefreshManual',
-	PROXY_ERROR: 'proxyError',
-	PATH_NOT_ALLOWED_ERROR: 'pathNotAllowedError'
-};
+	PROXY_ERROR: {
+		DEFAULT: 'proxyError',
+		MANUAL_AUTH_REFRESH_REQUIRED: 'manualAuthRefreshRequired'
+	},
+	REQUEST_ERROR: {
+		PATH_NOT_ALLOWED: 'requestPathNotAllowed',
+		UNAUTHORIZED: 'unauthorizedProxyRequest'
+	},
+	SERVER_ERROR: {
+		DEFAULT: 'serverError',
+		ON_AUTH_REFRESH: 'serverErrorOnRefresh',
+	},
+}
 
 /** Authentication methods */
 const {
@@ -42,11 +49,13 @@ const LOCAL_HOSTNAME = '127.0.0.1';
 const TARGET_SERVER_PORT = 443;
 
 class SuiteCloudAuthProxyService extends EventEmitter {
-	constructor(sdkPath, executionEnvironmentContext, allowedPathPrefix) {
+
+	constructor(sdkPath, executionEnvironmentContext, allowedPathPrefix, apiKey) {
 		super();
 		this._sdkPath = sdkPath;
 		this._executionEnvironmentContext = executionEnvironmentContext;
 		this._allowedPathPrefix = allowedPathPrefix;
+		this._apiKey = apiKey;
 		/** These are the variables we are going to use to store instance data */
 		this._accessToken = undefined;
 		this._localProxy = undefined;
@@ -57,6 +66,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	/**
 	 * starts the listener.
 	 * It can return an error, for instance when it cannot connect to the auth server or the parameters being incorrect
+	 * @public
 	 * @param authId
 	 * @param proxyPort
 	 * @returns {Promise<void>}
@@ -72,24 +82,19 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		this._targetHost = hostName;
 		this._accessToken = accessToken;
 
-		this.stop();
+		await this.stop();
 		this._localProxy = http.createServer();
 
 		this._localProxy.addListener('request', async (request, response) => {
 
-			if (!this._isPathAllowed(request.url)) {
-				const errorMessage = NodeTranslationService.
-				getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.REQUEST_PATH_NOT_ALLOWED_ERROR, this._allowedPathPrefix);
-
-				this._writeResponseMessage(response, HTTP_RESPONSE_CODE.FORBIDDEN, errorMessage);
-
-				this._handleListeningErrors(errorMessage, EVENTS.PATH_NOT_ALLOWED_ERROR);
-				return;
+			// Validate incoming request (Api Key & Request Path)
+			if (!this._isValidAndFilterIncomingRequest(request, response)) {
+				return
 			}
 
 			const requestOptions = this._buildRequestOptions(request);
 
-			//Save body
+			// Save body
 			const bodyChunks = [];
 			request.on('data', function (chunk) {
 				bodyChunks.push(chunk);
@@ -112,24 +117,55 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 			const errorMessage = (error.code === 'EADDRINUSE') ?
 				NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.ALREADY_USED_PORT, proxyPort, error.message ?? '')
 				: NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.INTERNAL_PROXY_SERVER_ERROR, proxyPort, error.message ?? '');
-			this._handleListeningErrors(errorMessage, EVENTS.PROXY_ERROR);
+			this._emitEventWithData(EVENTS.PROXY_ERROR.DEFAULT, errorMessage);
 		});
 	}
 
 	/**
-	 * Public method that stops the proxy
+	 * Public method that stops the proxy and returns a Promise resolved when it's fully closed
+	 * @public
 	 */
-	stop() {
-		if (this._localProxy) {
-			this._localProxy.close(() => console.log('SuiteCloud Proxy server stopped.'));
-			this._localProxy = null;
+	async stop() {
+		// when having a "listen EADDRINUSE: address already in use 127.0.0.1:49285" the server instance exists but is not listening
+		// to avoid "Error [ERR_SERVER_NOT_RUNNING]: Server is not running." at close time there is the need to check if server is activelly listening
+		if (this._localProxy && this._localProxy.listening) {
+			// Wrap the close callback in a Promise
+			const closePromise = new Promise((resolve, reject) => {
+				this._localProxy.close(error => {
+					if (error) {
+						console.error('Error occurred while stopping SuiteCloud Auth Proxy server.')
+						console.error(error)
+						reject(error);
+					} else {
+						console.log('SuiteCloud Auth Proxy server stopped.');
+						resolve();
+					}
+				});
+			});
+
+			await closePromise;
 		} else {
 			console.log('No server instance to stop.');
 		}
+
+		this._localProxy = null;
 	}
 
 	/**
+	 * Updates the stored API key, which is used to authenticate and filter incoming requests to the local server.
+	 *
+	 * @public
+	 * @param {string} newApiKey - The new API key to set for request filtering.
+	 * @returns {void}
+	 */
+	updateApiKey(newApiKey) {
+		this._apiKey = newApiKey;
+	}
+
+
+	/**
 	 * For being used after manual authentication. It refreshes the access token from credentials.
+	 * @public
 	 * @returns {Promise<void>}
 	 */
 	async reloadAccessToken() {
@@ -138,9 +174,23 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		console.log('access token refreshed');
 	}
 
-	_handleListeningErrors(errorMsg, event) {
-		console.error(errorMsg);
-		this.emit(event, this._buildEmitObject(errorMsg));
+	/**
+	 * Emits an event with a structured data object.
+	 *
+	 * @param {string} eventName - The name of the event to emit.
+	 * @param {string} errorMessage - The error message to include in the data object.
+	 * @param {string} [requestUrl] - (Optional) The URL associated with the event, if applicable.
+	 * @returns {void}
+	 * @private
+	 */
+	_emitEventWithData(eventName, errorMessage, requestUrl) {
+		const emitData = {
+			authId: this._authId,
+			message: errorMessage,
+			...(requestUrl && { requestUrl })
+		}
+		console.error({ eventName, emitData });
+		this.emit(eventName, emitData);
 	}
 
 	/**
@@ -164,17 +214,6 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 	}
 
 	/**
-	 * Makes sure the request path is valid.
-	 * If _allowedPathPrefix is not defined it will return valid
-	 * @param path
-	 * @returns {boolean}
-	 * @private
-	 */
-	_isPathAllowed(path) {
-		return this._allowedPathPrefix ? path.startsWith(this._allowedPathPrefix) : true;
-	}
-
-	/**
 	 * This method retrieves the credentials and returns the hostname and the accessToken
 	 * @returns {Promise<{hostName: string, accessToken: string}>}
 	 * @private
@@ -193,6 +232,58 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 			accessToken: authIDActionResult.data[this._authId].token.accessToken,
 			hostName: authIDActionResult.data[this._authId].hostInfo.hostName,
 		};
+	}
+
+	/**
+	 * Validates an incoming proxy request for apiKey & allowed path.
+	 * Responds and emits the correct events on failure.
+	 * @param {http.IncomingMessage} request
+	 * @param {http.ServerResponse} response
+	 * @returns {boolean} true if valid, false if rejected
+	 */
+	_isValidAndFilterIncomingRequest(request, response) {
+		const requestValidationFunctions = [
+			this._checkAuthenticationHeader.bind(this),
+			this._checkRequestPath.bind(this)
+		];
+
+		// check all validations are true or stops in the first failing one and returns false
+		return requestValidationFunctions.every((validateFunction => validateFunction(request, response)));
+	}
+
+	/**
+	 * Authentication filter: check authorization header if an API key is configured.
+	 * Manages response and emit event on failure
+	 */
+	_checkAuthenticationHeader(request, response) {
+		if (this._apiKey) {
+			const authHeader = request.headers['authorization'];
+			if (authHeader !== `Bearer ${this._apiKey}`) {
+				const unauthorizedMessage = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.UNAUTHORIZED_PROXY_REQUEST);
+				// using 401-Unauthorized http response code as CLINE won't activate the retry mechanism with it
+				// not using 407-Proxy Authentication Required as CLINE activates the retry mechanism with it
+				this._writeResponseMessage(response, HTTP_RESPONSE_CODE.UNAUTHORIZED, unauthorizedMessage);
+				this._emitEventWithData(EVENTS.REQUEST_ERROR.UNAUTHORIZED, unauthorizedMessage, request.url)
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Allowed path filter: check allowed prefix if configured.
+	 * Manages response and emit event on failure
+	 */
+	_checkRequestPath(request, response) {
+		// Allowed path filter: check allowed prefix if configured
+		if (this._allowedPathPrefix && !request.url.startsWith(this._allowedPathPrefix)) {
+			const errorMessage = NodeTranslationService.
+				getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.REQUEST_PATH_NOT_ALLOWED_ERROR, this._allowedPathPrefix);
+			this._writeResponseMessage(response, HTTP_RESPONSE_CODE.FORBIDDEN, errorMessage);
+			this._emitEventWithData(EVENTS.REQUEST_ERROR.PATH_NOT_ALLOWED, errorMessage);
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -235,7 +326,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 					newProxyRequest.write(body);
 					newProxyRequest.end();
 				} else {
-					this.emit(refreshOperationResult.emitEventName, this._buildEmitObject(refreshOperationResult.errorMessage));
+					this._emitEventWithData(refreshOperationResult.emitEventName, refreshOperationResult.errorMessage);
 					//Message shown to cline
 					this._writeResponseMessage(response, refreshOperationResult.responseStatusCode, refreshOperationResult.errorMessage);
 					proxyResponse.pipe(response, { end: true });
@@ -247,12 +338,12 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 		});
 
-		proxyRequest.on('error', (err) => {
-			console.error('Proxy request error:', err);
+		proxyRequest.on('error', (error) => {
+			console.error('Proxy request error:', error);
+			this._emitEventWithData(EVENTS.SERVER_ERROR.DEFAULT, error.message)
 			response.writeHead(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
-			this.emit(EVENTS.SERVER_ERROR, this._buildEmitObject(err.message));
 			//TODO Review this message and see confluence error pages and review with the tech writers
-			response.end('SuiteCloud Proxy error: ' + err.message);
+			response.end('SuiteCloud Proxy error: ' + error.message);
 		});
 		return proxyRequest;
 	}
@@ -278,7 +369,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (!inspectAuthOperationResult.isSuccess()) {
 			const errorMsg = this._cleanText(inspectAuthOperationResult.errorMessages.join('. '));
 
-			refreshInfo.emitEventName = EVENTS.SERVER_ERROR_ON_REFRESH;
+			refreshInfo.emitEventName = EVENTS.SERVER_ERROR.ON_AUTH_REFRESH;
 			refreshInfo.errorMessage = errorMsg;
 			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
@@ -290,7 +381,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 		if (inspectAuthData[AUTHORIZATION_PROPERTIES_KEYS.NEEDS_REAUTHORIZATION]) {
 			const errorMsg = NodeTranslationService.getMessage(SUITECLOUD_AUTH_PROXY_SERVICE.NEED_TO_REAUTHENTICATE);
 
-			refreshInfo.emitEventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
+			refreshInfo.emitEventName = EVENTS.PROXY_ERROR.MANUAL_AUTH_REFRESH_REQUIRED;
 			refreshInfo.errorMessage = errorMsg;
 			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
@@ -303,7 +394,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 			//Refresh unsuccessful
 			const errorMsg = this._cleanText(forceRefreshOperationResult.errorMessages.join('. '));
 
-			refreshInfo.emitEventName = EVENTS.AUTH_REFRESH_MANUAL_EVENT;
+			refreshInfo.emitEventName = EVENTS.PROXY_ERROR.MANUAL_AUTH_REFRESH_REQUIRED;
 			refreshInfo.errorMessage = errorMsg;
 			refreshInfo.responseStatusCode = HTTP_RESPONSE_CODE.FORBIDDEN;
 
@@ -316,17 +407,6 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 
 			return Object.freeze(refreshInfo);
 		}
-	}
-
-	/**
-	 * This method is created in order to have centralized the structure of the
-	 * emit object in case it should be changed into the future
-	 * @param errorMsg
-	 * @returns {{message, authId}}
-	 * @private
-	 */
-	_buildEmitObject(errorMsg) {
-		return { message: errorMsg, authId: this._authId };
 	}
 
 	/**
@@ -360,6 +440,7 @@ class SuiteCloudAuthProxyService extends EventEmitter {
 			requestOptions.headers.authorization = 'Bearer ' + this._accessToken;
 		}
 	}
+
 
 	/**
 	 * Write JSON response message
