@@ -120,18 +120,18 @@ You can now configure the SuiteCloud Developer Assistant using Cline in SuiteClo
   * Work within your existing VS Code and Cline setup for a consistent workflow
 
 To set up SuiteCloud Developer Assistant using Cline:
-1.  Open SuiteCloud Extension for VS Code and click the SuiteCloud Developer Assistant welcome message to go to the SuiteCloud Extension for VS Code settings.
-2.  In **Workspace** > **SuiteCloud**, configure the fields as follows:
+1.  Open Visual Studio Code with the SuiteCloud Extension installed and click the SuiteCloud Developer Assistant welcome message to go to the extension settings.
+2.  In **Workspace** > **Extensions** > **SuiteCloud**, configure the fields as follows:
     * **Developer Assistant: Auth ID:** Set to the auth ID you want to use for the SuiteCloud Developer Assistant service.
     * **Local Port:** Autofilled by default. Change it if you prefer a different port or if the default port is already in use.
     * **Developer Assistant: Enable:** Set to enabled.
 
-    When you enable the SuiteCloud Developer Assistant service, a popup window will appear displaying an API key. Copy it and follow the instructions provided in the popup window.
+    During the initial setup, when you enable the SuiteCloud Developer Assistant service, a popup window will appear displaying an API key. Copy it and follow the instructions provided in the popup window.
 
 3. In the activity bar, go to the Cline extension. Click the provider/model selector, and configure the fields as follows:
       * **API Provider:** Set to **OpenAI Compatible**.
       * **OpenAI Compatible API Key:** Paste the generated API key.
-      * **Base URL:** Set to the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration. To see it again, refer to the output in the terminal.
+      * **Base URL:** Set to the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration. To see it again, refer to the SuiteCloud output panel.
       * **Model ID:** If this isn't autopopulated, set to **NetSuite**.
 You can start vibe-coding with SuiteCloud Developer Assistant.
 
