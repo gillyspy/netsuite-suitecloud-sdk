@@ -126,7 +126,7 @@ To set up SuiteCloud Developer Assistant using Cline:
 
 2.  Next, configure the fields as follows:
     * **Developer Assistant: Auth ID:** Set to the auth ID you want to use for the SuiteCloud Developer Assistant service.
-    * **Local Port:** Autofilled by default. Change it if you prefer a different port or if the default port is already in use.
+    * **Developer Assistant: Local Port:** Autofilled by default. Change it if you prefer a different port or if the default port is already in use.
     * **Developer Assistant: Enable:** Set to enabled.
 
     During the initial setup, when you enable the SuiteCloud Developer Assistant service, a popup window will appear displaying an API key. Copy it and follow the instructions provided in the popup window.
