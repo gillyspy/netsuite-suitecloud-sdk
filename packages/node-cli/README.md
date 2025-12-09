@@ -23,10 +23,10 @@ To ensure that you get the latest features and bug fixes, you should use the lat
 
 The following table shows the CLI versions currently available in NPM.
 
-| CLI Versions Available in NPM | Available Since | Compatible NetSuite Version |
-|:-----------------------------:|:---------------:|:---------------------------:|
-| 3.1.0 | 2025.2 | 2025.1 and 2025.2 |
-| 3.0.2 | 2025.2 | 2025.1 and 2025.2 |
+| CLI Versions Available in NPM | 
+|:-----------------------------:|
+| 3.2.0 |
+| 3.1.0 |
 
 
 ## Installation

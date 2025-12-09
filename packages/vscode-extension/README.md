@@ -111,7 +111,7 @@ The following SuiteCloud commands are available through the Command Palette:
 
 To read more about what you can do with SuiteCloud Extension for Visual Studio Code, visit <a href="https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_159223173518.html" rel="noopener noreferrer" target=blank>SuiteCloud Extension for Visual Studio Code Usage</a>.
 
-## SuiteCloud Developer Assistant Using Cline in SuiteCloud Extension for Visual Studio Code
+## SuiteCloud Developer Assistant Using Cline in SuiteCloud Extension for VS Code
 
 You can now configure the SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code. SuiteCloud Developer Assistant is an AI-powered coding assistant designed for SuiteCloud developers. Integrated with Visual Studio Code through the Cline extension, it uses advanced language models specialized for SuiteCloud and SuiteScript to support NetSuite customization tasks. With SuiteCloud Developer Assistant, you can:
   * Get real-time, context-aware coding assistance within your SuiteCloud projects
