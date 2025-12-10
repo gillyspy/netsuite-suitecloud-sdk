@@ -1,27 +1,25 @@
 {
-	"name": "@oracle/netsuite-uif-types",
-	"version": "8.0.0",
-	"description": "NetSuite UI Framework TypeScript type declarations",
+	"name": "@oracle/netsuite-schemas",
+	"version": "1.0.0",
+	"description": "JSON schema declarations",
 	"publisher": "Oracle",
 	"license": "UPL-1.0",
 	"keywords": [
 		"NetSuite",
 		"SuiteCloud",
 		"SDF",
-		"SuiteApp",
-		"TypeScript",
-		"UI",
-		"UIF"
+		"SuiteApp"
 	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/oracle/netsuite-suitecloud-sdk.git",
-		"directory": "packages/uif-types"
+		"directory": "packages/schemas"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
 	"bugs": {
 		"url": "https://github.com/oracle/netsuite-suitecloud-sdk/issues"
-	}
+	},
+	"private": true
 }

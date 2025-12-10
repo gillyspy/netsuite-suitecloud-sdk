@@ -10,6 +10,7 @@ import { DEVASSIST, FILES } from './ApplicationConstants';
 import AddDependencies from './commands/AddDependencies';
 import BaseAction from './commands/BaseAction';
 import CompareFile from './commands/CompareFile';
+import { createDevAssistApiKey } from './commands/CreateDevAssistApiKey';
 import CreateFile from './commands/CreateFile';
 import CreateProject from './commands/CreateProject';
 import Deploy from './commands/Deploy';
@@ -26,9 +27,10 @@ import Validate from './commands/Validate';
 import { installIfNeeded } from './core/sdksetup/SdkServices';
 import { EXTENSION_INSTALLATION } from './service/TranslationKeys';
 import { VSTranslationService } from './service/VSTranslationService';
-import { devAssistConfigurationChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
+import { devAssistConfigurationChangeHandler, devAssistSecretApiKeyChangeHandler, startDevAssistProxyIfEnabled } from './startup/DevAssistConfiguration';
 import { showSetupAccountWarningMessageIfNeeded } from './startup/ShowSetupAccountWarning';
 import { createAuthIDStatusBar, createDevAssistStatusBar, createSuiteCloudProjectStatusBar, updateAuthIDStatusBarIfNeeded, updateStatusBars } from './startup/StatusBarItemsFunctions';
+import { openDevAssistFeedbackForm } from './webviews/FeedbackFormWebviewController';
 
 
 const SCLOUD_OUTPUT_CHANNEL_NAME = 'SuiteCloud';
@@ -54,7 +56,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	installIfNeeded().then(() => {
 		sdkDependenciesDownloadedAndValidated = true;
 		showSetupAccountWarningMessageIfNeeded();
-		startDevAssistProxyIfEnabled(devAssistStatusBar)
+		startDevAssistProxyIfEnabled(context, devAssistStatusBar)
 	});
 
 	// initialize status bars
@@ -82,16 +84,26 @@ export async function activate(context: vscode.ExtensionContext) {
 		register('suitecloud.validate', new Validate())
 	);
 
-	// this command is used to open devAssist settings by clicking on devAssistStatusBar
-	context.subscriptions.push(vscode.commands.registerCommand('suitecloud.opensettings',
-		() => vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', DEVASSIST.CONFIG_KEYS.devAssistSection))
+	// register more commands
+	context.subscriptions.push(
+		// this command is used to open devAssist settings by clicking on devAssistStatusBar
+		vscode.commands.registerCommand('suitecloud.opensettings',
+			() => vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', DEVASSIST.CONFIG_KEYS.devAssistSection)),
+		// DevAssist Feedback Form WebView
+		vscode.commands.registerCommand('suitecloud.opendevassistfeedbackform',
+			() => openDevAssistFeedbackForm(context)),
+		// Command to create and store Developer Assistant service API Key
+		vscode.commands.registerCommand('suitecloud.createdevassistapikey',
+			() => createDevAssistApiKey(context)
+		)
 	);
 
 	// add watchers needed to update the status bars
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor((textEditor) => updateStatusBars(textEditor, suitecloudProjectStatusBar, authIDStatusBar)),
 		vscode.workspace.createFileSystemWatcher(`**/${FILES.PROJECT_JSON}`).onDidChange((uri) => updateAuthIDStatusBarIfNeeded(uri, authIDStatusBar)),
-		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent, devAssistStatusBar)))
+		vscode.workspace.onDidChangeConfiguration((configurationChangeEvent => devAssistConfigurationChangeHandler(configurationChangeEvent, context, devAssistStatusBar))),
+		context.secrets.onDidChange((secretChangeEvent: vscode.SecretStorageChangeEvent) => devAssistSecretApiKeyChangeHandler(secretChangeEvent, context, devAssistStatusBar))
 	);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)

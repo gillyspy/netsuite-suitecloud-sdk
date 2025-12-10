@@ -39,9 +39,10 @@ export interface ExecutionEnvironmentContextConstructor {
 
 export interface SuiteCloudAuthProxyServiceInstance extends EventEmitter {
 	start(authId: string, localProxyPort: number): Promise<void>;
-	stop(): void;
-	reloadAccessToken(): Promise<void>
+	stop(): Promise<void>;
+	reloadAccessToken(): Promise<void>;
+	updateApiKey(newApiKey?: string): void;
 }
 export interface SuiteCloudAuthProxyServiceConstructor {
-	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInstance): SuiteCloudAuthProxyServiceInstance;
+	new(sdkPath: string, executionEnvironmentContext: ExecutionEnvironmentContextInstance, allowedPathPrefix?: string, apiKey?: string): SuiteCloudAuthProxyServiceInstance;
 }
