@@ -492,6 +492,8 @@ declare module '@uif-js/component' {
 
 		export import WeekTimeView = Self.AgendaWeekTimeView;
 
+		export import AgendaEvent = Self.AgendaEvent;
+
 	}
 
 	namespace AgendaConstant {
@@ -911,13 +913,17 @@ declare module '@uif-js/component' {
 
 		icon: (object | globalThis.Array<any> | string | PackageCore.ImageMetadata | PackageCore.Component | PackageCore.JSX.Element);
 
-		actions: globalThis.Array<Self.ApplicationHeader.ActionDefinition>;
+		actions: (Self.ApplicationHeader.ActionGroup | globalThis.Array<Self.ApplicationHeader.ActionGroup>);
 
 		links: globalThis.Array<Self.ApplicationHeader.LinkDefinition>;
 
 		tools: (PackageCore.Component | PackageCore.JSX.Element);
 
 		outerGap: Self.ApplicationHeader.GapSize;
+
+		titlePanelCollapsible: boolean;
+
+		titlePanelCollapsed: boolean;
 
 		setTitle(title: (string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element)): void;
 
@@ -969,6 +975,8 @@ declare module '@uif-js/component' {
 
 		}
 
+		type ActionGroup = globalThis.Array<(Self.ApplicationHeader.ActionDefinition | PackageCore.JSX.Element)>;
+
 		interface GapSizeObject {
 			top?: Self.ApplicationHeader.GapSize;
 
@@ -985,7 +993,7 @@ declare module '@uif-js/component' {
 		}
 
 		interface Options extends PackageCore.Component.Options {
-			actions?: globalThis.Array<Self.ApplicationHeader.ActionDefinition>;
+			actions?: (Self.ApplicationHeader.ActionGroup | globalThis.Array<Self.ApplicationHeader.ActionGroup>);
 
 			icon?: (object | globalThis.Array<any> | string | PackageCore.ImageMetadata | PackageCore.Component | PackageCore.JSX.Element);
 
@@ -1000,6 +1008,10 @@ declare module '@uif-js/component' {
 			tools?: (PackageCore.Component | PackageCore.JSX.Element);
 
 			outerGap?: (Self.ApplicationHeader.GapSize | Self.ApplicationHeader.GapSizeObject);
+
+			titlePanelCollapsible?: boolean;
+
+			titlePanelCollapsed?: boolean;
 
 		}
 
@@ -1164,7 +1176,7 @@ declare module '@uif-js/component' {
 		interface Options extends PackageCore.Component.Options {
 			children?: PackageCore.VDom.Children;
 
-			content: (PackageCore.Component | PackageCore.JSX.Element);
+			content?: (PackageCore.Component | PackageCore.JSX.Element);
 
 			title?: (string | number | PackageCore.Translation);
 
@@ -1173,8 +1185,6 @@ declare module '@uif-js/component' {
 			color?: Self.Banner.Color;
 
 			showControls?: boolean;
-
-			centerImage?: boolean;
 
 			button?: Self.Button.Options;
 
@@ -1185,11 +1195,9 @@ declare module '@uif-js/component' {
 		}
 
 		enum Color {
-			NEUTRAL,
 			BLUE,
-			PURPLE,
-			TURQUOISE,
-			PINK,
+			BLUE_DARK,
+			GREEN,
 			ORANGE,
 		}
 
@@ -1204,6 +1212,8 @@ declare module '@uif-js/component' {
 		constructor(options?: Self.BannerMessage.Options);
 
 		type: Self.BannerMessage.Type;
+
+		icon: Self.Image.Source;
 
 		layout: Self.BannerMessage.Layout;
 
@@ -1232,6 +1242,8 @@ declare module '@uif-js/component' {
 			showCloseButton?: boolean;
 
 			title?: (string | PackageCore.Translation);
+
+			icon?: Self.Image.Source;
 
 			type?: Self.BannerMessage.Type;
 
@@ -1306,6 +1318,25 @@ declare module '@uif-js/component' {
 
 	namespace BlankPortlet {
 		interface Options extends PackageCore.Component.Options {
+		}
+
+	}
+
+	export class BloomPanel extends PackageCore.Component {
+		constructor(options?: Self.BloomPanel.Options);
+
+		active: boolean;
+
+		content: any;
+
+		children: PackageCore.VDom.Children;
+
+	}
+
+	export namespace BloomPanel {
+		interface Options extends PackageCore.Component.Options {
+			active?: boolean;
+
 		}
 
 	}
@@ -1504,6 +1535,10 @@ declare module '@uif-js/component' {
 	export class Button extends PackageCore.Component {
 		constructor(options?: Self.Button.Options);
 
+		startIcon: (PackageCore.ImageMetadata | null);
+
+		endIcon: (PackageCore.ImageMetadata | null);
+
 		action: Self.Button.ActionCallback;
 
 		label: (null | string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
@@ -1529,6 +1564,12 @@ declare module '@uif-js/component' {
 		hasBadge: boolean;
 
 		badge: (boolean | string | number | PackageCore.Translation | Self.Button.BadgeDefinition);
+
+		nativeType: Self.Button.NativeType;
+
+		onToggled: Self.Button.ToggledCallback;
+
+		bloom: boolean;
 
 		setLabel(label: (null | string | number | PackageCore.Translation | PackageCore.Component)): void;
 
@@ -1575,6 +1616,10 @@ declare module '@uif-js/component' {
 
 			icon?: Self.Image.Source;
 
+			startIcon?: Self.Image.Source;
+
+			endIcon?: Self.Image.Source;
+
 			iconPosition?: Self.Button.IconPosition;
 
 			label?: (null | string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
@@ -1584,6 +1629,10 @@ declare module '@uif-js/component' {
 			toggled?: boolean;
 
 			type?: Self.Button.Type;
+
+			nativeType?: Self.Button.NativeType;
+
+			onToggled?: Self.Button.ToggledCallback;
 
 		}
 
@@ -1605,6 +1654,15 @@ declare module '@uif-js/component' {
 
 		}
 
+		type ToggledCallback = (args: Self.Button.ToggledArgs, sender: Self.Button) => void;
+
+		interface ToggledArgs {
+			toggled: boolean;
+
+			reason: string;
+
+		}
+
 		interface ToggleButtonOptions extends Self.Button.Options {
 		}
 
@@ -1620,6 +1678,7 @@ declare module '@uif-js/component' {
 			RIGHT,
 			ABOVE,
 			BELOW,
+			HORIZONTAL,
 		}
 
 		enum Type {
@@ -1636,6 +1695,12 @@ declare module '@uif-js/component' {
 			DEFAULT,
 			GHOST,
 			PURE,
+		}
+
+		enum NativeType {
+			BUTTON,
+			SUBMIT,
+			RESET,
 		}
 
 		enum Hierarchy {
@@ -2410,9 +2475,9 @@ declare module '@uif-js/component' {
 		 */
 		static defaultDecorator(options?: PackageCore.Decorator.Options): PackageCore.Decorator;
 
-		static metric(title: (string | number | PackageCore.Translation), metric: (string | number | PackageCore.Translation), metadata?: (string | number | PackageCore.Translation), description?: (string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element), toolbar?: (PackageCore.Component | PackageCore.JSX.Element | globalThis.Array<(PackageCore.Component | PackageCore.JSX.Element)>), action?: () => void, cardOptions?: Self.Card.Options): Self.Card;
+		static metric(options: {title: (string | number | PackageCore.Translation); metric: (string | number | PackageCore.Translation); metadata?: (string | number | PackageCore.Translation); description?: (string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element); toolbar?: (PackageCore.Component | PackageCore.JSX.Element | globalThis.Array<(PackageCore.Component | PackageCore.JSX.Element)>); action?: () => void; cardOptions?: Self.Card.Options}): Self.Card;
 
-		static Metric(title: (string | number | PackageCore.Translation), metric: (string | number | PackageCore.Translation), metadata?: (string | number | PackageCore.Translation), children?: PackageCore.VDom.Children, toolbar?: (PackageCore.Component | PackageCore.JSX.Element | globalThis.Array<(PackageCore.Component | PackageCore.JSX.Element)>), action?: () => void, cardOptions?: Self.Card.Options): PackageCore.JSX.Element;
+		static Metric(props: {title: (string | number | PackageCore.Translation); metric: (string | number | PackageCore.Translation); metadata?: (string | number | PackageCore.Translation); children?: PackageCore.VDom.Children; toolbar?: (PackageCore.Component | PackageCore.JSX.Element | globalThis.Array<(PackageCore.Component | PackageCore.JSX.Element)>); action?: () => void; cardOptions?: Self.Card.Options}): PackageCore.JSX.Element;
 
 	}
 
@@ -2473,6 +2538,145 @@ declare module '@uif-js/component' {
 			HORIZONTAL,
 		}
 
+	}
+
+	export class Carousel extends PackageCore.Component {
+		constructor(options?: Self.Carousel.Options);
+
+		autoplay: boolean;
+
+		delimiterIcon: Self.Carousel.DelimiterIcon;
+
+		delimiterSize: Self.Carousel.DelimiterSize;
+
+		interval: number;
+
+		currentIndex: number;
+
+		isPlaying: boolean;
+
+		delimiterBackgroundTransparency: Self.Carousel.DelimiterBackgroundTransparency;
+
+		showArrows: Self.Carousel.ShowArrows;
+
+		showControlButton: Self.Carousel.ShowControlButton;
+
+		buttonsType: Self.Carousel.ButtonsType;
+
+		items: globalThis.Array<any>;
+
+		showDelimiters: boolean;
+
+		children: PackageCore.VDom.Children;
+
+		animation: Self.Carousel.Animation;
+
+		infinite: boolean;
+
+		private renderItems(): void;
+
+		private renderItem(): void;
+
+		static getStyles(): void;
+
+	}
+
+	export namespace Carousel {
+		interface Options extends PackageCore.Component.Options {
+			children?: PackageCore.VDom.Children;
+
+			autoplay?: boolean;
+
+			delimiterIcon?: Self.Carousel.DelimiterIcon;
+
+			delimiterSize?: Self.Carousel.DelimiterSize;
+
+			delimiterBackgroundTransparency?: Self.Carousel.DelimiterBackgroundTransparency;
+
+			showDelimiters?: Self.Carousel.ShowDelimiters;
+
+			interval?: number;
+
+			showArrows?: Self.Carousel.ShowArrows;
+
+			showControlButton?: Self.Carousel.ShowControlButton;
+
+			buttonType?: Self.Carousel.ButtonsType;
+
+			animation?: Self.Carousel.Animation;
+
+			infinite?: boolean;
+
+		}
+
+		export import DelimiterIcon = Self.DelimiterConstant.Icon;
+
+		export import DelimiterSize = Self.DelimiterConstant.Size;
+
+		export import DelimiterBackgroundTransparency = Self.CarouselConstants.BackgroundTransparency;
+
+		export import ShowArrows = Self.CarouselConstants.ShowArrows;
+
+		export import ShowControlButton = Self.CarouselConstants.ShowArrows;
+
+		export import ShowDelimiters = Self.CarouselConstants.ShowArrows;
+
+		export import ButtonsType = Self.CarouselConstants.ButtonsType;
+
+		export import Animation = Self.CarouselConstants.Animation;
+
+		export import ButtonName = Self.CarouselConstants.ButtonName;
+
+		export import I18N = Self.CarouselConstants.I18n;
+
+	}
+
+	namespace CarouselConstants {
+		enum BackgroundTransparency {
+			FULL,
+			HIGH,
+			MEDIUM,
+			LOW,
+		}
+
+		enum ShowArrows {
+			ALWAYS,
+			HOVER,
+			HIDDEN,
+		}
+
+		enum ButtonsType {
+			DEFAULT,
+			EMBEDDED,
+		}
+
+		enum Animation {
+			NONE,
+			SLIDE,
+			FADE,
+		}
+
+		enum ButtonName {
+			PREVIOUS,
+			NEXT,
+			AUTOPLAY,
+		}
+
+		enum I18n {
+			GO_PREVIOUS,
+			GO_NEXT,
+			START_PLAY,
+			PAUSE_PLAY,
+		}
+
+	}
+
+	export class CarouselItem {
+		static JsxComponent(props?: {children?: PackageCore.VDom.Children; currentIndex?: any; key?: any; animation?: Self.CarouselConstants.Animation}): PackageCore.JSX.Element;
+
+	}
+
+	export namespace CarouselItem {
 	}
 
 	export class CellField extends PackageCore.Component {
@@ -2891,6 +3095,10 @@ declare module '@uif-js/component' {
 
 		}
 
+		export import Group = Self.CheckBoxGroup;
+
+		export import Direction = Self.CheckBoxGroup.Direction;
+
 		enum VisualStyle {
 			CHECK,
 		}
@@ -2935,6 +3143,36 @@ declare module '@uif-js/component' {
 		}
 
 		export import Cell = Self.CheckBoxCell;
+
+	}
+
+	export class CheckBoxGroup extends PackageCore.Component {
+		constructor(options?: Self.CheckBoxGroup.Options);
+
+		content: PackageCore.Component;
+
+		setContent(content: PackageCore.Component): void;
+
+		children: PackageCore.VDom.Children;
+
+		static getStyles(): void;
+
+	}
+
+	export namespace CheckBoxGroup {
+		interface Options extends PackageCore.Component.Options {
+			content?: PackageCore.Component;
+
+			legend?: string;
+
+			direction?: Self.CheckBoxGroup.Direction;
+
+		}
+
+		enum Direction {
+			COLUMN,
+			ROW,
+		}
 
 	}
 
@@ -3602,6 +3840,11 @@ declare module '@uif-js/component' {
 			TEXT_BOX,
 		}
 
+		enum VisualStyle {
+			DEFAULT,
+			REDWOOD_FIELD,
+		}
+
 		export import Palette = Self.ColorPalette.Palette;
 
 		enum I18N {
@@ -3922,7 +4165,35 @@ declare module '@uif-js/component' {
 	}
 
 	export namespace Dashboard {
+		type LayoutResponsive = Record<Self.Dashboard.Breakpoint, Self.Dashboard.LayoutItem>;
+
+		interface LayoutItem {
+			id: any;
+
+			width: (number | Self.Dashboard.LayoutResponsiveSize);
+
+			height: (number | Self.Dashboard.LayoutResponsiveSize);
+
+		}
+
+		type LayoutResponsiveSize = Record<Self.Dashboard.Breakpoint, number>;
+
+		type LayoutFunction = (width: Self.Dashboard.Breakpoint) => globalThis.Array<Self.Dashboard.LayoutItem>;
+
+		interface Portlet {
+			id: any;
+
+			type: any;
+
+			content: any;
+
+		}
+
 		interface Options extends PackageCore.Component.Options {
+			layout: (globalThis.Array<Self.Dashboard.LayoutItem> | Self.Dashboard.LayoutResponsive | Self.Dashboard.LayoutFunction);
+
+			portlets: globalThis.Array<Self.Dashboard.Portlet>;
+
 		}
 
 		export import Breakpoint = Self.ResponsivePanel.Breakpoint;
@@ -4028,6 +4299,10 @@ declare module '@uif-js/component' {
 
 		cursorVisibility: Self.DataGrid.CursorVisibility;
 
+		bodyViewportSize: PackageCore.Scrollable.Size;
+
+		bodyContentSize: PackageCore.Scrollable.Size;
+
 		scrollOffset: {x: number; y: number};
 
 		scrollability: PackageCore.Scrollable.Scrollability;
@@ -4046,7 +4321,7 @@ declare module '@uif-js/component' {
 
 		clearColumns(): void;
 
-		setColumns(columns: (globalThis.Array<Self.GridColumn> | {left: globalThis.Array<Self.GridColumn>; body: globalThis.Array<Self.GridColumn>; right: globalThis.Array<Self.GridColumn>})): void;
+		setColumns(columns: Self.DataGrid.ColumnConfiguration): void;
 
 		setEditable(value: boolean): void;
 
@@ -4209,7 +4484,7 @@ declare module '@uif-js/component' {
 
 			columnReorder?: boolean;
 
-			columns?: (globalThis.Array<Self.DataGrid.ColumnDefinition> | {left: globalThis.Array<Self.DataGrid.ColumnDefinition>; body: globalThis.Array<Self.DataGrid.ColumnDefinition>; right: globalThis.Array<Self.DataGrid.ColumnDefinition>});
+			columns?: Self.DataGrid.ColumnConfiguration;
 
 			columnStretch?: boolean;
 
@@ -4292,6 +4567,8 @@ declare module '@uif-js/component' {
 			onSort?: Self.DataGrid.SortCallback;
 
 		}
+
+		type ColumnConfiguration = (globalThis.Array<Self.DataGrid.ColumnDefinition> | {left: globalThis.Array<Self.DataGrid.ColumnDefinition>; body: globalThis.Array<Self.DataGrid.ColumnDefinition>; right: globalThis.Array<Self.DataGrid.ColumnDefinition>});
 
 		type SortCallback = (args: Self.DataGrid.SortArgs, sender: Self.DataGrid) => void;
 
@@ -4531,9 +4808,9 @@ declare module '@uif-js/component' {
 
 		protected _onDataAccessFinished(): void;
 
-		static getValueMember(dataItem: object, valueMember: (Self.DataSourceComponent.ValueMemberCallback | string)): any;
+		static getValueMember(dataItem: object, valueMember: Self.DataSourceComponent.ValueMember): any;
 
-		static getDisplayMember(dataItem: object, displayMember: (Self.DataSourceComponent.DisplayMemberCallback | string)): (PackageCore.Translation | string);
+		static getDisplayMember(dataItem: object, displayMember: Self.DataSourceComponent.DisplayMember): (PackageCore.Translation | string);
 
 		static Event: Self.DataSourceComponent.EventTypes;
 
@@ -4559,6 +4836,10 @@ declare module '@uif-js/component' {
 			DATA_ACCESS_FINISHED: string;
 
 		}
+
+		type DisplayMember = (string | Self.DataSourceComponent.DisplayMemberCallback);
+
+		type ValueMember = (string | Self.DataSourceComponent.ValueMemberCallback);
 
 		type DisplayMemberCallback = (dataItem: any) => any;
 
@@ -4951,6 +5232,64 @@ declare module '@uif-js/component' {
 
 	}
 
+	export class Delimiter extends PackageCore.Component {
+		constructor(options?: Self.Delimiter.Options);
+
+		icon: Self.Delimiter.Icon;
+
+		size: Self.Delimiter.Size;
+
+		selected: boolean;
+
+		onClick: Function;
+
+		index: number;
+
+		static getStyles(): void;
+
+	}
+
+	export namespace Delimiter {
+		interface Options extends PackageCore.Component.Options {
+			icon?: Self.Delimiter.Icon;
+
+			size?: Self.Delimiter.Size;
+
+			selected?: boolean;
+
+			onClick: Function;
+
+			index?: number;
+
+		}
+
+		export import Icon = Self.DelimiterConstant.Icon;
+
+		export import Size = Self.DelimiterConstant.Size;
+
+		export import I18n = Self.DelimiterConstant.I18n;
+
+	}
+
+	namespace DelimiterConstant {
+		enum Icon {
+			CIRCLE,
+			SQUARE,
+			LINE,
+		}
+
+		enum Size {
+			SMALL,
+			MEDIUM,
+			LARGE,
+		}
+
+		enum I18n {
+			GO_TO,
+		}
+
+	}
+
 	function DeprecationPanel(props: {classList: (string | PackageCore.Style | globalThis.Array<string> | globalThis.Array<PackageCore.Style>); children: PackageCore.VDom.Children}): PackageCore.JSX.Element;
 
 	export class Divider extends PackageCore.Component {
@@ -5072,7 +5411,7 @@ declare module '@uif-js/component' {
 
 			comparator?: Self.Dropdown.ComparatorCallback;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
 			filterable?: boolean;
 
@@ -5092,7 +5431,7 @@ declare module '@uif-js/component' {
 
 			showLoaderOnDataAccess?: boolean;
 
-			valueMember?: (string | Self.DataSourceComponent.ValueMemberCallback);
+			valueMember?: Self.DataSourceComponent.ValueMember;
 
 			mandatory?: boolean;
 
@@ -5151,6 +5490,7 @@ declare module '@uif-js/component' {
 		enum VisualStyle {
 			DEFAULT,
 			EMBEDDED,
+			REDWOOD_FIELD,
 		}
 
 		enum Reason {
@@ -5183,13 +5523,13 @@ declare module '@uif-js/component' {
 
 		dataSource: PackageCore.DataSource;
 
-		displayMember: (string | Self.DataSourceComponent.DisplayMemberCallback);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
-		valueMember: (string | Self.DataSourceComponent.ValueMemberCallback);
+		valueMember: (Self.DataSourceComponent.ValueMember | null);
 
 		bindToValue: boolean;
 
-		valueDisplayMember: (string | Self.DataSourceComponent.DisplayMemberCallback);
+		valueDisplayMember: Self.DataSourceComponent.DisplayMember;
 
 		dropdown: (Self.Dropdown | null);
 
@@ -5207,13 +5547,13 @@ declare module '@uif-js/component' {
 
 		dataSource: (PackageCore.DataSource | null);
 
-		displayMember: (string | Self.DataSourceComponent.DisplayMemberCallback | null);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
-		valueMember: (string | Self.DataSourceComponent.ValueMemberCallback | null);
+		valueMember: (Self.DataSourceComponent.ValueMember | null);
 
 		bindToValue: boolean;
 
-		valueDisplayMember: (string | Self.DataSourceComponent.DisplayMemberCallback | null);
+		valueDisplayMember: (Self.DataSourceComponent.DisplayMember | null);
 
 		widgetOptions: (Self.Dropdown.Options | Self.GridColumn.WidgetOptionsCallback<Self.Dropdown.Options> | null);
 
@@ -5223,13 +5563,13 @@ declare module '@uif-js/component' {
 		interface Options extends Self.GridColumn.Options {
 			dataSource?: PackageCore.DataSource;
 
-			valueMember?: (string | Self.DataSourceComponent.ValueMemberCallback);
+			valueMember?: Self.DataSourceComponent.ValueMember;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
 			bindToValue?: boolean;
 
-			valueDisplayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			valueDisplayMember?: Self.DataSourceComponent.DisplayMember;
 
 			widgetOptions?: (Self.Dropdown.Options | Self.GridColumn.WidgetOptionsCallback<Self.Dropdown.Options>);
 
@@ -5398,6 +5738,8 @@ declare module '@uif-js/component' {
 
 		fieldLevelHelp: (Self.Field.FieldLevelHelpCallback | Self.HelpService.FieldLevelHelpOptions);
 
+		bloom: boolean;
+
 		setInline(value: boolean): void;
 
 		setLabel(value: (string | number | PackageCore.Translation)): void;
@@ -5496,6 +5838,8 @@ declare module '@uif-js/component' {
 
 			inline?: boolean;
 
+			bloom?: boolean;
+
 		}
 
 		interface EventTypes extends PackageCore.Component.EventTypes {
@@ -5547,11 +5891,15 @@ declare module '@uif-js/component' {
 
 		title: (string | number | PackageCore.Translation | null);
 
+		titleControls: ((PackageCore.Component | PackageCore.VDom.Element) | globalThis.Array<(PackageCore.Component | PackageCore.JSX.Element)> | null);
+
 		color: Self.FieldGroup.Color;
 
 		collapsed: boolean;
 
 		collapsible: boolean;
+
+		onExpanded: Self.FieldGroup.ExpandedCallback;
 
 	}
 
@@ -5561,11 +5909,22 @@ declare module '@uif-js/component' {
 
 			title: (string | number | PackageCore.Translation);
 
+			titleControls?: ((PackageCore.Component | PackageCore.VDom.Element) | globalThis.Array<(PackageCore.Component | PackageCore.VDom.Element)>);
+
 			color?: Self.FieldGroup.Color;
 
 			collapsible?: boolean;
 
 			collapsed?: boolean;
+
+			onExpanded?: Self.FieldGroup.ExpandedCallback;
+
+		}
+
+		type ExpandedCallback = (args: Self.FieldGroup.ExpandedCallbackArgs) => void;
+
+		interface ExpandedCallbackArgs {
+			expanded: boolean;
 
 		}
 
@@ -5574,6 +5933,9 @@ declare module '@uif-js/component' {
 			NEUTRAL,
 		}
 
+	}
+
+	namespace FieldOptions {
 	}
 
 	export class FilePicker extends PackageCore.Component implements PackageCore.InputComponent {
@@ -5751,9 +6113,11 @@ declare module '@uif-js/component' {
 
 		selectedValue: any;
 
-		label: (string | PackageCore.Component | PackageCore.Translation);
+		acceptedValue: any;
 
-		valueFormatter: Self.FilterChip.ValueFormatterCallback;
+		label: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+		valueFormatter: (Self.FilterChip.ValueFormatterCallback | string);
 
 		valueComparator: Self.FilterChip.ValueComparatorCallback;
 
@@ -5783,17 +6147,17 @@ declare module '@uif-js/component' {
 
 		togglePicker(args?: object): void;
 
-		private createValuePanel(): PackageCore.JSX.Element;
+		private renderValuePanel(): PackageCore.JSX.Element;
 
-		private createSeparator(): PackageCore.JSX.Element;
+		private renderSeparator(): PackageCore.JSX.Element;
 
-		private createValue(selectedValue: any): (PackageCore.Component | PackageCore.JSX.Element);
+		private renderValue(selectedValue: any): (PackageCore.Component | PackageCore.JSX.Element);
 
-		private createValueFromString(text: string): PackageCore.JSX.Element;
+		private renderValueFromString(text: string): PackageCore.JSX.Element;
 
-		private createClearButton(): PackageCore.JSX.Element;
+		private renderClearButton(): PackageCore.JSX.Element;
 
-		private createLabel(): PackageCore.JSX.Element;
+		private renderLabel(): PackageCore.JSX.Element;
 
 		private createPicker(definition: Self.FilterChip.PickerCallback): Self.Picker;
 
@@ -5805,47 +6169,51 @@ declare module '@uif-js/component' {
 
 		private handlePickerUpdated(): void;
 
-		private isActivated(selectedValue: any): boolean;
+		private isActivated(): boolean;
 
 		static defaultValueComparator(selectedValue: any, emptyValue: any, filterChip: Self.FilterChip): boolean;
 
-		static defaultPicker(options: object): Self.FilterChip.PickerCallback;
+		static defaultPicker(options: Self.FilterChipPicker.Options): Self.FilterChip.PickerCallback;
 
-		static singlePicker(options: object): Self.FilterChip.PickerCallback;
+		static singlePicker(options: Self.RadioGroupPicker.Options): Self.FilterChip.PickerCallback;
 
 		static defaultValueFormatter(options?: Self.FilterChip.DefaultValueFormatterOptions): Self.FilterChip.ValueFormatterCallback;
 
-		static default(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions: object, valueFormatterOptions?: object): Self.FilterChip;
+		static Custom(props: Self.FilterChip.Options): PackageCore.JSX.Element;
 
-		static Default(props: Self.FilterChip.FactoryOptions & {pickerOptions?: object; valueFormatterOptions?: object}): PackageCore.JSX.Element;
+		static default(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions: Self.FilterChipPicker.Options, valueFormatterOptions?: Self.FilterChip.DefaultValueFormatterOptions): Self.FilterChip;
 
-		static single(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions: object, valueFormatterOptions?: object): Self.FilterChip;
+		static Default(props: Self.FilterChip.FactoryOptions & {pickerOptions?: Self.FilterChipPicker.Options; valueFormatterOptions?: Self.FilterChip.DefaultValueFormatterOptions}): PackageCore.JSX.Element;
 
-		static Single(props: Self.FilterChip.FactoryOptions & {pickerOptions?: object; valueFormatterOptions?: object}): PackageCore.JSX.Element;
+		static single(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions: Self.RadioGroupPicker.Options, valueFormatterOptions?: Self.FilterChip.DefaultValueFormatterOptions): Self.FilterChip;
 
-		static datePicker(options?: object): Self.FilterChip.PickerCallback;
+		static Single(props: Self.FilterChip.FactoryOptions & {pickerOptions?: Self.RadioGroupPicker.Options; valueFormatterOptions?: Self.FilterChip.DefaultValueFormatterOptions}): PackageCore.JSX.Element;
+
+		static Multi(props: Self.FilterChip.FactoryOptions & {pickerOptions?: Self.FilterChipPicker.Options; valueFormatterOptions?: Self.FilterChip.DefaultValueFormatterOptions}): PackageCore.JSX.Element;
+
+		static datePicker(options?: Self.CalendarPicker.Options): Self.FilterChip.PickerCallback;
 
 		static dateValueFormatter(formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip.ValueFormatterCallback;
 
-		static date(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions?: object, formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip;
+		static date(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions?: Self.CalendarPicker.Options, formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip;
 
-		static Date(props: Self.FilterChip.FactoryOptions & {pickerOptions?: object; formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)}): PackageCore.JSX.Element;
+		static Date(props: Self.FilterChip.FactoryOptions & {pickerOptions?: Self.CalendarPicker.Options; formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)}): PackageCore.JSX.Element;
 
-		static dateRangePicker(options?: object): Self.FilterChip.PickerCallback;
+		static dateRangePicker(options?: Self.DateRangePicker.Options): Self.FilterChip.PickerCallback;
 
 		static dateRangeValueFormatter(formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip.ValueFormatterCallback;
 
-		static dateRange(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions?: object, formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip;
+		static dateRange(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions?: Self.DateRangePicker.Options, formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip;
 
-		static DateRange(props: Self.FilterChip.FactoryOptions & {pickerOptions?: object; formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)}): PackageCore.JSX.Element;
+		static DateRange(props: Self.FilterChip.FactoryOptions & {pickerOptions?: Self.DateRangePicker.Options; formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)}): PackageCore.JSX.Element;
 
-		static timePicker(options?: object): Self.FilterChip.PickerCallback;
+		static timePicker(options?: Self.TimeSelectorPicker.Options): Self.FilterChip.PickerCallback;
 
 		static timeValueFormatter(formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip.ValueFormatterCallback;
 
-		static time(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions?: object, formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip;
+		static time(filterChipOptions: Self.FilterChip.FactoryOptions, pickerOptions?: Self.TimeSelectorPicker.Options, formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)): Self.FilterChip;
 
-		static Time(props: Self.FilterChip.FactoryOptions & {pickerOptions?: object; formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)}): PackageCore.JSX.Element;
+		static Time(props: Self.FilterChip.FactoryOptions & {pickerOptions?: Self.TimeSelectorPicker.Options; formatOrFormatter?: (string | Self.FilterChip.FormatterCallback)}): PackageCore.JSX.Element;
 
 		static timeRangePicker(options?: object): Self.FilterChip.PickerCallback;
 
@@ -5886,7 +6254,7 @@ declare module '@uif-js/component' {
 
 		type PickerCallback = (filterChip: Self.FilterChip) => Self.Picker;
 
-		type ValueFormatterCallback = (selectedValue: any, filterChip: Self.FilterChip) => (string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+		type ValueFormatterCallback = (selectedValue: any, filterChip: Self.FilterChip) => globalThis.Promise<(string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element)>;
 
 		type FormatterCallback = (value: any, filterChip: Self.FilterChip, formatService: PackageCore.FormatService) => (string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
 
@@ -5895,7 +6263,7 @@ declare module '@uif-js/component' {
 
 			valueComparator?: Self.FilterChip.ValueComparatorCallback;
 
-			label: (string | PackageCore.Component | PackageCore.Translation);
+			label: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
 
 			picker: Self.FilterChip.PickerCallback;
 
@@ -5968,7 +6336,9 @@ declare module '@uif-js/component' {
 		}
 
 		interface DefaultValueFormatterOptions {
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
+
+			valueMember?: Self.DataSourceComponent.ValueMember;
 
 		}
 
@@ -5992,8 +6362,8 @@ declare module '@uif-js/component' {
 		}
 
 		enum I18n {
-			CLEAR_FILTER,
 			ALL,
+			CLEAR_FILTER,
 			CHECKBOX_YES,
 			CHECKBOX_NO,
 		}
@@ -6003,13 +6373,15 @@ declare module '@uif-js/component' {
 	export class FilterChipPicker extends Self.Picker {
 		constructor(options: Self.FilterChipPicker.Options);
 
-		dataSource: PackageCore.DataSource;
+		dataSource: (PackageCore.DataSource | null);
 
 		listBox: Self.ListBox;
 
-		displayMember: (string | Self.DataSourceComponent.DisplayMemberCallback | null);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
-		searchMember: (string | Self.DataSourceComponent.ValueMemberCallback | null);
+		valueMember: (Self.DataSourceComponent.ValueMember | null);
+
+		searchMember: (Self.DataSourceComponent.ValueMember | null);
 
 		private handleSelectionChanged(args: Self.ListBox.SelectionChangedArgs): void;
 
@@ -6023,18 +6395,36 @@ declare module '@uif-js/component' {
 
 	export namespace FilterChipPicker {
 		interface Options extends Self.Picker.Options {
+			dataSource?: PackageCore.DataSource;
+
 			listBox?: Self.ListBox.Options;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
-			searchMember?: (string | Self.DataSourceComponent.ValueMemberCallback);
+			valueMember?: Self.DataSourceComponent.ValueMember;
+
+			searchMember?: Self.DataSourceComponent.ValueMember;
 
 			comparator?: (left: any, right: any) => boolean;
+
+			search?: (boolean | Self.FilterChipPicker.SearchSettings | Self.FilterChipPicker.SearchPredicate);
+
+		}
+
+		type SearchPredicate = (item: any, string: string) => boolean;
+
+		interface SearchSettings {
+			predicate?: Self.FilterChipPicker.SearchPredicate;
+
+			textBox?: Self.TextBox.Options;
 
 		}
 
 	}
 
+	/**
+	 * @deprecated Replaced by ListView.Filter JSX
+	 */
 	export namespace FilterFactory {
 		type FilterPredicateCallback = (item: any, value: any) => boolean;
 
@@ -6047,35 +6437,60 @@ declare module '@uif-js/component' {
 
 		}
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createCheckBoxFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); binding?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: boolean}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createToggleFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); binding?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: boolean}): Self.FilterFactory.Filter;
 
-		function createTextBoxFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); binding?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: string; matchingOperator?: Self.FilterFactoryConstant.TextBoxFilterMatchingOperator}): Self.FilterFactory.Filter;
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
+		function createTextBoxFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); binding?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: string; matchingOperator?: Self.FilterFactory.TextBoxMatchingOperator}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createDropdownFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); dataProvider: () => PackageCore.DataSource; valueMember: string; displayMember: string; binding?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: any}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createMultiselectDropdownFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); dataProvider: () => PackageCore.DataSource; valueMember: string; displayMember: string; binding?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: globalThis.Array<any>}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createDateFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); binding?: (string | ((item: any) => PackageCore.Date)); filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: PackageCore.Date}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createDateRangeFilter(options: {automationId?: string; id: string; label: (string | PackageCore.Translation); binding?: (string | ((item: any) => PackageCore.Date)); filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: Self.DateRange.Range}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createTimeFilter(options: {id: string; label: (string | PackageCore.Translation); binding?: (string | ((item: any) => PackageCore.Time)); format?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: PackageCore.Time}): Self.FilterFactory.Filter;
 
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
 		function createTimeRangeFilter(options: {id: string; label: (string | PackageCore.Translation); binding?: (string | ((item: any) => PackageCore.Time)); format?: string; filterPredicate?: Self.FilterFactory.FilterPredicateCallback; value?: {start: PackageCore.Time; end: PackageCore.Time}}): Self.FilterFactory.Filter;
 
-		function create(type: Self.FilterFactoryConstant.FilterType, options: object): Self.FilterFactory.Filter;
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
+		function create(type: Self.FilterFactory.Type, options: object): Self.FilterFactory.Filter;
 
-	}
-
-	export namespace FilterFactoryConstant {
-		enum FilteringAreaPlacement {
-			TOP,
-			SIDE,
-		}
-
-		enum FilterType {
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
+		enum Type {
 			TEXT_BOX,
 			DROPDOWN,
 			MULTISELECT_DROPDOWN,
@@ -6086,11 +6501,10 @@ declare module '@uif-js/component' {
 			TIME_RANGE,
 		}
 
-		enum TextBoxFilterMatchingOperator {
-			STARTS_WITH,
-			ENDS_WITH,
-			CONTAINS,
-		}
+		/**
+		 * @deprecated Replaced by ListView.Filter JSX
+		 */
+		export import TextBoxMatchingOperator = Self.ListViewConstant.TextBoxFilterMatchingOperator;
 
 	}
 
@@ -6099,19 +6513,49 @@ declare module '@uif-js/component' {
 
 		state: globalThis.Array<Self.FilterPanel.FilterState>;
 
+		/**
+		 * @deprecated
+		 */
 		filters: globalThis.Array<Self.FilterPanel.FilterDefinition>;
 
-		filtersVisibilityToggle: Self.Button;
+		activeFilters: globalThis.Array<Self.FilterPanel.FilterState>;
+
+		activeFiltersCount: number;
+
+		hasActiveFilters: boolean;
+
+		children: PackageCore.VDom.Children;
+
+		values: (Self.FilterPanel.FilterValueMap | null);
 
 		showClearAll: boolean;
 
 		orientation: Self.FilterPanel.Orientation;
+
+		filtersExpanded: boolean;
+
+		onFiltersChanged: (Self.FilterPanel.FiltersChangedCallback | null);
+
+		onFiltersExpanded: (Self.FilterPanel.FiltersExpandedCallback | null);
+
+		/**
+		 * @deprecated
+		 */
+		filtersVisibilityToggle: Self.FilterPanelToggle;
 
 		getState(): globalThis.Array<Self.FilterPanel.FilterState>;
 
 		getActiveFiltersCount(): number;
 
 		isAnyFilterActive(): boolean;
+
+		clearAllFilters(): void;
+
+		static Horizontal(props?: Self.FilterPanel.Options): PackageCore.JSX.Element;
+
+		static Vertical(props?: Self.FilterPanel.Options): PackageCore.JSX.Element;
+
+		static Item(props: Self.FilterPanel.ItemOptions): PackageCore.JSX.Element;
 
 		static Event: Self.FilterPanel.EventTypes;
 
@@ -6121,7 +6565,9 @@ declare module '@uif-js/component' {
 		interface Options extends PackageCore.Component.Options {
 			children?: PackageCore.VDom.Children;
 
-			filters: globalThis.Array<Self.FilterPanel.FilterDefinition>;
+			filters?: globalThis.Array<Self.FilterPanel.FilterDefinition>;
+
+			values?: Self.FilterPanel.FilterValueMap;
 
 			orientation?: Self.FilterPanel.Orientation;
 
@@ -6129,17 +6575,58 @@ declare module '@uif-js/component' {
 
 			horizontalExpansionEnabled?: boolean;
 
+			filtersExpanded?: boolean;
+
+			onFiltersChanged?: Self.FilterPanel.FiltersChangedCallback;
+
+			onFiltersExpanded?: Self.FilterPanel.FiltersExpandedCallback;
+
 		}
 
+		type FilterId = (string | number);
+
+		type FilterValueMap = Record<Self.FilterPanel.FilterId, any>;
+
 		interface FilterDefinition {
-			id: any;
+			id: Self.FilterPanel.FilterId;
 
 			filterChip: Self.FilterChip;
 
 		}
 
-		interface FilterState extends Self.FilterPanel.FilterDefinition {
+		interface FilterState {
+			id: Self.FilterPanel.FilterId;
+
+			activated: boolean;
+
 			value: any;
+
+		}
+
+		type FiltersChangedCallback = (args: Self.FilterPanel.FiltersChangedCallbackArgs) => void;
+
+		interface FiltersChangedCallbackArgs {
+			values: Self.FilterPanel.FilterValueMap;
+
+			previousValues: Self.FilterPanel.FilterValueMap;
+
+			changedFilters: Self.FilterPanel.FilterValueMap;
+
+		}
+
+		type FiltersExpandedCallback = (args: Self.FilterPanel.FiltersExpandedCallbackArgs) => void;
+
+		interface FiltersExpandedCallbackArgs {
+			expanded: boolean;
+
+		}
+
+		interface ItemOptions {
+			children?: PackageCore.VDom.Children;
+
+			id: Self.FilterPanel.FilterId;
+
+			key?: any;
 
 		}
 
@@ -6148,17 +6635,93 @@ declare module '@uif-js/component' {
 
 		}
 
+		export import Toggle = Self.FilterPanelToggle;
+
 		enum Reason {
-			VISIBILITY_CHANGED,
 			FILTER_VALUE_CHANGED,
 			CLEAR_ALL,
 			FILTERS_SETTER,
+			VISIBILITY_CHANGED,
 		}
 
 		enum Orientation {
 			VERTICAL,
 			HORIZONTAL,
 		}
+
+	}
+
+	class FilterPanelToggle extends PackageCore.Component {
+		constructor(options?: Self.FilterPanelToggle.Options);
+
+		toggled: boolean;
+
+		activeFiltersCount: number;
+
+		behavior: Self.Button.Behavior;
+
+		action: Self.Button.ActionCallback;
+
+		onToggled: (Self.FilterPanelToggle.ToggledCallback | null);
+
+	}
+
+	namespace FilterPanelToggle {
+		interface Options {
+			toggled?: boolean;
+
+			activeFiltersCount?: number;
+
+			FilterPanelToggle?: Self.Button.Behavior;
+
+			action?: Self.Button.ActionCallback;
+
+			onToggled?: Self.FilterPanelToggle.ToggledCallback;
+
+		}
+
+		type ToggledCallback = (args: Self.FilterPanelToggle.ToggledCallbackArgs, sender: Self.FilterPanelToggle) => void;
+
+		interface ToggledCallbackArgs {
+			toggled: boolean;
+
+		}
+
+		export import Behavior = Self.Button.Behavior;
+
+	}
+
+	class FilterPositionToggleGroup extends PackageCore.Component {
+		constructor(options?: Self.FilterPositionToggleGroup.Options);
+
+		filtersPosition: Self.FilterPositionToggleGroup.FiltersPosition;
+
+		activeFiltersCount: number;
+
+		onFiltersPositionChanged: Self.FilterPositionToggleGroup.FiltersPositionChangedCallback;
+
+	}
+
+	namespace FilterPositionToggleGroup {
+		interface Options {
+			filtersPosition?: Self.FilterPositionToggleGroup.FiltersPosition;
+
+			activeFiltersCount?: number;
+
+			onFiltersPositionChanged?: Self.FilterPositionToggleGroup.FiltersPositionChangedCallback;
+
+		}
+
+		type FiltersPositionChangedCallback = (args: Self.FilterPositionToggleGroup.FiltersPositionChangedCallbackArgs, sender: Self.FilterPositionToggleGroup) => void;
+
+		interface FiltersPositionChangedCallbackArgs {
+			position: Self.FilterPositionToggleGroup.FiltersPosition;
+
+			previousPosition: Self.FilterPositionToggleGroup.FiltersPosition;
+
+		}
+
+		export import FiltersPosition = Self.ListViewConstant.FiltersPosition;
 
 	}
 
@@ -7261,6 +7824,18 @@ declare module '@uif-js/component' {
 		XXL,
 		XXXL,
 		XXXXL,
+		SPACING1X,
+		SPACING2X,
+		SPACING3X,
+		SPACING4X,
+		SPACING5X,
+		SPACING6X,
+		SPACING7X,
+		SPACING8X,
+		SPACING9X,
+		SPACING10X,
+		SPACING11X,
+		SPACING12X,
 		SMALL,
 		MEDIUM,
 		LARGE,
@@ -7830,6 +8405,8 @@ declare module '@uif-js/component' {
 
 		sortComparatorProvider: (Self.GridColumn.SortComparatorProviderCallback | null);
 
+		visibility: (Self.GridColumn.VisibilityBreakpoint | null);
+
 		createCell(args: object): Self.GridCell;
 
 		createHeaderCell(args: any): Self.GridHeaderCell;
@@ -7980,7 +8557,7 @@ declare module '@uif-js/component' {
 
 			validator?: Self.GridCell.ValidatorCallback;
 
-			customizeCell?: (cell: Self.GridCell) => void;
+			customizeCell?: Self.GridColumn.CustomizeCellCallback;
 
 			customizeHeaderCell?: (cell: Self.GridHeaderCell) => void;
 
@@ -8026,6 +8603,8 @@ declare module '@uif-js/component' {
 
 			sortComparatorProvider?: Self.GridColumn.SortComparatorProviderCallback;
 
+			visibility?: Self.GridColumn.VisibilityBreakpoint;
+
 			on?: PackageCore.EventSource.ListenerMap;
 
 		}
@@ -8053,6 +8632,15 @@ declare module '@uif-js/component' {
 			column: Self.GridColumn;
 
 			direction: Self.GridColumn.SortDirection;
+
+		}
+
+		type CustomizeCellCallback = (cell: Self.GridCell, args: Self.GridColumn.CustomizeCellCallbackArgs) => void;
+
+		interface CustomizeCellCallbackArgs {
+			column: Self.GridColumn;
+
+			row: Self.GridDataRow;
 
 		}
 
@@ -8094,6 +8682,15 @@ declare module '@uif-js/component' {
 		export import HorizontalAlignment = Self.GridConstants.HorizontalAlignment;
 
 		export import SortDirection = Self.GridConstants.SortDirection;
+
+		enum VisibilityBreakpoint {
+			XX_SMALL,
+			X_SMALL,
+			SMALL,
+			MEDIUM,
+			LARGE,
+			X_LARGE,
+		}
 
 		enum Width {
 			AUTO,
@@ -8406,7 +9003,7 @@ declare module '@uif-js/component' {
 
 		addRow(row: Self.GridDataRow, options?: {index?: number; reason?: string}): Self.GridRow;
 
-		addRows(rows: globalThis.Array<Self.GridDataRow>, options?: {index?: number; reason?: string}): void;
+		addRows(rows: globalThis.Array<Self.GridDataRow>, options?: {index?: number; previousIndex?: number; reason?: string}): void;
 
 		removeRow(row: Self.GridDataRow, options?: {reason?: string}): Self.GridRow;
 
@@ -8480,7 +9077,7 @@ declare module '@uif-js/component' {
 
 		isSelected(item: any): boolean;
 
-		static of(items: globalThis.Array<any>): void;
+		static of(items: globalThis.Array<any>): Self.GridMultiSelection;
 
 		static EMPTY: Self.GridMultiSelection;
 
@@ -9262,7 +9859,7 @@ declare module '@uif-js/component' {
 
 		isSelected(item: any): boolean;
 
-		static of(item: any): void;
+		static of(item: any): Self.GridSingleSelection;
 
 		static EMPTY: Self.GridSingleSelection;
 
@@ -9330,6 +9927,10 @@ declare module '@uif-js/component' {
 		columnSize: PackageCore.StaticSizeIndex;
 
 		viewportSize: {x: number; y: number};
+
+		bodyViewportSize: PackageCore.Scrollable.Size;
+
+		bodyContentSize: PackageCore.Scrollable.Size;
 
 		scrollController: PackageCore.ScrollController;
 
@@ -9474,7 +10075,9 @@ declare module '@uif-js/component' {
 	export class GrowlPanel extends PackageCore.Component {
 		constructor(options?: Self.GrowlPanel.Options);
 
-		position: Self.GrowlPanel.Position;
+		position: (Self.GrowlPanel.Position | null);
+
+		alignment: (Self.GrowlPanel.Alignment | null);
 
 		messages: globalThis.Array<PackageCore.Component>;
 
@@ -9487,6 +10090,8 @@ declare module '@uif-js/component' {
 		clear(): void;
 
 		setPosition(position: Self.GrowlPanel.Position): void;
+
+		setAlignment(alignment: Self.GrowlPanel.Position): void;
 
 		createUserMessage(message: PackageCore.UserMessageService.MessageOptions): Self.GrowlMessage;
 
@@ -9502,8 +10107,22 @@ declare module '@uif-js/component' {
 
 			position?: Self.GrowlPanel.Position;
 
+			alignment?: Self.GrowlPanel.Alignment;
+
 			manual?: boolean;
 
+		}
+
+		export import Position = Self.GrowlPanelOptions.Position;
+
+		export import Alignment = Self.GrowlPanelOptions.Alignment;
+
+	}
+
+	namespace GrowlPanelOptions {
+		enum Alignment {
+			START,
+			END,
 		}
 
 		enum Position {
@@ -9723,23 +10342,6 @@ declare module '@uif-js/component' {
 
 		}
 
-	}
-
-	enum I18N {
-		APPLY,
-		CANCEL,
-		CLEAR_1_FILTER,
-		CLEAR_ALL_1_FILTERS,
-		CLEAR_ALL_FILTERS,
-		FILTERS,
-		HIDE_FILTERS,
-		OPEN_FILTERS_MODAL,
-		OPEN_FILTERS_MODAL_1_FILTER_APPLIED,
-		OPEN_FILTERS_MODAL_1_FILTERS_APPLIED,
-		SHOW_FILTERS_ON_THE_SIDE,
-		SHOW_FILTERS_ON_THE_SIDE_1,
-		SHOW_FILTERS_ON_THE_TOP,
-		SHOW_FILTERS_ON_THE_TOP_1,
 	}
 
 	export class IFrame extends PackageCore.Component {
@@ -10364,7 +10966,11 @@ declare module '@uif-js/component' {
 
 		static Definition(props: Self.List.Options): PackageCore.JSX.Element;
 
-		static Item(children?: PackageCore.VDom.Children, classList?: (string | PackageCore.Style | globalThis.Array<(string | PackageCore.Style)>), rootStyle?: Record<string, string>, rootAttributes?: Record<string, string>, type?: Self.List.Type): PackageCore.JSX.Element;
+		static Item(props: {children?: PackageCore.VDom.Children; classList?: (string | PackageCore.Style | globalThis.Array<(string | PackageCore.Style)>); rootStyle?: Record<string, string>; rootAttributes?: Record<string, string>; type?: Self.List.Type}): PackageCore.JSX.Element;
+
+		static Term(props: {children?: PackageCore.VDom.Children; classList?: (string | PackageCore.Style | globalThis.Array<(string | PackageCore.Style)>); rootStyle?: Record<string, string>; rootAttributes?: Record<string, string>}): PackageCore.JSX.Element;
+
+		static Details(props: {children?: PackageCore.VDom.Children; classList?: (string | PackageCore.Style | globalThis.Array<(string | PackageCore.Style)>); rootStyle?: Record<string, string>; rootAttributes?: Record<string, string>}): PackageCore.JSX.Element;
 
 	}
 
@@ -10388,23 +10994,6 @@ declare module '@uif-js/component' {
 		enum VisualStyle {
 			STANDALONE,
 			EMBEDDED,
-		}
-
-	}
-
-	class ListActionPanel extends PackageCore.Component {
-		constructor(options: Self.ListActionPanel.Options);
-
-		empty: boolean;
-
-		visibleControlsNumber: number;
-
-		showAllControls(): void;
-
-	}
-
-	namespace ListActionPanel {
-		interface Options extends PackageCore.Component.Options {
 		}
 
 	}
@@ -10436,9 +11025,9 @@ declare module '@uif-js/component' {
 
 		multiSelect: boolean;
 
-		displayMember: (Self.DataSourceComponent.DisplayMemberCallback | string);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
-		valueMember: (Self.DataSourceComponent.ValueMemberCallback | string);
+		valueMember: (Self.DataSourceComponent.ValueMember | null);
 
 		showCheckMarks: boolean;
 
@@ -10526,7 +11115,7 @@ declare module '@uif-js/component' {
 
 		visit(callback: (item: Self.ListItem) => (boolean | null)): void;
 
-		private _keySearch(message: object): boolean;
+		private keySearch(message: object): boolean;
 
 		static Event: Self.ListBox.EventTypes;
 
@@ -10536,9 +11125,9 @@ declare module '@uif-js/component' {
 		type IndexPath = globalThis.Array<number>;
 
 		interface Options extends Self.DataSourceComponent.Options {
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
-			valueMember?: (string | Self.DataSourceComponent.ValueMemberCallback);
+			valueMember?: Self.DataSourceComponent.ValueMember;
 
 			groupAutomationIdMember?: string;
 
@@ -10796,7 +11385,7 @@ declare module '@uif-js/component' {
 
 		dataBound: boolean;
 
-		height: number;
+		height: (number | null);
 
 		userData: any;
 
@@ -10846,7 +11435,7 @@ declare module '@uif-js/component' {
 
 		setDraggable(value: boolean, options: object): void;
 
-		setHeight(value: number, options: object): void;
+		setHeight(value: (number | null), options: object): void;
 
 		visit(callback: (item: Self.ListItem) => (boolean | null), self: Self.ListItem): void;
 
@@ -10868,7 +11457,7 @@ declare module '@uif-js/component' {
 
 			level: number;
 
-			height: number;
+			height: (number | null);
 
 			dataEntry: PackageCore.DataStoreEntry;
 
@@ -10918,75 +11507,6 @@ declare module '@uif-js/component' {
 	}
 
 	namespace ListMouseSelectionHandler {
-	}
-
-	namespace ListPresenterConstant {
-		enum ColumnName {
-			SELECTION,
-		}
-
-		enum DataType {
-			LIST_ACTION,
-			ITEM_ACTION,
-			SELECTION_ACTION,
-			QUICK_SORT_OPTION,
-			LINK_ACTION,
-			TRANSLATION_OR_STRING,
-		}
-
-		enum ItemSelection {
-			NONE,
-			SINGLE,
-			MULTIPLE,
-		}
-
-		enum Layout {
-			TABLE,
-			TABLE_DETAIL,
-		}
-
-		enum FiltersPosition {
-			TOP,
-			SIDE,
-			NONE,
-		}
-
-		enum FilterType {
-			TEXT_BOX,
-			DROPDOWN,
-			MULTISELECT_DROPDOWN,
-			CHECK_BOX,
-			TOGGLE,
-			DATE,
-			TIME,
-			DATE_RANGE,
-			TIME_RANGE,
-		}
-
-		enum TextBoxFilterMatchingOperator {
-			STARTS_WITH,
-			ENDS_WITH,
-			CONTAINS,
-		}
-
-	}
-
-	namespace ListResponsiveVisibility {
-		enum VisibilityBreakpoint {
-			XX_SMALL,
-			X_SMALL,
-			SMALL,
-			MEDIUM,
-			LARGE,
-			X_LARGE,
-		}
-
-		enum Visibility {
-			ABOVE,
-			BELOW,
-			FOR,
-		}
-
 	}
 
 	export enum ListSelectReason {
@@ -11039,128 +11559,416 @@ declare module '@uif-js/component' {
 
 	}
 
-	class ListTableLayout extends PackageCore.Component {
-		constructor(options: Self.ListTableLayout.Options);
-
-		masterDetail: boolean;
-
-		dataGrid: Self.DataGrid;
-
-		selectedItems: globalThis.Array<object>;
-
-		showPage(dataSource: PackageCore.DataSource, pageSize?: (number | null), pageIndex?: (number | null)): void;
-
-		showData(dataSource: PackageCore.DataSource): void;
-
-		showError(errorMessage: string): void;
-
-		hideError(): void;
-
-		static Event: Self.ListTableLayout.EventTypes;
-
-	}
-
-	namespace ListTableLayout {
-		interface Options extends PackageCore.Component.Options {
-		}
-
-		interface EventTypes extends PackageCore.Component.EventTypes {
-			SELECTION_CHANGED: string;
-
-			SORTING_CHANGED: string;
-
-			MASTER_DETAIL_CLOSED: string;
-
-			ROW_REORDERED: string;
-
-			ITEM_EDITED: string;
-
-		}
-
-		enum MasterDetailWidth {
-			EQUAL,
-			SMALL_DETAIL,
-			LARGE_DETAIL,
-			CONTENT,
-		}
-
-	}
-
 	export class ListView extends PackageCore.Component {
-		constructor(options: Self.ListView.Options);
+		dataProvider: (Self.ListView.StaticDataProvider | Self.ListView.PagedDataProvider);
 
-		state: any;
+		dataSource: (PackageCore.DataSource | null);
 
-		totalItemsCount: number;
+		filteredDataSource: (PackageCore.DataSource | null);
 
-		paginationSegments: globalThis.Array<{label: string}>;
+		columns: (Self.DataGrid.ColumnConfiguration | null);
 
-		selectedPageIndex: (number | null);
+		filters: (globalThis.Array<PackageCore.JSX.Element> | globalThis.Array<Self.FilterFactory.Filter> | null);
 
-		selectedItems: globalThis.Array<any>;
-
-		filters: globalThis.Array<Self.ListView.Filter>;
-
-		dataSource: PackageCore.DataSource;
+		filterValues: Record<string, any>;
 
 		filtersPosition: Self.ListView.FiltersPosition;
 
+		availableFiltersPositions: globalThis.Array<Self.ListView.FiltersPosition>;
+
+		editable: boolean;
+
+		pagination: (Self.Pagination.Options | boolean | null);
+
+		/**
+		 * @deprecated
+		 */
+		paginationSegments: globalThis.Array<{label: string}>;
+
+		totalItemsCount: (number | null);
+
+		selectedPageIndex: (number | null);
+
+		searchPhrase: string;
+
+		refreshButtonVisible: boolean;
+
+		searchBoxVisible: boolean;
+
+		filterHandler: (Self.ListView.FilterHandlerCallback | null);
+
+		dataGridOptions: Self.DataGrid.Options;
+
+		emptyStateMessage: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+		errorMessage: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element | null);
+
+		activeLayout: Self.ListView.Layout;
+
+		availableLayouts: globalThis.Array<Self.ListView.Layout>;
+
+		detailRowContent: (Self.GridSyntheticCell.ContentCallback | null);
+
+		detailRowHeight: (number | Self.GridRow.Height);
+
+		masterDetailContent: (Self.ListView.MasterDetailContentCallback | null);
+
+		masterDetailWidth: Self.ListView.MasterDetailWidth;
+
+		masterDetailNoSelectionMessage: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+		cursorItem: any;
+
+		itemReorder: boolean;
+
+		itemActionsProvider: (Self.ListView.ItemActionsProvider | null);
+
+		selectedItems: globalThis.Array<any>;
+
+		itemSelection: Self.ListView.ItemSelection;
+
+		viewSelectedItems: boolean;
+
+		ignoreFilters: boolean;
+
+		selectionActions: globalThis.Array<Self.ListView.SelectionAction>;
+
+		listActions: globalThis.Array<Self.ListView.Action>;
+
+		quickSort: (Self.ListView.QuickSortOption | null);
+
+		quickSortOptions: globalThis.Array<Self.ListView.QuickSortOption>;
+
+		sortable: boolean;
+
+		multiColumnSort: boolean;
+
+		sortDirections: globalThis.Array<Self.ListView.SortDirectionConfig>;
+
+		responsiveStrategy: (Self.ListView.ResponsiveStrategy | Self.ListView.ResponsiveStrategyCallback);
+
+		onStateUpdated: (Self.ListView.StateUpdatedCallback | null);
+
+		/**
+		 * @deprecated Use dataLoaderVisible
+		 */
 		loaderVisible: boolean;
 
-		layout: Self.ListTableLayout;
+		dataLoaderVisible: boolean;
 
-		showPage(dataSource: PackageCore.DataSource, pageSize?: number, pageIndex?: number): void;
+		state: Self.ListView.State;
 
-		showData(dataSource: PackageCore.DataSource): void;
+		dataGrid: (Self.DataGrid | null);
+
+		/**
+		 * @deprecated
+		 */
+		layout: any;
 
 		refresh(args?: {includeFilters?: boolean}): void;
 
-		showError(errorMessage: string): void;
+		/**
+		 * @deprecated
+		 */
+		showPage(dataSource: PackageCore.DataSource, pageSize?: number, pageIndex?: number): void;
+
+		/**
+		 * @deprecated
+		 */
+		showData(dataSource: PackageCore.DataSource): void;
+
+		showError(message: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element)): void;
 
 		hideError(): void;
 
-		static ofStaticData(args: Self.StaticDataListViewFactory.Options): Self.ListView;
+		flushUpdates(): void;
 
-		static ofPagedData(args: Self.PagedDataListViewFactory.Options): Self.ListView;
+		/**
+		 * @deprecated
+		 */
+		static ofStaticData(options: Self.ListView.LegacyStaticFactoryOptions): Self.ListView;
+
+		/**
+		 * @deprecated
+		 */
+		static ofPagedData(options: Self.ListView.LegacyPagedFactoryOptions): Self.ListView;
 
 		static Event: Self.ListView.EventTypes;
 
 	}
 
 	export namespace ListView {
-		interface Filter {
-			id: string;
+		interface Options extends PackageCore.Component.Options {
+			columns?: Self.DataGrid.ColumnConfiguration;
 
-			filterChip: Self.FilterChip;
+			dataProvider?: Self.ListView.DataProvider;
 
-		}
+			pagedDataProvider?: boolean;
 
-		interface ColumnDefinition extends Self.GridColumn {
-			sortPredicate?: (args: Self.DataGrid.SortArg) => PackageCore.Comparator.Function;
+			filters?: (globalThis.Array<PackageCore.JSX.Element> | globalThis.Array<Self.FilterFactory.Filter>);
 
-			visibility?: globalThis.Array<Self.ListView.VisibilityBreakpoint>;
+			filterValues?: Self.ListView.FilterValues;
 
-		}
+			filtersPosition?: Self.ListView.FiltersPosition;
 
-		interface TableLayoutOptions {
-			columns: (globalThis.Array<Self.ListView.ColumnDefinition> | {left: globalThis.Array<Self.ListView.ColumnDefinition>; body: globalThis.Array<Self.ListView.ColumnDefinition>; right: globalThis.Array<Self.ListView.ColumnDefinition>});
+			availableFiltersPositions?: globalThis.Array<Self.ListView.FiltersPosition>;
 
-			detailRowContent?: () => PackageCore.Component;
+			editable?: boolean;
+
+			pagination?: (Self.Pagination.Options | boolean | null);
+
+			searchPhrase?: string;
+
+			totalItemsCount?: number;
+
+			selectedPageIndex?: number;
+
+			refreshButtonVisible?: boolean;
+
+			searchBoxVisible?: boolean;
+
+			filterHandler?: Self.ListView.FilterHandlerCallback;
+
+			emptyStateMessage?: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+			errorMessage?: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+			detailRowContent?: (Self.GridSyntheticCell.ContentCallback | PackageCore.JSX.Element | PackageCore.Component);
 
 			detailRowHeight?: (number | Self.GridRow.Height);
 
-			masterDetailContent?: () => PackageCore.Component;
+			activeLayout?: Self.ListView.Layout;
 
-			masterDetailWidth?: Self.ListView.TableMasterDetailWidth;
+			availableLayouts?: globalThis.Array<Self.ListView.Layout>;
 
-			gridOptions?: Self.DataGrid.Options;
+			masterDetailContent?: Self.ListView.MasterDetailContentCallback;
+
+			masterDetailWidth?: Self.ListView.MasterDetailWidth;
+
+			masterDetailNoSelectionMessage?: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+			cursorItem?: any;
+
+			itemReorder?: boolean;
+
+			itemActionsProvider?: Self.ListView.ItemActionsProvider;
+
+			selectedItems?: globalThis.Array<any>;
+
+			itemSelection?: Self.ListView.ItemSelection;
+
+			viewSelectedItems?: boolean;
+
+			ignoreFilters?: boolean;
+
+			selectionActions?: globalThis.Array<Self.ListView.SelectionAction>;
+
+			listActions?: globalThis.Array<Self.ListView.Action>;
+
+			quickSort?: Self.ListView.QuickSortOption;
+
+			quickSortOptions?: globalThis.Array<Self.ListView.QuickSortOption>;
+
+			sortable?: boolean;
+
+			multiColumnSort?: boolean;
+
+			sortDirections?: globalThis.Array<Self.ListView.SortDirectionConfig>;
+
+			dataGridOptions?: Self.DataGrid.Options;
+
+			dataLoaderVisible?: boolean;
+
+			responsiveStrategy?: (Self.ListView.ResponsiveStrategy | Self.ListView.ResponsiveStrategyCallback);
+
+			onStateUpdated?: Self.ListView.StateUpdatedCallback;
 
 		}
 
-		interface TableLayout {
-			table?: boolean;
+		interface State {
+			quickSort: (Self.ListView.QuickSortOption | null);
 
-			tableDetail?: boolean;
+			filtersIgnored: boolean;
+
+			filters: globalThis.Array<Self.ListView.FilterState>;
+
+			activeFilters: globalThis.Array<Self.ListView.FilterState>;
+
+			filterValues: Self.ListView.FilterValues;
+
+			searchPhrase: string;
+
+			viewSelectedItems: globalThis.Array<any>;
+
+			sorting: globalThis.Array<Self.ListView.SortDirectionState>;
+
+			pagination: Self.ListView.PaginationState;
+
+		}
+
+		type FilterId = (string | number);
+
+		interface FilterState {
+			id: Self.ListView.FilterId;
+
+			value: any;
+
+			filterPredicate: Self.ListView.FilterPredicate;
+
+		}
+
+		type FilterPredicate = (item: any, value: any) => boolean;
+
+		type ComposedFilterPredicate = (item: any) => boolean;
+
+		interface PaginationState {
+			rowsPerPage: number;
+
+			currentPage: object;
+
+			currentIndex: number;
+
+		}
+
+		type DataProvider = (Self.ListView.StaticDataProvider | Self.ListView.PagedDataProvider);
+
+		type StaticDataProvider = () => PackageCore.DataSource;
+
+		type PagedDataProvider = (state: Self.ListView.State) => globalThis.Promise<Self.ListView.PagedDataProviderResult>;
+
+		interface PagedDataProviderResult {
+			dataSource: PackageCore.DataSource;
+
+			totalItemsCount?: number;
+
+		}
+
+		type StateUpdatedCallback = (args: Self.ListView.StateUpdatedCallbackArgs) => void;
+
+		interface StateUpdatedCallbackArgs {
+			state: Self.ListView.State;
+
+			previousState: Self.ListView.State;
+
+		}
+
+		type FilterHandlerCallback = (args: Self.ListView.FilterHandlerCallbackArgs) => PackageCore.DataSource;
+
+		interface FilterHandlerCallbackArgs {
+			dataSource: PackageCore.DataSource;
+
+			predicate: Self.ListView.ComposedFilterPredicate;
+
+			searchPhrasePredicate: Self.ListView.ComposedFilterPredicate;
+
+			filtersPredicate: Self.ListView.ComposedFilterPredicate;
+
+			state: any;
+
+		}
+
+		type FilterValues = Record<Self.ListView.FilterId, any>;
+
+		type MasterDetailContentCallback = (dataItem: any) => (null | PackageCore.Component | PackageCore.JSX.Element);
+
+		type ItemActionsProvider = (dataItem: any) => globalThis.Array<Self.ListView.Action>;
+
+		type Action = (Self.ListView.ButtonAction | Self.ListView.LinkAction);
+
+		interface ButtonAction {
+			icon?: Self.Image.Source;
+
+			iconOnly?: boolean;
+
+			label?: (string | PackageCore.Translation);
+
+			action?: Self.Button.ActionCallback;
+
+			type?: Self.Button.Type;
+
+			items?: globalThis.Array<Self.MenuItem.ItemDefinition>;
+
+			enabled?: boolean;
+
+		}
+
+		interface LinkAction {
+			url?: (string | PackageCore.Url);
+
+			route?: (string | PackageCore.Route | Self.Link.Route);
+
+			label: (string | PackageCore.Translation);
+
+			enabled?: boolean;
+
+		}
+
+		interface SelectionAction {
+			action?: Self.ListView.SelectionActionCallback;
+
+			icon?: Self.Image.Source;
+
+			iconPosition?: Self.Button.IconPosition;
+
+			label?: (null | string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
+
+			type?: Self.Button.Type;
+
+		}
+
+		type SelectionActionCallback = (selectedItems: globalThis.Array<any>) => void;
+
+		interface QuickSortOption {
+			id: any;
+
+			icon?: Self.Image.Source;
+
+			label: (string | PackageCore.Translation);
+
+		}
+
+		interface SortDirectionConfig {
+			columnName: string;
+
+			direction: Self.ListView.SortDirection;
+
+		}
+
+		interface SortDirectionState extends Self.ListView.SortDirectionConfig {
+			column?: Self.DataGrid.ColumnDefinition;
+
+		}
+
+		type ResponsiveStrategyCallback = (args: Self.ListView.ResponsiveStrategyCallbackArgs) => Self.ListView.ResponsiveStrategyCallbackResult;
+
+		interface ResponsiveStrategyCallbackArgs {
+			width: number;
+
+			searchBoxVisible: boolean;
+
+			filtersPostion: Self.ListView.FiltersPosition;
+
+			filterCount: number;
+
+			listActionCount: number;
+
+		}
+
+		interface ResponsiveStrategyCallbackResult {
+			collapseSearchBox?: boolean;
+
+			collapseFilters?: boolean;
+
+			maxVisibleListActions?: number;
+
+			listActionsBelowFilters?: boolean;
+
+		}
+
+		interface MasterDetailWidthOption {
+			master: Self.SplitPanelItem.SizeOptions;
+
+			detail: Self.SplitPanelItem.SizeOptions;
 
 		}
 
@@ -11175,11 +11983,45 @@ declare module '@uif-js/component' {
 
 			ITEM_EDITED: string;
 
-			RENDERED: string;
+		}
+
+		export import ColumnFactory = Self.ListViewColumnFactory;
+
+		export import FiltersPosition = Self.ListViewConstant.FiltersPosition;
+
+		export import Filter = Self.ListViewFilter;
+
+		export import TextBoxFilterMatchingOperator = Self.ListViewConstant.TextBoxFilterMatchingOperator;
+
+		namespace Pagination {
+			function basic(rowsCount?: number, rowsPerPage?: number): Self.Pagination.Options;
+
+			function customizablePageSize(rowsCount?: number, rowsPerPage?: number): Self.Pagination.Options;
+
+			function segmented(segments: globalThis.Array<object>): Self.Pagination.Options;
 
 		}
 
-		interface Options extends PackageCore.Component.Options {
+		export import Layout = Self.ListViewConstant.Layout;
+
+		export import MasterDetailWidth = Self.ListViewConstant.MasterDetailWidth;
+
+		/**
+		 * @deprecated Use ListView.MasterDetailWidth instead
+		 */
+		export import TableMasterDetailWidth = Self.ListViewConstant.MasterDetailWidth;
+
+		export import SortDirection = Self.GridConstants.SortDirection;
+
+		export import ItemSelection = Self.ListViewConstant.ItemSelection;
+
+		export import Visibility = Self.ListViewConstant.Visibility;
+
+		export import VisibilityBreakpoint = Self.GridColumn.VisibilityBreakpoint;
+
+		export import ResponsiveStrategy = Self.ListViewConstant.ResponsiveStrategy;
+
+		interface LegacyOptions extends PackageCore.Component.Options {
 			defaultLayout?: Self.ListView.Layout;
 
 			availableLayouts?: Record<Self.ListView.Layout, boolean>;
@@ -11200,7 +12042,7 @@ declare module '@uif-js/component' {
 
 			availableFiltersPositions?: globalThis.Array<Self.ListView.FiltersPosition>;
 
-			filters?: globalThis.Array<Self.ListView.Filter>;
+			filters?: globalThis.Array<Self.FilterFactory.Filter>;
 
 			quickSortOptions?: globalThis.Array<any>;
 
@@ -11218,64 +12060,65 @@ declare module '@uif-js/component' {
 
 		}
 
-		export import ColumnFactory = Self.ListViewColumnFactory;
+		interface LegacyStaticFactoryOptions extends Self.ListView.LegacyOptions {
+			parentContext?: PackageCore.Context;
 
-		export import ItemSelection = Self.ListPresenterConstant.ItemSelection;
+			dataProvider: Self.ListView.StaticDataProvider;
 
-		export import FiltersPosition = Self.ListPresenterConstant.FiltersPosition;
+			filterHandler?: Self.ListView.FilterHandlerCallback;
 
-		export import Visibility = Self.ListResponsiveVisibility.Visibility;
-
-		export import VisibilityBreakpoint = Self.ListResponsiveVisibility.VisibilityBreakpoint;
-
-		enum ResponsiveStrategy {
-			ONE_LINE,
-			TWO_LINES,
 		}
 
-		export import Pagination = Self.PaginationConfiguration;
+		interface LegacyPagedFactoryOptions extends Self.ListView.LegacyOptions {
+			parentContext?: PackageCore.Context;
 
-		export import Layout = Self.ListPresenterConstant.Layout;
+			dataProvider: Self.ListView.PagedDataProvider;
 
-		export import TableMasterDetailWidth = Self.ListTableLayout.MasterDetailWidth;
-
-		export import SortDirection = Self.GridConstants.SortDirection;
-
-		enum StateProperty {
-			VIEW_SELECTED_ITEMS,
 		}
+
+		interface BaseFilterProps {
+			id: Self.ListView.FilterId;
+
+			label: string;
+
+			binding?: string;
+
+			filterPredicate?: Self.ListView.FilterPredicate;
+
+		}
+
+		type CreateColumnOptions = (Omit<Self.ActionColumn.Options, "type"> | Omit<Self.CheckBoxColumn.Options, "type"> | Omit<Self.DatePickerColumn.Options, "type"> | Omit<Self.DropdownColumn.Options, "type"> | Omit<Self.GrabColumn.Options, "type"> | Omit<Self.LinkColumn.Options, "type"> | Omit<Self.MultiselectDropdownColumn.Options, "type"> | Omit<Self.SelectionColumn.Options, "type"> | Omit<Self.TemplatedColumn.Options, "type"> | Omit<Self.TextAreaColumn.Options, "type"> | Omit<Self.TextBoxColumn.Options, "type"> | Omit<Self.TimePickerColumn.Options, "type"> | Omit<Self.TreeColumn.Options, "type">);
 
 	}
 
 	export namespace ListViewColumnFactory {
-		interface ColumnOptions extends Self.GridColumn.Options {
-			searchable?: boolean;
+		function createTextColumn(columnOptions: Omit<Self.TextBoxColumn.Options, "type">, widgetOptions?: Self.TextBox.Options): Self.TextBoxColumn.Options;
 
-			searchPredicate?: Self.GridColumn.SearchPredicateCallback;
+		function createNumberColumn(columnOptions: Omit<Self.TextBoxColumn.Options, "type">, widgetOptions?: Self.TextBox.Options): Self.TextBoxColumn.Options;
 
-			sortComparatorProvider?: Self.GridColumn.SortComparatorProviderCallback;
+		function createTimeColumn(columnOptions: Omit<Self.TimePickerColumn.Options, "type">, widgetOptions?: Self.TimePicker.Options): Self.TimePickerColumn.Options;
 
-		}
+		function createDateColumn(columnOptions: Omit<Self.DatePickerColumn.Options, "type">, widgetOptions?: Self.DatePicker.Options): Self.DatePickerColumn.Options;
 
-		function createTextColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		function createDateTimeColumn(columnOptions: Omit<Self.DatePickerColumn.Options, "type">, widgetOptions?: Self.DatePicker.Options): Self.DatePickerColumn.Options;
 
-		function createNumberColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		function createCheckColumn(columnOptions: Omit<Self.CheckBoxColumn.Options, "type">, widgetOptions?: Self.CheckBox.Options): Self.CheckBoxColumn.Options;
 
-		function createTimeColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		function createLinkColumn(columnOptions: Omit<Self.LinkColumn.Options, "type">, widgetOptions?: Self.Link.Options): Self.LinkColumn.Options;
 
-		function createDateColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		/**
+		 * @deprecated
+		 */
+		function createImageColumn(columnOptions: Omit<Self.TemplatedColumn.Options, "type">, widgetOptions?: Self.Image.Options): Self.TemplatedColumn.Options;
 
-		function createDateTimeColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		function createTextAreaColumn(columnOptions: Omit<Self.TextAreaColumn.Options, "type">, widgetOptions?: Self.TextArea.Options): Self.TextAreaColumn.Options;
 
-		function createCheckColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		/**
+		 * @deprecated
+		 */
+		function createEditViewColumn(columnOptions: Omit<Self.TemplatedColumn.Options, "type">, widgetOptions?: object): Self.TemplatedColumn.Options;
 
-		function createLinkColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
-
-		function createImageColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
-
-		function createTextAreaColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
-
-		function createEditViewColumn(columnOptions: Self.ListViewColumnFactory.ColumnOptions, widgetOptions?: object): object;
+		function create(columnType: Self.ListViewColumnFactory.ColumnType, columnOptions: Self.ListView.CreateColumnOptions, widgetOptions?: object): Self.DataGrid.ColumnDefinition;
 
 		enum ColumnType {
 			CHECK,
@@ -11292,82 +12135,72 @@ declare module '@uif-js/component' {
 			TEMPLATED,
 		}
 
-		function create(columnType: Self.ListViewColumnFactory.ColumnType, columnOptions: object, widgetOptions?: object): object;
-
 	}
 
-	class ListViewSelectionBar extends PackageCore.Component {
-		constructor(options: Self.ListViewSelectionBar.Options);
-
-		totalItemsCount: number;
-
-		selectedItemsCount: number;
-
-		filtersApplied: boolean;
-
-		ignoreFilters: boolean;
-
-		static Event: Self.ListViewSelectionBar.EventTypes;
-
-	}
-
-	namespace ListViewSelectionBar {
-		interface Options extends PackageCore.Component.Options {
+	namespace ListViewConstant {
+		enum ItemSelection {
+			NONE,
+			SINGLE,
+			MULTIPLE,
 		}
 
-		interface EventTypes extends PackageCore.Component.EventTypes {
-			VIEW_SELECTED_TOGGLED: string;
+		enum Layout {
+			TABLE,
+			TABLE_DETAIL,
+		}
 
-			FILTERS_IGNORED_TOGGLED: string;
+		enum FiltersPosition {
+			TOP,
+			SIDE,
+			NONE,
+		}
 
+		enum Visibility {
+			ABOVE,
+			BELOW,
+			FOR,
+		}
+
+		enum ResponsiveStrategy {
+			ONE_LINE,
+			TWO_LINES,
+		}
+
+		enum TextBoxFilterMatchingOperator {
+			STARTS_WITH,
+			ENDS_WITH,
+			CONTAINS,
+		}
+
+		enum MasterDetailWidth {
+			EQUAL,
+			SMALL_DETAIL,
+			LARGE_DETAIL,
+			CONTENT,
 		}
 
 	}
 
-	namespace ListViewUtil {
-		function createTooltip(content: (string | PackageCore.Translation | PackageCore.Component)): Self.Tooltip;
+	export namespace ListViewFilter {
+		function Custom(props: {id: Self.ListView.FilterId; filterPredicate: Self.ListView.FilterPredicate; children?: PackageCore.JSX.Element}): PackageCore.JSX.Element;
 
-		function createActionControl(actionDefinition: object): any;
+		function CheckBox(props: Self.ListView.BaseFilterProps): PackageCore.JSX.Element;
 
-	}
+		function TextBox(props: Self.ListView.BaseFilterProps & {matchingOperator?: Self.ListView.TextBoxFilterMatchingOperator}): PackageCore.JSX.Element;
 
-	class ListViewingTools extends PackageCore.Component {
-		constructor(options: Self.ListViewingTools.Options);
+		function Toggle(props: Self.ListView.BaseFilterProps): PackageCore.JSX.Element;
 
-		pagination: Self.Pagination;
+		function Dropdown(props: Self.ListView.BaseFilterProps & {dataSource: PackageCore.DataSource; displayMember?: Self.DataSourceComponent.DisplayMember; valueMember?: Self.DataSourceComponent.ValueMember; search?: boolean}): PackageCore.JSX.Element;
 
-		paginationState: object;
+		function MultiselectDropdown(props: Self.ListView.BaseFilterProps & {dataSource: PackageCore.DataSource; displayMember?: Self.DataSourceComponent.DisplayMember; valueMember?: Self.DataSourceComponent.ValueMember}): PackageCore.JSX.Element;
 
-		activeLayout: Self.ListPresenterConstant.Layout;
+		function Date(props: Self.ListView.BaseFilterProps): PackageCore.JSX.Element;
 
-		totalItemsCount: number;
+		function DateRange(props: Self.ListView.BaseFilterProps): PackageCore.JSX.Element;
 
-		paginationSegments: globalThis.Array<{label: string}>;
+		function Time(props: Self.ListView.BaseFilterProps): PackageCore.JSX.Element;
 
-		selectedPageIndex: (number | null);
-
-		setTotalItemsCount(totalItemsCount: number, filtersApplied?: boolean): void;
-
-		private _refreshTotalItemsText(): void;
-
-		private _getPaginationState(): ({currentPage: object; rowsPerPage: object; currentIndex: number} | null);
-
-		private _createQuickSortControl(quickSortOptions: globalThis.Array<object>): (Self.MenuButton | null);
-
-		static Event: Self.ListViewingTools.EventTypes;
-
-	}
-
-	namespace ListViewingTools {
-		interface Options extends PackageCore.Component.Options {
-		}
-
-		interface EventTypes extends PackageCore.Component.EventTypes {
-			LAYOUT_CHANGED: string;
-
-			PAGINATION_WIDTH_CHANGED: string;
-
-		}
+		function TimeRange(props: Self.ListView.BaseFilterProps): PackageCore.JSX.Element;
 
 	}
 
@@ -11599,7 +12432,7 @@ declare module '@uif-js/component' {
 
 		text: string;
 
-		rawText: globalThis.Array<any>;
+		rawText: globalThis.Array<string>;
 
 		inputText: string;
 
@@ -11675,6 +12508,8 @@ declare module '@uif-js/component' {
 
 			size?: Self.MaskedTextBox.Size;
 
+			textValidator?: Self.MaskedTextBox.TextValidatorCallback;
+
 			onTextChanged?: Self.MaskedTextBox.TextChangedCallback;
 
 			onTextAccepted?: Self.MaskedTextBox.TextAcceptedCallback;
@@ -11711,6 +12546,15 @@ declare module '@uif-js/component' {
 
 		}
 
+		type TextValidatorCallback = (args: Self.MaskedTextBox.TextValidatorCallbackArgs) => boolean;
+
+		interface TextValidatorCallbackArgs {
+			text: string;
+
+			rawText: globalThis.Array<string>;
+
+		}
+
 		interface Selection {
 			start: number;
 
@@ -11736,6 +12580,7 @@ declare module '@uif-js/component' {
 		enum VisualStyle {
 			DEFAULT,
 			EMBEDDED,
+			REDWOOD_FIELD,
 		}
 
 		enum TextAlignment {
@@ -11800,6 +12645,8 @@ declare module '@uif-js/component' {
 		orientation: Self.Menu.Orientation;
 
 		size: Self.Menu.Size;
+
+		type: Self.Menu.Type;
 
 		setOrientation(orientation: Self.Menu.Orientation): void;
 
@@ -11869,6 +12716,8 @@ declare module '@uif-js/component' {
 
 			stackIcon?: boolean;
 
+			type?: Self.Menu.Type;
+
 		}
 
 		interface EventTypes extends PackageCore.Component.EventTypes {
@@ -11889,6 +12738,8 @@ declare module '@uif-js/component' {
 		export import Reason = Self.MenuOptions.Reason;
 
 		export import Size = Self.MenuOptions.Size;
+
+		export import Type = Self.MenuOptions.Type;
 
 		export import VisualStyle = Self.MenuOptions.VisualStyle;
 
@@ -11935,6 +12786,8 @@ declare module '@uif-js/component' {
 
 		openOnHover: boolean;
 
+		menuTarget: Self.Window.Target;
+
 		setMenu(menu: (globalThis.Array<Self.MenuItem.ItemDefinition> | Self.Menu)): void;
 
 		openMenu(args?: object): void;
@@ -11958,6 +12811,8 @@ declare module '@uif-js/component' {
 			menu: (globalThis.Array<Self.MenuItem.ItemDefinition> | Self.Menu.Options);
 
 			openOnHover?: boolean;
+
+			menuTarget?: Self.Window.Target;
 
 		}
 
@@ -12030,6 +12885,8 @@ declare module '@uif-js/component' {
 
 		private _getActionHandler(): void;
 
+		static CustomItem(definition: Self.MenuItem.CustomItemDefinition): Self.MenuItem;
+
 		static ActionItem(definition: Self.MenuItem.ActionItemDefinition): Self.MenuItem;
 
 		static LinkItem(definition: Self.MenuItem.LinkItemDefinition): Self.MenuItem;
@@ -12072,8 +12929,19 @@ declare module '@uif-js/component' {
 
 		}
 
+		interface CustomItemDefinition extends Self.MenuItem.BaseItemDefinition {
+			content?: (PackageCore.Component | PackageCore.VDom.Element);
+
+			action: Self.MenuItemButton.ActionCallback;
+
+		}
+
 		interface ActionItemDefinition extends Self.MenuItem.BaseItemDefinition {
 			icon?: Self.Image.Source;
+
+			startIcon?: Self.Image.Source;
+
+			endIcon?: Self.Image.Source;
 
 			label?: (string | PackageCore.Translation);
 
@@ -12085,6 +12953,10 @@ declare module '@uif-js/component' {
 
 		interface LinkItemDefinition extends Self.MenuItem.BaseItemDefinition {
 			icon?: Self.Image.Source;
+
+			startIcon?: Self.Image.Source;
+
+			endIcon?: Self.Image.Source;
 
 			label?: (string | PackageCore.Translation);
 
@@ -12132,6 +13004,10 @@ declare module '@uif-js/component' {
 	export class MenuItemContent extends PackageCore.Component {
 		constructor(options?: Self.MenuItemContent.Options);
 
+		endIcon: (Self.Image.Source | null);
+
+		startIcon: (Self.Image.Source | null);
+
 		label: (string | PackageCore.Translation);
 
 		hasLabel: boolean;
@@ -12159,6 +13035,10 @@ declare module '@uif-js/component' {
 			label?: (string | PackageCore.Translation);
 
 			icon?: Self.Image.Source;
+
+			startIcon?: Self.Image.Source;
+
+			endIcon?: Self.Image.Source;
 
 			shortcut?: string;
 
@@ -12205,6 +13085,11 @@ declare module '@uif-js/component' {
 			THEMED,
 		}
 
+		enum Type {
+			DEFAULT,
+			CONTEXT_MENU,
+		}
+
 	}
 
 	export class MeterBar extends PackageCore.Component {
@@ -12241,6 +13126,10 @@ declare module '@uif-js/component' {
 		setValue(value: number, options: object): void;
 
 		acceptChanges(options: object): void;
+
+		static basicDynamicColor(errorToWarning: number, warningToSuccess: number): Self.MeterBar.ValueColorCallback;
+
+		static basicColorSegments(errorToWarning: number, warningToSuccess: number): globalThis.Array<Self.MeterBar.SegmentColor>;
 
 	}
 
@@ -12378,6 +13267,10 @@ declare module '@uif-js/component' {
 		setValue(value: number, options: object): void;
 
 		acceptChanges(options: object): void;
+
+		static basicDynamicColor(errorToWarning: number, warningToSuccess: number): Self.MeterCircle.ValueColorCallback;
+
+		static basicColorSegments(errorToWarning: number, warningToSuccess: number): globalThis.Array<Self.MeterCircle.SegmentColor>;
 
 	}
 
@@ -12698,7 +13591,7 @@ declare module '@uif-js/component' {
 
 			dataSource?: PackageCore.DataSource;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
 			noDataMessage?: string;
 
@@ -12718,7 +13611,7 @@ declare module '@uif-js/component' {
 
 			mandatory?: boolean;
 
-			tagDisplayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			tagDisplayMember?: Self.DataSourceComponent.DisplayMember;
 
 			tagMaxWidth?: number;
 
@@ -12779,6 +13672,7 @@ declare module '@uif-js/component' {
 		enum VisualStyle {
 			STANDALONE,
 			EMBEDDED,
+			REDWOOD_FIELD,
 		}
 
 		enum Reason {
@@ -12807,7 +13701,7 @@ declare module '@uif-js/component' {
 
 		dataSource: PackageCore.DataSource;
 
-		displayMember: (string | Self.DataSourceComponent.DisplayMemberCallback);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
 		multiselectDropdown: (Self.MultiselectDropdown | null);
 
@@ -12825,7 +13719,7 @@ declare module '@uif-js/component' {
 
 		dataSource: (PackageCore.DataSource | null);
 
-		displayMember: (string | Self.DataSourceComponent.DisplayMemberCallback | null);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
 		widgetOptions: (Self.MultiselectDropdown.Options | Self.GridColumn.WidgetOptionsCallback<Self.MultiselectDropdown.Options> | null);
 
@@ -12835,7 +13729,7 @@ declare module '@uif-js/component' {
 		interface Options extends Self.GridColumn.Options {
 			dataSource?: PackageCore.DataSource;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
 			widgetOptions?: (Self.MultiselectDropdownColumn.Options | Self.GridColumn.WidgetOptionsCallback<Self.MultiselectDropdownColumn.Options>);
 
@@ -12908,6 +13802,7 @@ declare module '@uif-js/component' {
 		enum VisualStyle {
 			STANDALONE,
 			EMBEDDED,
+			REDWOOD_FIELD,
 		}
 
 		enum ToggledReason {
@@ -13298,6 +14193,8 @@ declare module '@uif-js/component' {
 
 			placeholder?: string;
 
+			searchString?: string;
+
 		}
 
 		interface LanguageSelectorOptions {
@@ -13367,35 +14264,39 @@ declare module '@uif-js/component' {
 
 	}
 
-	export namespace OneLineResponsiveStrategy {
-		function createToolbarPanel(itemSelection: Self.ListPresenterConstant.ItemSelection, startPanel: Self.StackPanel, actionPanel: Self.StackPanel, viewingTools: Self.StackPanel, toolbarPanelOptions: object): {toolbar: Self.StackPanel; endPanel: Self.StackPanel};
+	export function PageRoot(props: object): PackageCore.JSX.Element;
 
-		function apply(options: {itemSelection: Self.ListPresenterConstant.ItemSelection; searchBox: Self.TextBox; searchBoxButton: Self.Button; viewingTools: Self.StackPanel; selectionPanel: Self.StackPanel; sidePanel: Self.StackPanel; startPanel: Self.StackPanel; endPanel: Self.StackPanel; viewWidth: number; filterPanel: PackageCore.Presenter; actionPanel: PackageCore.Presenter; updateSearchBoxVisibility: (visible: boolean) => void; hideAllFilters: () => void; filtersInModal: boolean; filtersPosition: Self.ListView.FiltersPosition}): void;
+	class PageSearch {
+		addItem(item: Self.PageSearch.SearchableItem, options: Self.PageSearch.SearchableItemOptions): void;
 
-		function reset(itemSelection: Self.ListPresenterConstant.ItemSelection, endPanel: Self.StackPanel, viewingTools: Self.StackPanel, selectionPanel: Self.StackPanel): void;
+		addItems(items: globalThis.Array<Self.PageSearch.SearchableItem>, options: Self.PageSearch.SearchableItemOptions): void;
+
+		removeItem(itemId: string): void;
 
 	}
 
-	export function PageRoot(props: object): PackageCore.JSX.Element;
+	namespace PageSearch {
+		interface SearchableItem {
+			id: string;
 
-	export namespace PagedDataListViewFactory {
-		type DataProvider = (state: any) => Self.PagedDataListViewFactory.DataProviderResult;
+			label: string;
 
-		interface DataProviderResult {
-			dataSource: PackageCore.DataSource;
-
-			totalItemsCount?: number;
+			action: () => void;
 
 		}
 
-		interface Options extends Self.ListView.Options {
-			parentContext?: PackageCore.Context;
+		interface SearchableItemOptions {
+			category: Self.SearchItemCategory;
 
-			dataProvider: Self.PagedDataListViewFactory.DataProvider;
+			idProperty?: string;
+
+			actionProperty?: string;
+
+			labelProperty?: string;
+
+			nestedArrayProperty?: string;
 
 		}
-
-		function createView(ListView: Self.ListView, options: Self.PagedDataListViewFactory.Options): Self.ListView;
 
 	}
 
@@ -13420,7 +14321,7 @@ declare module '@uif-js/component' {
 
 		navigation: (Self.Pagination.Navigation | null);
 
-		rowsCounter: (Self.Pagination.RowsCounter | null);
+		rowsCounter: (Self.Pagination.RowsCounter | number | string | null);
 
 		loadMore: (number | null);
 
@@ -13508,6 +14409,8 @@ declare module '@uif-js/component' {
 
 		private renderRowsCounterUnknownText(): string;
 
+		private renderRowsCounterCustom(): Self.Text;
+
 		private renderLoadMoreButton(): (Self.Button | null);
 
 		private handleLoadMoreButtonClick(): void;
@@ -13583,7 +14486,7 @@ declare module '@uif-js/component' {
 
 			type: Self.Pagination.NavigationType;
 
-			segmentationWidth: (number | string);
+			segmentationWidth?: (number | string);
 
 		}
 
@@ -13593,13 +14496,15 @@ declare module '@uif-js/component' {
 		}
 
 		interface NavigationButtons {
-			firstPage: boolean;
+			firstPage?: boolean;
 
-			previousPage: boolean;
+			previousPage?: boolean;
 
-			nextPage: boolean;
+			nextPage?: boolean;
 
-			lastPage: boolean;
+			lastPage?: boolean;
+
+			total?: boolean;
 
 		}
 
@@ -13617,7 +14522,7 @@ declare module '@uif-js/component' {
 
 			navigation?: Self.Pagination.Navigation;
 
-			rowsCounter?: (Self.Pagination.RowsCounter | number);
+			rowsCounter?: (Self.Pagination.RowsCounter | number | string);
 
 			loadMore?: number;
 
@@ -13648,6 +14553,7 @@ declare module '@uif-js/component' {
 			COMPLETE,
 			TOTAL,
 			UNKNOWN,
+			CUSTOM,
 			NONE,
 		}
 
@@ -13697,15 +14603,6 @@ declare module '@uif-js/component' {
 			STANDALONE,
 			EMBEDDED,
 		}
-
-	}
-
-	namespace PaginationConfiguration {
-		function basic(totalItemsCount: number): object;
-
-		function customizablePageSize(totalItemsCount: number): object;
-
-		function segmented(segments: globalThis.Array<object>): object;
 
 	}
 
@@ -13821,7 +14718,7 @@ declare module '@uif-js/component' {
 
 	export namespace Picker {
 		interface Options {
-			window?: Self.Popover.Options;
+			window?: Omit<Self.Popover.Options, "owner">;
 
 			openConfiguration?: (options: Self.Window.OpenArgs) => Self.Window.OpenArgs;
 
@@ -14043,6 +14940,8 @@ declare module '@uif-js/component' {
 
 		clickableLabel: boolean;
 
+		readOnly: boolean;
+
 		emptyLabel: boolean;
 
 		group: (Self.RadioGroup | null);
@@ -14065,8 +14964,6 @@ declare module '@uif-js/component' {
 
 		static Event: Self.RadioButton.EventTypes;
 
-		static Group(props?: Self.RadioButtonGroup.Options): PackageCore.JSX.Element;
-
 	}
 
 	export namespace RadioButton {
@@ -14084,6 +14981,8 @@ declare module '@uif-js/component' {
 			action?: Self.RadioButton.ActionCallback;
 
 			data?: any;
+
+			readOnly?: boolean;
 
 		}
 
@@ -14118,6 +15017,8 @@ declare module '@uif-js/component' {
 			CLICK,
 			KEY_PRESS,
 		}
+
+		export import Group = Self.RadioButtonGroup;
 
 	}
 
@@ -14192,7 +15093,7 @@ declare module '@uif-js/component' {
 
 		}
 
-		export import GapSize = Self.GridPanel.GapSize;
+		export import GapSize = Self.GapSize;
 
 	}
 
@@ -14276,35 +15177,39 @@ declare module '@uif-js/component' {
 
 		radioGroup: Self.RadioGroup;
 
-		displayMember: (string | Self.DataSourceComponent.DisplayMemberCallback);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
-		private _handleSelectionChanged(item: any, args: Self.RadioButton.ActionArgs): void;
+		valueMember: (Self.DataSourceComponent.ValueMember | null);
 
-		private _forwardMessageToGroup(message: PackageCore.RoutedMessage, result: object): void;
+		private handleSelectionChanged(item: any, args: Self.RadioButton.ActionArgs): void;
 
-		private _selectFirst(topOrBottom: number): void;
+		private forwardMessageToGroup(message: PackageCore.RoutedMessage, result: object): void;
 
-		private _getDisplayMember(dataItem: object): any;
+		private selectFirst(topOrBottom: number): void;
 
-		private _updateContent(groupPanel: Self.StackPanel): void;
+		private getDisplayMember(dataItem: object): any;
 
-		private _createPlaceholder(): void;
+		private updateContent(selection: any, searchPhrase?: string): void;
 
-		private _createRadioButton(group: Self.RadioGroup, item: any): void;
+		private createPlaceholder(): void;
 
-		private _applySelection(selection: any): void;
+		private createRadioButton(group: Self.RadioGroup, item: any, value: boolean): void;
+
+		private applySelection(selection: any): void;
 
 	}
 
 	export namespace RadioGroupPicker {
 		interface Options extends Self.Picker.Options {
-			dataSource: PackageCore.ArrayDataSource;
+			dataSource: PackageCore.DataSource;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
+
+			valueMember?: Self.DataSourceComponent.ValueMember;
 
 			comparator?: (left: any, right: any) => boolean;
 
-			searchMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			searchMember?: Self.DataSourceComponent.DisplayMember;
 
 			noDataMessage?: (string | PackageCore.Translation);
 
@@ -14518,6 +15423,8 @@ declare module '@uif-js/component' {
 
 		description: (string | number | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element);
 
+		layout: Self.Reminder.Layout;
+
 	}
 
 	export namespace Reminder {
@@ -14528,6 +15435,13 @@ declare module '@uif-js/component' {
 
 			count?: (string | number | PackageCore.Translation | null);
 
+			layout?: Self.Reminder.Layout;
+
+		}
+
+		enum Layout {
+			HEADLINE,
+			INLINE,
 		}
 
 		enum Color {
@@ -14683,6 +15597,8 @@ declare module '@uif-js/component' {
 
 		onTextChanged: (Self.RichTextEditor.TextChangedCallback | null);
 
+		bloom: boolean;
+
 		setText(text: string, options?: object): void;
 
 		setMaxLength(maxLength: number): void;
@@ -14718,6 +15634,8 @@ declare module '@uif-js/component' {
 			defaultFontSize?: number;
 
 			onTextChanged?: Self.RichTextEditor.TextChangedCallback;
+
+			bloom?: boolean;
 
 		}
 
@@ -14892,6 +15810,19 @@ declare module '@uif-js/component' {
 
 			element?: Self.ScrollPanel.Element;
 
+			onScrollabilityChanged?: Self.ScrollPanel.ScrollabilityChangedCallback;
+
+		}
+
+		type ScrollabilityChangedCallback = (args: Self.ScrollPanel.ScrollabilityChangedCallbackArgs) => void;
+
+		interface ScrollabilityChangedCallbackArgs {
+			value: PackageCore.Scrollable.Scrollability;
+
+			previousValue: PackageCore.Scrollable.Scrollability;
+
+			reason: any;
+
 		}
 
 		enum ScrollControl {
@@ -15051,16 +15982,6 @@ declare module '@uif-js/component' {
 	export namespace ScrollbarDragListener {
 	}
 
-	class SearchEngine {
-		addElements(elements: globalThis.Map<any, any>): void;
-
-		removeElement(elementId: string): void;
-
-	}
-
-	namespace SearchEngine {
-	}
-
 	export class SearchItem extends PackageCore.Component {
 		constructor(options?: Self.SearchItem.Options);
 
@@ -15116,28 +16037,6 @@ declare module '@uif-js/component' {
 		BACK,
 		LOADER,
 		NO_RESULT,
-	}
-
-	export interface SearchableItem {
-		id: string;
-
-		label: string;
-
-		action: () => void;
-
-	}
-
-	export interface SearchableItemOptions {
-		category: Self.SearchItemCategory;
-
-		idProperty?: string;
-
-		actionProperty?: string;
-
-		labelProperty?: string;
-
-		nestedArrayProperty?: string;
-
 	}
 
 	export class SelectionCell extends Self.GridCell {
@@ -15204,6 +16103,8 @@ declare module '@uif-js/component' {
 			widgetOptions?: (Self.CheckBox.Options | Self.GridColumn.WidgetOptionsCallback<Self.CheckBox.Options>);
 
 			strategy?: Self.GridSelectionStrategy;
+
+			withSelectAll?: boolean;
 
 		}
 
@@ -15369,7 +16270,7 @@ declare module '@uif-js/component' {
 
 			maxSelection?: (number | boolean);
 
-			sourceDataSource?: (PackageCore.ArrayDataSource | null);
+			sourceDataSource?: (PackageCore.DataSource | null);
 
 			sourceDisplayMember?: string;
 
@@ -15385,7 +16286,7 @@ declare module '@uif-js/component' {
 
 			sourceValueMember?: string;
 
-			targetDataSource?: (PackageCore.ArrayDataSource | null);
+			targetDataSource?: (PackageCore.DataSource | null);
 
 			targetDisplayMember?: string;
 
@@ -16105,24 +17006,6 @@ declare module '@uif-js/component' {
 
 	}
 
-	export namespace SortComparator {
-		interface Property {
-			propertyName: string;
-
-			comparator: PackageCore.Comparator.Function;
-
-			ascending: boolean;
-
-			nullFirst: boolean;
-
-		}
-
-		function ofObjectProperty(propertyName: string, comparator: PackageCore.Comparator.Function): PackageCore.Comparator.Function;
-
-		function ofObjectProperties(directions: globalThis.Array<Self.SortComparator.Property>): PackageCore.Comparator.Function;
-
-	}
-
 	export class SplitButton extends PackageCore.Component {
 		constructor(options?: Self.SplitButton.Options);
 
@@ -16555,7 +17438,7 @@ declare module '@uif-js/component' {
 
 			outerGap?: (Self.StackPanel.GapSize | Self.StackPanel.GapSizeObject);
 
-			wrap?: boolean;
+			wrap?: (Self.StackPanel.Wrap | boolean);
 
 			element?: Self.StackPanel.Element;
 
@@ -16745,24 +17628,6 @@ declare module '@uif-js/component' {
 	}
 
 	namespace StandardWindow {
-	}
-
-	export namespace StaticDataListViewFactory {
-		type DataProvider = () => PackageCore.DataSource;
-
-		type FilterHandler = (dataSource: PackageCore.DataSource, predicate: (item: any) => boolean, currentState: any, oldState: any) => PackageCore.DataSource;
-
-		interface Options extends Self.ListView.Options {
-			parentContext?: PackageCore.Context;
-
-			dataProvider: Self.StaticDataListViewFactory.DataProvider;
-
-			filterHandler?: Self.StaticDataListViewFactory.FilterHandler;
-
-		}
-
-		function createView(ListView: any, options: Self.StaticDataListViewFactory.Options): Self.ListView;
-
 	}
 
 	class StaticListView extends PackageCore.Component {
@@ -17030,6 +17895,10 @@ declare module '@uif-js/component' {
 
 		children: PackageCore.VDom.Children;
 
+		items: globalThis.Array<Self.SummaryBox.ItemOptions>;
+
+		private parseChildren(children: PackageCore.VDom.Children): globalThis.Array<Self.SummaryBox.ItemOptions>;
+
 		static Item(props?: Self.SummaryBoxItem.Options): PackageCore.JSX.Element;
 
 		static Total(props?: Self.SummaryBoxTotal.Options): PackageCore.JSX.Element;
@@ -17037,8 +17906,23 @@ declare module '@uif-js/component' {
 	}
 
 	export namespace SummaryBox {
+		interface ItemOptions {
+			label: (string | number | PackageCore.Translation);
+
+			color?: Self.SummaryBoxItem.Color;
+
+			icon?: Self.Image.Source;
+
+			value: (string | number | PackageCore.Translation);
+
+			type: Self.SummaryBox.Type;
+
+		}
+
 		interface Options extends PackageCore.Component.Options {
 			children?: PackageCore.VDom.Children;
+
+			items?: globalThis.Array<Self.SummaryBox.ItemOptions>;
 
 			collapsed?: boolean;
 
@@ -17051,6 +17935,11 @@ declare module '@uif-js/component' {
 		}
 
 		export import Color = Self.SummaryBoxItem.Color;
+
+		enum Type {
+			ITEM,
+			TOTAL,
+		}
 
 	}
 
@@ -17220,9 +18109,9 @@ declare module '@uif-js/component' {
 	}
 
 	class SystemSearch {
-		addPageSearchItem(item: Self.SearchableItem, options: Self.SearchableItemOptions): void;
+		addPageSearchItem(item: Self.PageSearch.SearchableItem, options: Self.PageSearch.SearchableItemOptions): void;
 
-		addPageSearchItems(items: globalThis.Array<Self.SearchableItem>, options: Self.SearchableItemOptions): void;
+		addPageSearchItems(items: globalThis.Array<Self.PageSearch.SearchableItem>, options: Self.PageSearch.SearchableItemOptions): void;
 
 		removePageSearchItem(itemId: string): void;
 
@@ -17612,6 +18501,8 @@ declare module '@uif-js/component' {
 
 		export import Decorator = PackageCore.Decorator;
 
+		export import VisualStyle = Self.TabPanelOptions.VisualStyle;
+
 		enum ContentUpdateReason {
 			ITEM_ADDED,
 			ITEM_REMOVED,
@@ -17742,19 +18633,19 @@ declare module '@uif-js/component' {
 
 		private normalizeContent(content: any): globalThis.Array<(PackageCore.Component | string)>;
 
-		static Header(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static Header(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
-		static Body(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static Body(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
-		static Footer(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static Footer(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
-		static Row(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static Row(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
-		static HeaderCell(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static HeaderCell(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
-		static Cell(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static Cell(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
-		static Caption(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children}): PackageCore.JSX.Element;
+		static Caption(args: {classList?: (string | globalThis.Array<string> | PackageCore.Style | globalThis.Array<PackageCore.Style>); rootStyle?: object; rootAttributes?: object; children?: PackageCore.VDom.Children; key?: any}): PackageCore.JSX.Element;
 
 	}
 
@@ -17983,6 +18874,8 @@ declare module '@uif-js/component' {
 
 		onTextAccepted: (Self.TextArea.TextAcceptedCallback | null);
 
+		bloom: boolean;
+
 		setText(text: (string | number), options?: {reason?: string; accept?: boolean}): boolean;
 
 		setName(name: string): void;
@@ -18057,6 +18950,10 @@ declare module '@uif-js/component' {
 
 			onTextAccepted?: Self.TextArea.TextAcceptedCallback;
 
+			toolbar?: (PackageCore.Component | PackageCore.JSX.Element);
+
+			bloom?: boolean;
+
 		}
 
 		type TextChangedCallback = (args: Self.TextArea.TextChangedArgs, sender: Self.TextArea) => void;
@@ -18114,6 +19011,7 @@ declare module '@uif-js/component' {
 		enum VisualStyle {
 			DEFAULT,
 			EMBEDDED,
+			REDWOOD_FIELD,
 		}
 
 		enum AutoComplete {
@@ -18465,6 +19363,7 @@ declare module '@uif-js/component' {
 			DEFAULT,
 			EMBEDDED,
 			SYSTEM_HEADER,
+			REDWOOD_FIELD,
 		}
 
 		enum Reason {
@@ -18914,19 +19813,29 @@ declare module '@uif-js/component' {
 	}
 
 	export class TimeRangePicker extends Self.Picker {
-		private _handleSelectionChanged(args: {currentRange: object; oldRange: object}, reason: string): void;
+		constructor(options: Self.TimeRangePicker.Options);
+
+		private _handleSelectionChanged(args: Self.TimeRange.RangeChangedArgs): void;
 
 	}
 
 	export namespace TimeRangePicker {
+		interface Options extends Self.Picker.Options {
+		}
+
 	}
 
 	export class TimeSelectorPicker extends Self.Picker {
+		constructor(options: Self.TimeSelectorPicker.Options);
+
 		private _handleSelectionChanged(args: Self.TimePicker.TimeChangedArgs): void;
 
 	}
 
 	export namespace TimeSelectorPicker {
+		interface Options extends Self.Picker.Options {
+		}
+
 	}
 
 	export class ToggleGroup extends PackageCore.Component {
@@ -19067,6 +19976,7 @@ declare module '@uif-js/component' {
 		enum Type {
 			DEFAULT,
 			GHOST,
+			PURE,
 		}
 
 		enum Reason {
@@ -19224,7 +20134,7 @@ declare module '@uif-js/component' {
 
 		protected _checkDeprecatedEvent(eventName: PackageCore.EventSource.EventName): void;
 
-		constructor(options?: (string | PackageCore.JSX.Element | Self.Tooltip.Options));
+		constructor(options?: (string | PackageCore.Translation | PackageCore.Component | PackageCore.JSX.Element | Self.Tooltip.ContentCallback | Self.Tooltip.Options));
 
 		component: (PackageCore.Component | Element | null);
 
@@ -19468,7 +20378,7 @@ declare module '@uif-js/component' {
 		interface Options extends Self.GridColumn.Options {
 			showTreeLines?: boolean;
 
-			withHierarch?: boolean;
+			withHierarchy?: boolean;
 
 			autoWidth?: boolean;
 
@@ -19769,7 +20679,7 @@ declare module '@uif-js/component' {
 
 		lockedLevels: number;
 
-		displayMember: (Self.DataSourceComponent.DisplayMemberCallback | string);
+		displayMember: (Self.DataSourceComponent.DisplayMember | null);
 
 		cursorItem: Self.TreeItem;
 
@@ -19923,7 +20833,7 @@ declare module '@uif-js/component' {
 
 			customizeItem?: Self.TreeView.CustomizeItemCallback;
 
-			displayMember?: (string | Self.DataSourceComponent.DisplayMemberCallback);
+			displayMember?: Self.DataSourceComponent.DisplayMember;
 
 			draggable?: boolean;
 
@@ -20045,15 +20955,6 @@ declare module '@uif-js/component' {
 		export import SelectionMode = Self.TreeConstant.SelectionMode;
 
 		export import CounterFormat = Self.TreeChildCounter.Format;
-
-	}
-
-	export namespace TwoLinesResponsiveStrategy {
-		function createToolbarPanel(itemSelection: Self.ListPresenterConstant.ItemSelection, startPanel: Self.StackPanel, actionPanel: Self.StackPanel, viewingTools: Self.StackPanel, toolbarPanelOptions: object): {toolbar: Self.StackPanel; endPanel: Self.StackPanel};
-
-		function apply(options: {itemSelection: Self.ListPresenterConstant.ItemSelection; searchBox: Self.TextBox; searchBoxButton: Self.Button; viewingTools: Self.StackPanel; selectionPanel: Self.StackPanel; sidePanel: Self.StackPanel; startPanel: Self.StackPanel; endPanel: Self.StackPanel; viewWidth: number; filterPanel: PackageCore.Presenter; actionPanel: PackageCore.Presenter; updateSearchBoxVisibility: (visible: boolean) => void; hideAllFilters: () => void; filtersPosition: Self.ListView.FiltersPosition}): void;
-
-		function reset(itemSelection: Self.ListPresenterConstant.ItemSelection, endPanel: Self.StackPanel, viewingTools: Self.StackPanel, selectionPanel: Self.StackPanel): void;
 
 	}
 
@@ -20231,6 +21132,8 @@ declare module '@uif-js/component' {
 
 		}
 
+		type Target = (PackageCore.VDomRef | PackageCore.Component | Element | string | PackageCore.PositionHelper.Point | PackageCore.Rectangle | PackageCore.PositionHelper.TargetPoint);
+
 		interface PositionArgs {
 			alignment?: (PackageCore.PositionHelper.Alignment | globalThis.Array<PackageCore.PositionHelper.Alignment>);
 
@@ -20252,7 +21155,7 @@ declare module '@uif-js/component' {
 
 			strategy?: PackageCore.PositionHelper.Strategy;
 
-			target?: (PackageCore.VDomRef | PackageCore.Component | Element | string | PackageCore.PositionHelper.Point | PackageCore.Rectangle | PackageCore.PositionHelper.TargetPoint);
+			target?: Self.Window.Target;
 
 		}
 
@@ -20516,8 +21419,8 @@ declare module '@uif-js/component' {
 
 	}
 
-	export function createActionColumn(columnOptions: Self.ActionColumn.Options): Self.ActionColumn.Options;
+	export function createActionColumn(columnOptions: Omit<Self.ActionColumn.Options, "type">): Self.ActionColumn.Options;
 
-	export function createTemplatedColumn(columnOptions: Self.TemplatedColumn.Options): Self.TemplatedColumn.Options;
+	export function createTemplatedColumn(columnOptions: Omit<Self.TemplatedColumn.Options, "type">): Self.TemplatedColumn.Options;
 
 }

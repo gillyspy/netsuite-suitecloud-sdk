@@ -23,10 +23,10 @@ To ensure that you get the latest features and bug fixes, you should use the lat
 
 The following table shows the extension versions currently available in the Marketplace.
 
-| Extension Versions Available in the Marketplace | Available Since | Compatible NetSuite Version |
-|:-----------------------------------------------:|:---------------:|:---------------------------:|
-| 3.0.0 | 2025.1 | 2024.2 and 2025.1 |
-| 2.0.X | 2024.2 | 2024.2 and 2025.1 |
+| Extension Versions Available in the Marketplace |
+|:-----------------------------------------------:|
+| 3.1.x |
+| 3.0.x |
 
 ## Installing SuiteCloud Extension for Visual Studio Code
 To install SuiteCloud Extension for Visual Studio Code, follow these steps:
@@ -87,7 +87,7 @@ The selected account is set as default for the project.
   <img src="resources/SetUpAccount.gif" alt="animated" />
 </p>
 
-### SuiteCloud Commands
+## SuiteCloud Commands
 
 The following SuiteCloud commands are available through the Command Palette:
 
@@ -110,6 +110,36 @@ The following SuiteCloud commands are available through the Command Palette:
 |<a href="https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_164563201243.html" rel="noopener noreferrer" target=blank>Validate Project</a>|Validates a project against your NetSuite account. Only the files and folders referenced in the deploy.xml file are validated.|
 
 To read more about what you can do with SuiteCloud Extension for Visual Studio Code, visit <a href="https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_159223173518.html" rel="noopener noreferrer" target=blank>SuiteCloud Extension for Visual Studio Code Usage</a>.
+
+## SuiteCloud Developer Assistant Using Cline in SuiteCloud Extension for VS Code
+
+You can now configure the SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code (VS Code). SuiteCloud Developer Assistant is an AI-powered coding assistant designed for SuiteCloud developers. Integrated with Visual Studio Code through the Cline extension, it uses advanced language models specialized for SuiteCloud and SuiteScript to support NetSuite customization tasks. With SuiteCloud Developer Assistant, you can:
+  * Get real-time, context-aware coding assistance within your SuiteCloud projects
+  * Generate SuiteScript 2.1 code based on your input
+  * Create and manage XML custom objects to speed up development
+  * Work within your existing VS Code and Cline setup for a consistent workflow
+
+To set up SuiteCloud Developer Assistant:
+1.  Open Visual Studio Code with the SuiteCloud Extension installed and click the SuiteCloud Developer Assistant welcome message to go to the extension settings.
+
+    This will take you to Settings > Workspace tab > Extensions > SuiteCloud.
+
+2.  Next, configure the fields as follows:
+    * **Developer Assistant: Auth ID:** Enter the auth ID you want to use for the SuiteCloud Developer Assistant service.
+    * **Developer Assistant: Local Port:** Auto-filled by default. Change it if you prefer a different port or if the default port is already in use.
+    * **Developer Assistant: Enable:** Check the **Enable** box.
+
+    During the initial setup, when you enable the SuiteCloud Developer Assistant service, a popup window appears displaying an API key. Copy it and follow the instructions provided.
+
+3. In the activity bar, go to the Cline extension. Click the provider/model selector (status bar), and configure the fields as follows:
+      * **API Provider:** Select **OpenAI Compatible**.
+      * **OpenAI Compatible API Key:** Paste the generated API key.
+      * **Base URL:** Enter the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration. To see it again, refer to the SuiteCloud output panel.
+      * **Model ID:** If this isn't autopopulated, enter **NetSuite**.
+
+You can start vibe-coding with SuiteCloud Developer Assistant.
+
+Want more information? See <a href="https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/subsect_1121114206.html" rel="noopener noreferrer" target=blank>Setting up SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code</a> and  <a href="https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_1171315103" rel="noopener noreferrer" target=blank>SuiteCloud Developer Assistant Guide</a>. 
 
 ## Using SuiteCloud Extension for Visual Studio Code with SuiteCloud CLI for Node.js
 SuiteCloud CLI for Node.js is compatible with your Visual Studio Code integrated terminal, so you can run SuiteCloud CLI for Node.js commands directly there, independently from VS Code. To read more about it, visit <a href="https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/book_1558706016.html" rel="noopener noreferrer" target=blank>SuiteCloud CLI for Node.js</a>. 
