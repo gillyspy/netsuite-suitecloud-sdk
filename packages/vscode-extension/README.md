@@ -113,29 +113,29 @@ To read more about what you can do with SuiteCloud Extension for Visual Studio C
 
 ## SuiteCloud Developer Assistant Using Cline in SuiteCloud Extension for VS Code
 
-You can now configure the SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code. SuiteCloud Developer Assistant is an AI-powered coding assistant designed for SuiteCloud developers. Integrated with Visual Studio Code through the Cline extension, it uses advanced language models specialized for SuiteCloud and SuiteScript to support NetSuite customization tasks. With SuiteCloud Developer Assistant, you can:
+You can now configure the SuiteCloud Developer Assistant using Cline in SuiteCloud Extension for Visual Studio Code (VS Code). SuiteCloud Developer Assistant is an AI-powered coding assistant designed for SuiteCloud developers. Integrated with Visual Studio Code through the Cline extension, it uses advanced language models specialized for SuiteCloud and SuiteScript to support NetSuite customization tasks. With SuiteCloud Developer Assistant, you can:
   * Get real-time, context-aware coding assistance within your SuiteCloud projects
   * Generate SuiteScript 2.1 code based on your input
   * Create and manage XML custom objects to speed up development
   * Work within your existing VS Code and Cline setup for a consistent workflow
 
-To set up SuiteCloud Developer Assistant using Cline:
+To set up SuiteCloud Developer Assistant:
 1.  Open Visual Studio Code with the SuiteCloud Extension installed and click the SuiteCloud Developer Assistant welcome message to go to the extension settings.
 
-    This will take you to **Settings** > **Workspace** tab > **Extensions** > **SuiteCloud**.
+    This will take you to Settings > Workspace tab > Extensions > SuiteCloud.
 
 2.  Next, configure the fields as follows:
-    * **Developer Assistant: Auth ID:** Set to the auth ID you want to use for the SuiteCloud Developer Assistant service.
-    * **Developer Assistant: Local Port:** Autofilled by default. Change it if you prefer a different port or if the default port is already in use.
-    * **Developer Assistant: Enable:** Set to enabled.
+    * **Developer Assistant: Auth ID:** Enter the auth ID you want to use for the SuiteCloud Developer Assistant service.
+    * **Developer Assistant: Local Port:** Auto-filled by default. Change it if you prefer a different port or if the default port is already in use.
+    * **Developer Assistant: Enable:** Check the **Enable** box.
 
-    During the initial setup, when you enable the SuiteCloud Developer Assistant service, a popup window will appear displaying an API key. Copy it and follow the instructions provided in the popup window.
+    During the initial setup, when you enable the SuiteCloud Developer Assistant service, a popup window appears displaying an API key. Copy it and follow the instructions provided.
 
-3. In the activity bar, go to the Cline extension. Click the provider/model selector, and configure the fields as follows:
-      * **API Provider:** Set to **OpenAI Compatible**.
+3. In the activity bar, go to the Cline extension. Click the provider/model selector (status bar), and configure the fields as follows:
+      * **API Provider:** Select **OpenAI Compatible**.
       * **OpenAI Compatible API Key:** Paste the generated API key.
-      * **Base URL:** Set to the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration. To see it again, refer to the SuiteCloud output panel.
-      * **Model ID:** If this isn't autopopulated, set to **NetSuite**.
+      * **Base URL:** Enter the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration. To see it again, refer to the SuiteCloud output panel.
+      * **Model ID:** If this isn't autopopulated, enter **NetSuite**.
 
 You can start vibe-coding with SuiteCloud Developer Assistant.
 
