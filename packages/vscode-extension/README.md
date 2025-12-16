@@ -138,7 +138,7 @@ To set up SuiteCloud Developer Assistant:
       * **Model ID:** If this isn't autopopulated, enter **NetSuite**.
       * **Model Configuration:**
         * Clear the **Supports Images** checkbox.
-        * Set the **Context Window Size** to **1,000,000**.
+        * Set the **Context Window Size** to **1000000**.
 
 You can start vibe-coding with SuiteCloud Developer Assistant.
 
