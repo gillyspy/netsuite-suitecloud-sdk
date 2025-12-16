@@ -136,6 +136,9 @@ To set up SuiteCloud Developer Assistant:
       * **OpenAI Compatible API Key:** Paste the generated API key.
       * **Base URL:** Enter the URL provided by SuiteCloud Extension for VS Code during SuiteCloud Developer Assistant configuration. To see it again, refer to the SuiteCloud output panel.
       * **Model ID:** If this isn't autopopulated, enter **NetSuite**.
+      * **Model Configuration:**
+        * Clear the **Supports Images** checkbox.
+        * Set the **Context Window Size** to **1000000**.
 
 You can start vibe-coding with SuiteCloud Developer Assistant.
 
