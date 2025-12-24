@@ -23,10 +23,11 @@ To ensure that you get the latest features and bug fixes, you should use the lat
 
 The following table shows the CLI versions currently available in NPM.
 
-| CLI Versions Available in NPM | Available Since | Compatible NetSuite Version |
-|:-----------------------------:|:---------------:|:---------------------------:|
-| 3.0.1 | 2025.2 | 2025.1 and 2025.2 |
-| 3.0.0 | 2025.1 | 2024.2 and 2025.1 |
+| CLI Versions Available in NPM | 
+|:-----------------------------:|
+| 3.1.2 |
+| 3.1.1 |
+
 
 ## Installation
 Since CLI for Node.js is a development tool, use a global instance to install it by running the following command:
@@ -54,7 +55,7 @@ suitecloud <command> <option> <argument>
 | --- | --- |
 |[`account:manageauth`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_157304934116.html)|Manages authentication IDs for all your projects.|
 |[`account:setup`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_89132630266.html)|Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. It requires browser-based login to NetSuite.|
-|[`account:setup:ci`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_81134826821.html)|Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. It does not require browser-based login to NetSuite. This command is helpful for automated environments such as CI.|
+|[`account:setup:ci`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_81134826821.html)|Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. It also allows you to select an existing auth ID for the SuiteCloud project. This command does not require browser-based login to NetSuite and is helpful for automated environments such as CI.|
 |[`file:create`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_162810635242.html)|Creates SuiteScript files in the selected folder using the correct template with SuiteScript modules injected.|
 |[`file:import`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_156041963273.html)|Imports files from an account to your account customization project.|
 |[`file:list`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_156042966488.html)|Lists the files in the File Cabinet of your account.|
@@ -92,8 +93,8 @@ suitecloud account:setup
 ```
 
 ## Release Notes & Documentation
-To read the 2025.1 NetSuite's release notes and documentation, check the following sections of NetSuite's Help Center:
-- Read the release notes for NetSuite 2025.1 in [SuiteCloud SDK Release Notes](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_1558730192.html).
+To read the 2025.2 NetSuite's release notes and documentation, check the following sections of NetSuite's Help Center:
+- Read the release notes for NetSuite 2025.2 in [SuiteCloud SDK Release Notes](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_1558730192.html).
 - Read the latest updates under SuiteCloud SDK in the [Help Center Weekly Updates](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_3798389663.html).
 - Read the CLI for Node.js documentation in [SuiteCloud CLI for Node.js Guide](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1558708800.html).
 
