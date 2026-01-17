@@ -59,6 +59,52 @@ module.exports = class FileSystemService {
 		return fullPathFiles;
 	}
 
+	/**
+	 * @see {FileSystemService}
+	 */
+	getFirstAncestorByName(names, startingPath, isDirectory = false) {
+		assert(names);
+		assert(names.length);
+		assert(startingPath);
+		let filesFound = [];
+		let limitReached = false;
+		try {
+			const getAncestorsRecursively = source => {
+				if (source === '/') limitReached = true;
+
+				if(limitReached) return;
+
+				const firstFound = readdirSync(source).find(fileOrDir => {
+					const fullPath = path.join(source, fileOrDir);
+					if(isDirectory && lstatSync(fullPath).isDirectory()){
+						if( names.includes(fileOrDir)) return true;
+					}
+
+					if (lstatSync(fullPath).isFile()) {
+						if (fileOrDir === 'package.json') limitReached = true;
+						if (!isDirectory && names.includes(fileOrDir)) return true;
+					}
+				});
+				const nextPath = path.join(source, '..');
+				if (nextPath === source) limitReached = true;
+
+				if( firstFound ) {
+					filesFound.push(path.resolve(path.join(source,firstFound)));
+					return;
+				}
+
+				if(limitReached) return;
+
+				getAncestorsRecursively(nextPath);
+			}
+			getAncestorsRecursively(startingPath);
+		} catch {
+			return;
+		}
+
+		return filesFound.shift();
+	}
+
 	createFileFromTemplate(options) {
 		assert(options.template);
 		assert(options.destinationFolder);
