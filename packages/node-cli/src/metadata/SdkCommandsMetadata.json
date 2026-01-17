@@ -48,6 +48,7 @@
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
@@ -77,6 +78,7 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination.",
 				"mandatory": true,
@@ -156,13 +158,14 @@
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -264,13 +267,14 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"applyinstallprefs": {
 				"name": "applyinstallprefs",
@@ -304,13 +308,14 @@
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"skip_warning": {
 				"name": "skip_warning",
@@ -373,23 +378,25 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -452,23 +459,25 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -491,13 +500,14 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -540,13 +550,14 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -628,13 +639,14 @@
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Specifies the path of your project folder.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -657,23 +669,25 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -696,23 +710,25 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
@@ -735,13 +751,14 @@
 			},
 			"authid": {
 				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
 				"option": "authid",
 				"description": "References the custom alias you give to a specific account-role combination. Referred to as authentication ID and auth ID in the documentation.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"applyinstallprefs": {
 				"name": "applyinstallprefs",
@@ -765,13 +782,14 @@
 			},
 			"project": {
 				"name": "project",
+				"env": "SUITECLOUD_PROJECT_FOLDER",
 				"option": "project",
 				"description": "Sets the folder or zipped file containing the project. It overrides the default project.",
 				"mandatory": true,
 				"type": "SINGLE",
 				"usage": "c:\/project\/",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"server": {
 				"name": "server",
