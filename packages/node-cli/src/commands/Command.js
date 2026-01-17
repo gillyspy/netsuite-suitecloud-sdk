@@ -19,6 +19,12 @@ const INTERACTIVE_MODE = {
 	DEFAULT: 'DEFAULT',
 };
 
+const NEVER_PARAMS = {
+	'CONFIG': 'config',
+	'NOCONFIG': 'noconfig'
+};
+
+/** @type {import('./Command')} */
 class Command {
 	constructor(options, action, inputHandler, outputHandler) {
 		assert(options);
@@ -34,7 +40,7 @@ class Command {
 
 		this._commandMetadata = options.commandMetadata;
 		this._projectFolder = options.projectFolder;
-		this._executionPath = options.executionPath;
+		this.__executionPath = options.executionPath;
 		this._runInInteractiveMode = options.runInInteractiveMode;
 		this._interactiveSupport = options.interactiveSupport;
 		this._log = options.log;
@@ -44,11 +50,21 @@ class Command {
 		this._outputHandler = new outputHandler(options);
 	}
 
+	get _executionPath(){
+		debugger;
+		return this.__executionPath;
+	}
+
 	async run(inputParams) {
+		this._cleanNeverParams(inputParams);
 		const execParams =
 			this._interactiveSupport === INTERACTIVE_MODE.ALWAYS || (this._interactiveSupport !== INTERACTIVE_MODE.NEVER && this._runInInteractiveMode)
 				? await this._inputHandler.getParameters(inputParams)
 				: inputParams;
+
+		if( this._interactiveSupport === INTERACTIVE_MODE.ALWAYS || (this._interactiveSupport !== INTERACTIVE_MODE.NEVER && this._runInInteractiveMode)) {
+			if( inputParams.authid) execParams.authid = inputParams.authid
+		}
 
 		const preExec = await this._action.preExecute(execParams);
 
@@ -64,6 +80,12 @@ class Command {
 		} else {
 			return this._outputHandler.parse(actionResult);
 		}
+	}
+
+	_cleanNeverParams(params){
+		Object.values(NEVER_PARAMS).forEach((p)=>{
+			if( Reflect.has(params,p)) delete params[p];
+		})
 	}
 
 	_validateActionParameters(params) {
