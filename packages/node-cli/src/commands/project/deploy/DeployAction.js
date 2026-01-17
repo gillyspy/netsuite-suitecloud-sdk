@@ -56,7 +56,6 @@ module.exports = class DeployAction extends (
 		return {
 			...params,
 			[COMMAND.OPTIONS.PROJECT]: CommandUtils.quoteString(this._projectFolder),
-			[COMMAND.OPTIONS.AUTH_ID]: getProjectDefaultAuthId(this._executionPath),
 			...AccountSpecificValuesUtils.transformArgument(params),
 		};
 	}
@@ -109,7 +108,7 @@ module.exports = class DeployAction extends (
 				message: NodeTranslationService.getMessage(
 					COMMAND_DEPLOY.MESSAGES.PREVIEWING,
 					this._projectName,
-					getProjectDefaultAuthId(this._executionPath),
+					this._authId
 				),
 			});
 
@@ -136,7 +135,7 @@ module.exports = class DeployAction extends (
 				message: NodeTranslationService.getMessage(
 					COMMAND_DEPLOY.MESSAGES.DEPLOYING,
 					this._projectName,
-					getProjectDefaultAuthId(this._executionPath),
+					this._authId
 				),
 			});
 
