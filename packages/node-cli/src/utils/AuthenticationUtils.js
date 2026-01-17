@@ -5,13 +5,10 @@
 'use strict';
 
 const FileUtils = require('./FileUtils');
+const assert = require('assert');
 const NodeTranslationService = require('../services/NodeTranslationService');
-const {
-	ERRORS,
-	UTILS,
-	COMMAND_SETUPACCOUNTCI: { ERRORS: { NOT_EXISTING_AUTH_ID } },
-} = require('../services/TranslationKeys');
-const { FILES} = require('../ApplicationConstants');
+const { ERRORS, UTILS } = require('../services/TranslationKeys');
+const { FILES } = require('../ApplicationConstants');
 const { ActionResult } = require('../services/actionresult/ActionResult');
 const AuthenticateActionResult = require('../services/actionresult/AuthenticateActionResult');
 const { executeWithSpinner } = require('../ui/CliSpinner');
@@ -21,7 +18,8 @@ const SdkOperationResultUtils = require('../utils/SdkOperationResultUtils');
 const SdkExecutor = require('../SdkExecutor');
 const { lineBreak } = require('../loggers/LoggerOsConstants')
 const ExecutionEnvironmentContext = require('../ExecutionEnvironmentContext');
-const SdkOperationResult = require('../utils/SdkOperationResult')
+const SdkOperationResult = require('../utils/SdkOperationResult');
+const {ENV_VARS} = require('../ApplicationConstants');
 
 const DEFAULT_AUTH_ID_PROPERTY = 'defaultAuthId';
 
@@ -91,20 +89,15 @@ function setDefaultAuthentication(projectFolder, authId) {
 	}
 }
 
-function getProjectDefaultAuthId(projectFolder) {
-	const projectFilePath = path.join(projectFolder, FILES.PROJECT_JSON);
-	if (FileUtils.exists(projectFilePath)) {
-		try {
-			const fileContentJson = FileUtils.readAsJson(projectFilePath);
-			if (!fileContentJson.hasOwnProperty(DEFAULT_AUTH_ID_PROPERTY)) {
-				throw NodeTranslationService.getMessage(ERRORS.MISSING_DEFAULT_AUTH_ID, DEFAULT_AUTH_ID_PROPERTY);
-			}
-			return fileContentJson[DEFAULT_AUTH_ID_PROPERTY];
-		} catch (error) {
-			throw NodeTranslationService.getMessage(ERRORS.WRONG_JSON_FILE, projectFilePath, error) +
-			lineBreak + NodeTranslationService.getMessage(ERRORS.RUN_SETUP_ACCOUNT);
-		}
-	}
+/**
+ * @description - Looks at the environment for the value. This should be settled after the command is setup and launched.
+ * - only call this internally before the command is generated
+ * @deprecated - no new commands should call this directly
+ * @returns {string|void}
+ */
+function getProjectDefaultAuthId() {
+	// look in the environment first
+	return process.env[ENV_VARS.SUITECLOUD_AUTHID];
 }
 
 async function getAuthIds(sdkPath) {
