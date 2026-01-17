@@ -6,10 +6,13 @@
 
 const { ActionResult } = require('../../services/actionresult/ActionResult');
 const SdkExecutor = require('../../SdkExecutor');
+const { getProjectDefaultAuthId } = require('../../utils/AuthenticationUtils');
 
 module.exports = class BaseAction {
 	constructor(options) {
 		this._projectFolder = options.projectFolder;
+		// an optional opportunity to override;
+		this._authId = options.authId || getProjectDefaultAuthId();
 		this._commandMetadata = options.commandMetadata;
 		this._executionPath = options.executionPath;
 		this._runInInteractiveMode = options.runInInteractiveMode;
