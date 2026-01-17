@@ -5,9 +5,14 @@
 'use strict';
 
 
+const { getProjectDefaultAuthId } = require('../../utils/AuthenticationUtils');
 module.exports = class BaseOutputHandler {
 	constructor(options) {
 		this._log = options.log;
+		this._projectFolder = options.projectFolder;
+		this._authId = options.authId || getProjectDefaultAuthId();
+
+		this._log.info(`[${options.authId || 'N/A'}]: ${options.projectFolder}`);
 	}
 
 	parse(actionResult) {
