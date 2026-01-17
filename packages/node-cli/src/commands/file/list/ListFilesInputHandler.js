@@ -26,7 +26,7 @@ module.exports = class ListFilesInputHandler extends BaseInputHandler {
 		this._accountFileCabinetService = new AccountFileCabinetService(
 			this._sdkPath,
 			this._executionEnvironmentContext,
-			getProjectDefaultAuthId(this._executionPath)
+			 this._authId
 		);
 	}
 
