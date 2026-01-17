@@ -14,8 +14,10 @@ const { unwrapExceptionMessage, unwrapInformationMessage } = require('../utils/E
 const { getProjectDefaultAuthId } = require('../utils/AuthenticationUtils');
 const ExecutionEnvironmentContext = require('../ExecutionEnvironmentContext');
 const { checkIfReauthorizationIsNeeded, refreshAuthorization } = require('../utils/AuthenticationUtils');
-const { AUTHORIZATION_PROPERTIES_KEYS } = require('../ApplicationConstants');
+const { AUTHORIZATION_PROPERTIES_KEYS, AUTHORIZATION_FORCE_PROMPTS, ENV_VARS } = require('../ApplicationConstants');
+const ManageAccountInputHandler = require('../commands/account/manageauth/ManageAccountInputHandler');
 
+/** @type {CommandActionExecutor} */
 module.exports = class CommandActionExecutor {
 	constructor(dependencies) {
 		assert(dependencies);
@@ -36,6 +38,9 @@ module.exports = class CommandActionExecutor {
 			this._executionEnvironmentContext = dependencies.executionEnvironmentContext;
 		}
 	}
+	get _executionPath(){
+		return this._cliConfigurationService?._executionPath ?? process.cwd();
+	}
 
 	async executeAction(context) {
 		assert(context);
@@ -47,8 +52,16 @@ module.exports = class CommandActionExecutor {
 		try {
 			const commandName = context.commandName;
 			const commandMetadata = this._commandsMetadataService.getCommandMetadataByName(commandName);
-			this._cliConfigurationService.initialize(this._executionPath);
-			const projectFolder = this._cliConfigurationService.getProjectFolder(commandName);
+			if (context.arguments.config) {
+				this._cliConfigurationService.initialize(context.arguments.config, true);
+			} else if (context.arguments.noconfig) {
+				//do nothing;
+				this._cliConfigurationService.initialize(undefined, true);
+			} else {
+				// location of suitecloud.config
+				this._cliConfigurationService.initialize(process.cwd());
+			}
+
 			commandUserExtension = this._cliConfigurationService.getCommandUserExtension(commandName);
 			const runInInteractiveMode = context.runInInteractiveMode;
 			const defaultAuthId = commandMetadata.isSetupRequired ? getProjectDefaultAuthId(this._executionPath) : null;
@@ -56,28 +69,107 @@ module.exports = class CommandActionExecutor {
 			this._checkCanExecuteCommand({ runInInteractiveMode, commandMetadata, defaultAuthId });
 
 			const commandArguments = this._extractOptionValuesFromArguments(commandMetadata.options, context.arguments);
-			
-			// run beforeExecute(args) from suitecloud.config.js
-			const beforeExecutingOutput = await commandUserExtension.beforeExecuting({
+
+			// need the
+			const projectFolder = this._cliConfigurationService.getProjectFolder(commandName, commandArguments?.project);
+			const projectPath = this._cliConfigurationService.getProjectPath(projectFolder);
+			let authId;
+			// allow an override via --authid
+			if (commandArguments?.authid) {
+				if (!runInInteractiveMode) {
+					// this might throw -- it could also be semi-interactive
+					try{
+						authId = this._cliConfigurationService.getAuthId(commandName, projectPath, commandArguments?.authid);
+					}catch(e){
+						if( commandMetadata.isSetupRequired ) throw e;
+					}
+
+				} else {
+					[authId] = AUTHORIZATION_FORCE_PROMPTS;
+				}
+			}
+			// in interactive mode we can prompt for the authid
+			if (AUTHORIZATION_FORCE_PROMPTS.includes(authId)) {
+				const interactiveAuthIdHandler = new ManageAccountInputHandler({
+					projectFolder: projectPath,
+					commandMetadata,
+					log: this._log,
+					// force it
+					runInInteractiveMode: true,
+					executionEnvironmentContext: this._executionEnvironmentContext,
+					sdkPath: this._sdkPath,
+				});
+				const { selected_auth_id: chosenAuth } = await interactiveAuthIdHandler.getAuthId(authId);
+				if (chosenAuth?.authId) authId = chosenAuth.authId;
+			}
+
+			this._checkCanExecuteCommand({ runInInteractiveMode, commandMetadata, defaultAuthId: authId });
+
+			const commandArgumentsWithDefaultContext = this._applyDefaultContextParams(
+				commandArguments,
+				{
+					project: projectPath,
+					authid: authId,
+				},
+				commandMetadata,
+			);
+			const beforeExecutingOptions = {
 				commandName: commandName,
-				projectFolder: this._executionPath,
-				arguments: commandMetadata.isSetupRequired ? this._applyDefaultContextParams(commandArguments, defaultAuthId) : commandArguments,
-			});
+				// the path of the config for teh service
+				projectFolder: projectFolder, // this._cliConfigurationService._executionPath,
+				projectPath: projectPath,
+				// probably cwd
+				executionPath: this._executionPath,
+				// do not pass reference
+				arguments: { ...commandArgumentsWithDefaultContext },
+			};
+			if (commandMetadata.isSetupRequired) {
+				// run beforeExecute(args) from suitecloud.config.js
+				beforeExecutingOptions.authId = authId;
+				beforeExecutingOptions.arguments = {
+					...commandArgumentsWithDefaultContext,
+					authid: authId,
+				};
+			}
+
+			if (context.runInInteractiveMode){
+				beforeExecutingOptions.arguments.interactive = true
+			}
+
+			// establish these prior to calling the hooks so they have the available in their environment as well
+			process.env[ENV_VARS.SUITECLOUD_PROJECT_FOLDER] = projectFolder;
+			process.env[ENV_VARS.SUITECLOUD_PROJECT_PATH] = projectPath;
+			process.env[ENV_VARS.SUITECLOUD_PROJECT_ROOT] = this._executionPath;
+			// this might modified but we need the user's hooks to take advantage of their current values
+			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
+
+			const beforeExecutingOutput = await commandUserExtension.beforeExecuting(beforeExecutingOptions);
 			const overriddenArguments = beforeExecutingOutput.arguments;
-			
+
+			// do not allow this argument to be overwritten (i.e. change it back)
+			if (Reflect.has(commandArgumentsWithDefaultContext, 'project'))
+				overriddenArguments.project = commandArgumentsWithDefaultContext.project;
+
+			// update the authid as well (not recommended but possible) -- should this be in the isSetupRequired check?
+			// EXPERIMENTAL: ALLOW UPDATE OF THE AUTHID AT THIS TIME
+			if (commandMetadata.isSetupRequired)
+				authId = beforeExecutingOutput?.arguments?.authid || authId;
+
 			if (commandMetadata.isSetupRequired && !context.arguments[AUTHORIZATION_PROPERTIES_KEYS.SKIP_AUHTORIZATION_CHECK]) {
 				// check if reauthz is needed to show proper message before continuing with the execution
 				// check after the beforeExecute() has been performed because for instance some unit-test failed and we won't continue the execution
-				await this._refreshAuthorizationIfNeeded(defaultAuthId);
+				await this._refreshAuthorizationIfNeeded(authId);
 			}
+			// AT THIS POINT THE AUTHID IS NOW LOCKED IN SO WE CAN UPDATE THE (TEMP) ENVIRONMENT AGAIN
+			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
 
 			// command creation
 			// src/commands/{noun}/{verb}/{verb}{noun}Command.js => specific implementation creation for a given command
-			const command = this._getCommand(runInInteractiveMode, projectFolder, commandMetadata);
+			const command = this._getCommand(runInInteractiveMode, projectPath, commandMetadata, authId);
 
 			// command execution
 			// src/commands/Command.js, run(inputParams) => execution flow for all commands
-			const actionResult = await command.run(overriddenArguments)
+			const actionResult = await command.run(overriddenArguments);
 
 			if (context.runInInteractiveMode) {
 				// generate non-interactive equivalent
@@ -134,7 +226,7 @@ module.exports = class CommandActionExecutor {
 		return errorMessage;
 	}
 
-	_checkCanExecuteCommand({ commandMetadata, defaultAuthId, runInInteractiveMode}) {
+	_checkCanExecuteCommand({ commandMetadata, defaultAuthId, runInInteractiveMode }) {
 		if (commandMetadata.isSetupRequired && !defaultAuthId) {
 			throw NodeTranslationService.getMessage(ERRORS.SETUP_REQUIRED);
 		}
@@ -154,13 +246,23 @@ module.exports = class CommandActionExecutor {
 		return optionValues;
 	}
 
-	_getCommand(runInInteractiveMode, projectFolder, commandMetadata) {
+	/**
+	 *
+	 * @param runInInteractiveMode
+	 * @param projectFolder
+	 * @param commandMetadata
+	 * @param {string} authId
+	 * @returns {import('../commands/Command')}
+	 * @private
+	 */
+	_getCommand(runInInteractiveMode, projectFolder, commandMetadata, authId) {
 		const commandPath = commandMetadata.generator;
 		const commandGenerator = require(commandPath);
 		if (!commandGenerator) {
 			throw `Path ${commandPath} doesn't contain any command`;
 		}
 		return commandGenerator.create({
+			authId: authId,
 			commandMetadata: commandMetadata,
 			projectFolder: projectFolder,
 			executionPath: this._executionPath,
@@ -171,8 +273,17 @@ module.exports = class CommandActionExecutor {
 		});
 	}
 
-	_applyDefaultContextParams(args, defaultAuthId) {
-		args.authid = defaultAuthId;
-		return args;
+	/**
+	 * Assign default context params IF they apply
+	 */
+	_applyDefaultContextParams(args, any, meta) {
+		return Object.keys(any)
+			.filter((k1) => Object.keys(meta).includes(k1))
+			.reduce((args, filteredKey) => {
+				return {
+					...args,
+					[filteredKey]: any[filteredKey],
+				};
+			}, args);
 	}
 };
