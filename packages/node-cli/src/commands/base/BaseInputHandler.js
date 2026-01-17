@@ -4,12 +4,15 @@
  */
 'use strict';
 
+const { getProjectDefaultAuthId } = require('../../utils/AuthenticationUtils');
 module.exports = class BaseInputHandler {
 	constructor(options) {
 		this._projectFolder = options.projectFolder;
 		this._commandMetadata = options.commandMetadata;
 		this._executionPath = options.executionPath;
+		this._configPath = options.configPath;
 		this._log = options.log;
+		this._authId = options.authId || getProjectDefaultAuthId();
 		this._runInInteractiveMode = options.runInInteractiveMode;
 		this._executionEnvironmentContext = options.executionEnvironmentContext;
 		this._sdkPath = options.sdkPath;
