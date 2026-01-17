@@ -40,7 +40,6 @@ module.exports = class UpdateAction extends BaseAction {
 
 	preExecute(params) {
 		params[COMMAND_OPTIONS.PROJECT] = CommandUtils.quoteString(this._projectFolder);
-		params[COMMAND_OPTIONS.AUTH_ID] = getProjectDefaultAuthId(this._executionPath);
 		params[COMMAND_OPTIONS.SCRIPT_ID] = [...new Set(params[ANSWERS_NAMES.SCRIPT_ID_LIST])].join(' ');
 		return params;
 	}
