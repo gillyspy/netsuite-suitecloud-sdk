@@ -41,7 +41,6 @@ module.exports = class ImportFilesInputHandler extends BaseInputHandler {
 		this._sdkExecutor = new SdkExecutor(this._sdkPath, this._executionEnvironmentContext);
 
 		this._projectInfoService = new ProjectInfoService(this._projectFolder);
-		this._authId = getProjectDefaultAuthId(this._executionPath);
 	}
 
 	async getParameters(params) {
