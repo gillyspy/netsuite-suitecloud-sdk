@@ -4,11 +4,14 @@
  */
 'use strict';
 
+const PACKAGE = require('../package.json');
+
 module.exports = {
 	AUTHORIZATION_PROPERTIES_KEYS: {
 		NEEDS_REAUTHORIZATION: 'needsReauthorization',
 		SKIP_AUHTORIZATION_CHECK: 'skipAuthorizationCheck'
 	},
+	AUTHORIZATION_FORCE_PROMPTS : ['prompt'],
 	SDK_COMMANDS_METADATA_FILE: 'metadata/SdkCommandsMetadata.json',
 	SDK_COMMANDS_METADATA_PATCH_FILE: 'metadata/SdkCommandsMetadataPatch.json', //Overwrites selected properties in SdkCommandsMetadata.json file that are specific for SuiteCloud CLI for Node.js
 	NODE_COMMANDS_METADATA_FILE: 'metadata/NodeCommandsMetadata.json',
@@ -24,6 +27,8 @@ module.exports = {
 		LOCKING_PREFERENCE: 'locking.xml',
 		MANIFEST_XML: 'manifest.xml',
 		SDK_SETTINGS: 'suitecloud-sdk-settings.json',
+		CLI_CONFIG_FILE_JS: [PACKAGE.configFile].flat().map(cf=>(cf+ '.js')),
+		CLI_CONFIG_FILE_JSON: [PACKAGE.configFile].flat().map(cf=>(cf+ '.json')),
 	},
 	FOLDERS: {
 		FILE_CABINET: '/FileCabinet',
@@ -67,7 +72,11 @@ module.exports = {
 	ENV_VARS: {
 		SUITECLOUD_CI: 'SUITECLOUD_CI',
 		SUITECLOUD_CI_PASSKEY: 'SUITECLOUD_CI_PASSKEY',
-		SUITECLOUD_FALLBACK_PASSKEY: 'SUITECLOUD_FALLBACK_PASSKEY'
+		SUITECLOUD_FALLBACK_PASSKEY: 'SUITECLOUD_FALLBACK_PASSKEY',
+		SUITECLOUD_AUTHID: 'SUITECLOUD_AUTHID',
+		SUITECLOUD_PROJECT_FOLDER: 'SUITECLOUD_PROJECT_FOLDER',
+		SUITECLOUD_PROJECT_PATH: 'SUITECLOUD_PROJECT_PATH',
+		SUITECLOUD_PROJECT_ROOT: 'SUITECLOUD_PROJECT_ROOT',
 	},
 	HTTP_RESPONSE_CODE: {
 		UNAUTHORIZED: 401,
