@@ -55,12 +55,7 @@ module.exports = class ManageAccountInputHandler extends BaseInputHandler {
 		if (!this._runInInteractiveMode) {
 			return params;
 		}
-		let answers;
-		const authIDActionResult = await getAuthIds(this._sdkPath);
-		if (!authIDActionResult.isSuccess()) {
-			throw authIDActionResult.errorMessages;
-		}
-		answers = await this._selectAuthID(authIDActionResult.data, prompt);
+		let answers = await this.getAuthId(params)
 		this._log.info(AccountCredentialsFormatter.getInfoString(answers[ANSWERS_NAMES.SELECTED_AUTH_ID]));
 		const selectedAuthID = answers[ANSWERS_NAMES.SELECTED_AUTH_ID].authId;
 		answers[ANSWERS_NAMES.ACTION] = await this._selectAction(prompt);
@@ -71,6 +66,18 @@ module.exports = class ManageAccountInputHandler extends BaseInputHandler {
 		}
 
 		return this._extractAnswers(answers);
+	}
+
+	async getAuthId(params){
+		if (!this._runInInteractiveMode) {
+			return params;
+		}
+
+		const authIDActionResult = await getAuthIds(this._sdkPath);
+		if (!authIDActionResult.isSuccess()) {
+			throw authIDActionResult.errorMessages;
+		}
+		return await this._selectAuthID(authIDActionResult.data, prompt);
 	}
 
 	_logAccountInfo(selectedAuthId) {
