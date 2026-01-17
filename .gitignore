@@ -13,3 +13,6 @@ packages/**/dist
 
 # config
 **/core/sdksetup/config*.json
+
+# packed files
+*.tgz
