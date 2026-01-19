@@ -1,4 +1,124 @@
 {
+	"custom:hook": {
+		"name": "custom:hook",
+		"sdkCommand":null,
+		"alias": "customhook",
+		"description": "Runs a passthrough for your handlers. Otherwise does nothing.",
+		"isSetupRequired": false,
+		"forceInteractiveMode": false,
+		"options": {
+			"option1": {
+				"name": "option1",
+				"description": "Arbitrary value for your custom hook to recognize",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"option2": {
+				"name": "option2",
+				"description": "Arbitrary for your custom hook to recognize",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"option3": {
+				"name": "option3",
+				"description": "Arbitrary for your custom hook to recognize",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"option4": {
+				"name": "option4",
+				"description": "Arbitrary for your custom hook to recognize",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"option5": {
+				"name": "option5",
+				"description": "Arbitrary for your custom hook to recognize",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"multi1": {
+				"name": "multi1",
+				"description": "Arbitrary array for your custom hook to recognize",
+				"usage": "--multi1 a b c",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"multi2": {
+				"name": "multi2",
+				"description": "Arbitrary array for your custom hook to recognize",
+				"usage": "--multi2 a b c",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"multi3": {
+				"name": "multi3",
+				"description": "Arbitrary array for your custom hook to recognize",
+				"usage": "--multi3 a b c",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"multi4": {
+				"name": "multi4",
+				"description": "Arbitrary array for your custom hook to recognize",
+				"usage": "--multi4 a b c",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"multi5": {
+				"name": "multi5",
+				"description": "Arbitrary array for your custom hook to recognize",
+				"usage": "--multi5 a b c",
+				"type": "SINGLE",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"flag1": {
+				"name": "flag1",
+				"description": "Arbitrary on/off flag for your custom hook to use",
+				"type": "FLAG",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"flag2": {
+				"name": "flag2",
+				"description": "Arbitrary on/off flag for your custom hook to use",
+				"type": "FLAG",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"flag3": {
+				"name": "flag3",
+				"description": "Arbitrary on/off flag for your custom hook to use",
+				"type": "FLAG",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"flag4": {
+				"name": "flag4",
+				"description": "Arbitrary on/off flag for your custom hook to use",
+				"type": "FLAG",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			},
+			"flag5": {
+				"name": "flag5",
+				"description": "Arbitrary on/off flag for your custom hook to use",
+				"type": "FLAG",
+				"mandatory": false,
+				"disableInIntegrationMode": false
+			}
+		}
+	},
 	"account:setup": {
 		"name": "account:setup",
 		"alias": "sa",

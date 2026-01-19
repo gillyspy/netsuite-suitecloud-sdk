@@ -20,6 +20,11 @@
 		"generator": "./commands/custom/hello/Command"
 	},
 	{
+		"commandName": "custom:hook",
+		"supportsInteractiveMode": false,
+		"generator": "./commands/custom/hook/Command"
+	},
+	{
 		"commandName": "file:create",
 		"supportsInteractiveMode": true,
 		"generator": "commands/file/create/CreateFileCommand"
