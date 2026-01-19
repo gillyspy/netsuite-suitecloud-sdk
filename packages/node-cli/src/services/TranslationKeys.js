@@ -5,6 +5,10 @@
 'use strict';
 
 module.exports = {
+	COMMAND_HELLO: {
+		TEST: 'COMMAND_HELLO_TEST',
+		TEST2: 'COMMAND_HELLO_TEST2',
+	},
 	COMMAND_CUSTOMJOB: {
 		ERRORS: {},
 		MESSAGES: {},

@@ -15,6 +15,7 @@ class ActionResult {
 		this.validateParameters(parameters);
 		this._status = parameters.status;
 		this._data = parameters.data;
+		this._authId = parameters.authId;
 		this._resultMessage = parameters.resultMessage;
 		this._errorMessages = parameters.errorMessages;
 		this._projectFolder = parameters.projectFolder;
@@ -44,6 +45,10 @@ class ActionResult {
 
 	get errorMessages() {
 		return this._errorMessages;
+	}
+
+	get authId(){
+		return this._authId;
 	}
 
 	get data() {

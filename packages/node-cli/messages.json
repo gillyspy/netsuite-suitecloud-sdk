@@ -79,6 +79,8 @@
 	"COMMAND_DEPLOY_MESSAGES_PREVIEWING": "Previewing project \"{0}\" with auth ID \"{1}\"...",
 	"COMMAND_DEPLOY_ERRORS_VALIDATE_AND_DRYRUN_OPTIONS_PASSED": "The \"--validate\" and \"--dryrun\" options are mutually exclusive. Use one of the two at a time.",
 
+	"COMMAND_HELLO_TEST": "👋🏻 You are in aux:hello. You said: `{0}`",
+	"COMMAND_HELLO_TEST2": "Nicely Done!",
 	"COMMAND_IMPORTFILES_ERRORS_INTERNAL": "Something went wrong with {0}, error: {1}",
 	"COMMAND_IMPORTFILES_ERRORS_IS_SUITEAPP": "The files could not be imported. You are trying to import files to a SuiteApp project. You can only import files to Account Customization Projects.",
 	"COMMAND_IMPORTFILES_ERRORS_NO_FOLDERS_FOUND": "No folders available.",
