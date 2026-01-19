@@ -29,7 +29,7 @@
 		"sdf.config",
 		"suitecloud.config"
 	],
-	"sdkDownloadUrl": "https://system.netsuite.com/download/suitecloud-sdk/25.1",
+	"sdkDownloadUrl": "https://system.netsuite.com/download/suitecloud-sdk/25.2",
 	"bin": {
 		"sdf": "src/suitecloud.js"
 	},
