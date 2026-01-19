@@ -38,3 +38,10 @@ Thumbs.db
 
 # Project config
 project.json
+
+# temp files
+sdftemp*
+
+# default deploy and manifest file
+deploy.xml
+manifest.xml
