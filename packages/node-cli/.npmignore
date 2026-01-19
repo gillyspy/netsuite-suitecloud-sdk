@@ -11,3 +11,17 @@
 # node-cli specific
 **/__test__/**
 **/__tests__/**
+jest.config.js
+jsconfig.json
+TESTING.md
+
+
+ # ignore the .ts files
+ *.ts
+
+ # include the .d.ts files
+ !*.d.ts
+
+ # large files
+ *.tgz
+ *.png
