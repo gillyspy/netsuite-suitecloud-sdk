@@ -23,7 +23,7 @@
 	},
 	"main": "./src/suitecloud.js",
 	"preferGlobal": true,
-	"sdkFilename": "cli-2025.1.0.jar",
+	"sdkFilename": "cli-2025.2.1.jar",
 	"nsCompatibleVersion": "2025.2",
 	"configFile": [
 		"sdf.config",
