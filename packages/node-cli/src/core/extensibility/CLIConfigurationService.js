@@ -10,7 +10,7 @@ const path = require('path');
 const NodeTranslationService = require('./../../services/NodeTranslationService');
 const { ERRORS } = require('./../../services/TranslationKeys');
 const FileService = require('../../services/FileSystemService');
-// const { getProjectDefaultAuthId } = require('../../utils/AuthenticationUtils');
+const { getProjectDefaultAuthId } = require('../../utils/AuthenticationUtils');
 const CommandUserExtension = require('./CommandUserExtension');
 const { ENV_VARS, FILES, FOLDERS } = require('../../ApplicationConstants');
 const CLI_CONFIG_FILES = [...FILES.CLI_CONFIG_FILE_JS, ...FILES.CLI_CONFIG_FILE_JSON];
@@ -58,6 +58,7 @@ module.exports = class CLIConfigurationService {
 		if (!cliConfigFile) {
 			const candidateDir = fileServiceInstance.getFirstAncestorByName(PROJECT_DIRS, executionPath, true);
 			if (candidateDir) this._executionPath = candidateDir;
+			else this._executionPath = executionPath;
 		} else {
 			this._executionPath = path.dirname(cliConfigFile);
 		}

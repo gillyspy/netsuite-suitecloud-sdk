@@ -45,6 +45,7 @@ module.exports = class CLI {
 		try {
 			const commandMetadataList = this._commandsMetadataService.getCommandsMetadata();
 
+			this._addUbiquitousOptions(commandMetadataList, [] );
 			const thirdArgument = process.argv[2];
 			if (
 				thirdArgument &&
@@ -104,10 +105,48 @@ module.exports = class CLI {
 	}
 
 	_validateInteractive() {
-		if (process.argv.length > 4) {
+		let additionalAllowed = 0;
+		process.argv.forEach((arg)=>{
+			if( /\b(authid|project|config)\b/.test(arg) ) additionalAllowed = additionalAllowed + 2;
+		});
+		if (process.argv.length > (4 + additionalAllowed) ) {
 			// There are more options apart from -i or --interactive
 			throw NodeTranslationService.getMessage(ERRORS.INTERACTIVE_MODE_MORE_OPTIONS);
 		}
+	}
+
+	_addUbiquitousOptions(commandMetadataList, exemptions= []) {
+		Object.values(commandMetadataList).forEach((commandMetadata) => {
+			if(exemptions.includes( commandMetadata.name )) return;
+
+			Object.assign(
+				commandMetadata.options,
+				{
+					"config": {
+						"name": "config",
+						"option": "config",
+						"description": "Specify a config file to use. Otherwise cli will discover closest config file",
+						"mandatory": false,
+						"type": "SINGLE",
+						"usage": "\"./path/to/sdf.config.alt.js\"",
+						"defaultOption": false,
+						"disableInIntegrationMode": false,
+						"conflicts": ["noconfig"]
+					},
+					"noconfig": {
+						"name": "noconfig",
+						"option": "noconfig",
+						"description": "Do not use any config file",
+						"mandatory": false,
+						"type": "FLAG",
+						"usage": "",
+						"defaultOption": false,
+						"disableInIntegrationMode": false,
+						"conflicts": ["config"]
+					}
+				}
+			);
+		});
 	}
 
 	_initializeCommands(commandMetadataList, runInInteractiveMode) {

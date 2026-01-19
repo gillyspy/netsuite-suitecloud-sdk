@@ -119,6 +119,46 @@
 			}
 		}
 	},
+	"custom:hello": {
+		"name": "custom:hello",
+		"sdkCommand": null,
+		"usage": "",
+		"description": "A test",
+		"isSetupRequired": false,
+		"options": {
+			"authid": {
+				"name": "authid",
+				"env": "SUITECLOUD_AUTHID",
+				"option": "authid",
+				"description": "References the custom alias you give to a specific account-role combination.",
+				"mandatory": false,
+				"type": "SINGLE",
+				"usage": "\"prompt\" to be prompted or \"MY-PROD\"",
+				"defaultOption": "prompt",
+				"disableInIntegrationMode": false
+			},
+			"debug": {
+				"name": "debug",
+				"option": "debug",
+				"description": "Whether to print some extra configuration information on screen or not",
+				"mandatory": false,
+				"type": "FLAG",
+				"usage": "",
+				"defaultOption": false,
+				"disableInIntegrationMode": false
+			},
+			"phrase": {
+				"name": "phrase",
+				"option": "phrase",
+				"description": "Is the phrase you want to add",
+				"mandatory": true,
+				"type": "SINGLE",
+				"usage": "Some example phrase",
+				"defaultOption": false,
+				"disableInIntegrationMode": false
+			}
+		}
+	},
 	"file:create": {
 		"name": "file:create",
 		"sdkCommand": "createfile",

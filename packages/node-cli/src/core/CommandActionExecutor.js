@@ -26,7 +26,6 @@ module.exports = class CommandActionExecutor {
 		assert(dependencies.log);
 		assert(dependencies.sdkPath);
 
-		this._executionPath = dependencies.executionPath;
 		this._cliConfigurationService = dependencies.cliConfigurationService;
 		this._commandsMetadataService = dependencies.commandsMetadataService;
 		this._log = dependencies.log;
@@ -64,10 +63,6 @@ module.exports = class CommandActionExecutor {
 
 			commandUserExtension = this._cliConfigurationService.getCommandUserExtension(commandName);
 			const runInInteractiveMode = context.runInInteractiveMode;
-			const defaultAuthId = commandMetadata.isSetupRequired ? getProjectDefaultAuthId(this._executionPath) : null;
-
-			this._checkCanExecuteCommand({ runInInteractiveMode, commandMetadata, defaultAuthId });
-
 			const commandArguments = this._extractOptionValuesFromArguments(commandMetadata.options, context.arguments);
 
 			// need the

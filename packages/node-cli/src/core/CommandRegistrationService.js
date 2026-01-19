@@ -52,6 +52,9 @@ module.exports = class CommandRegistrationService {
 				};
 			}
 			commandSetup = this._addNonInteractiveCommandOptions(commandSetup, commandMetadata.options);
+		} else {
+			commandSetup = this._addInteractiveCommandOptions(commandSetup, commandMetadata.options);
+
 		}
 
 		commandSetup.description(commandMetadata.description).action(async (options) => {
@@ -60,12 +63,31 @@ module.exports = class CommandRegistrationService {
 		});
 	}
 
+	_addInteractiveCommandOptions(commandSetup,options){
+		const filteredOptions = Object.entries(options).filter(([key,o])=>{
+			return ['authid','project','config'].includes(o.name);
+		});
+		filteredOptions.push(['interactive',{
+			"name": "interactive",
+			"option": "interactive",
+			"description": "Be interactive",
+			"mandatory": true,
+			"type": "FLAG",
+			"usage": "",
+			"defaultOption": true,
+			"disableInIntegrationMode": false,
+			"conflicts": []
+		}]);
+		return this._addNonInteractiveCommandOptions(commandSetup, Object.fromEntries(filteredOptions));
+	}
+
 	_addNonInteractiveCommandOptions(commandSetup, options) {
 		const optionsSortedByName = Object.values(options).sort((option1, option2) => option1.name.localeCompare(option2.name));
 		optionsSortedByName.forEach((option) => {
 			if (option.disableInIntegrationMode) {
 				return;
 			}
+			const Optional = 'Optional:';
 			let optionString = '';
 			if (option.alias) {
 				optionString = `-${option.alias}, `;
@@ -78,10 +100,29 @@ module.exports = class CommandRegistrationService {
 				optionString += ` <arguments...>`;
 			}
 
-			const commandOption = new Option(optionString, option.description);
+			const description = [option.description];
+			if( !option.mandatory ) description.unshift(Optional);
+			else description.unshift(''.padStart(Optional.length));
+
+			if( Array.isArray(option.conflicts)){
+				description.push('\nConflict: ' + option.conflicts)
+			}
+
+			// if( option.env)
+				//description.push('\nEnv:'.padEnd(Optional.length), options.env);
+
+			const commandOption = new Option(optionString, description.join(' '));
 			if (option.hidden) {
 				commandOption.hideHelp();
 			}
+			if( Array.isArray(option.conflicts)){
+				commandOption.conflicts(option.conflicts);
+			}
+
+			if( option.env ){
+				commandOption.env(option.env)
+			}
+
 			commandSetup.addOption(commandOption);
 		});
 		return commandSetup;

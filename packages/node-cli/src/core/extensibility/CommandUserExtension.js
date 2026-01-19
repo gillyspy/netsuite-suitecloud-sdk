@@ -5,6 +5,7 @@
 'use strict';
 
 const assert = require('assert');
+const nodePath = require('node:path');
 const NodeTranslationService = require('../../services/NodeTranslationService');
 const { lineBreak } = require('../../loggers/LoggerOsConstants');
 const { ERRORS } = require('../../services/TranslationKeys');
@@ -17,7 +18,8 @@ module.exports = class CommandUserExtension {
 	async beforeExecuting(options) {
 		assert(options);
 		assert(options.commandName);
-		assert(options.projectFolder);
+		assert(typeof options.projectFolder === 'string');
+		assert(options.projectPath);
 		assert(options.arguments);
 
 		try {
@@ -26,9 +28,12 @@ module.exports = class CommandUserExtension {
 			}
 			const beforeExecutingContext = {
 				command: options.commandName,
-				projectPath: options.projectFolder,
+				projectPath: options.projectPath,
+				projectFolder: nodePath.relative(options.executionPath, options.projectPath),
 				arguments: options.arguments,
 			};
+			if( options.executionPath) beforeExecutingContext.executionPath = options.executionPath;
+			if( options.authId) beforeExecutingContext.authId = options.authId;
 			const result = await this._cliConfig.beforeExecuting(beforeExecutingContext);
 			this._validateBeforeExecutingResult(result);
 			return result;
