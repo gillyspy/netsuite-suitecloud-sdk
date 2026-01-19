@@ -77,7 +77,11 @@ module.exports = class ValidateAction extends BaseAction {
 
 			const operationResult = await executeWithSpinner({
 				action: this._sdkExecutor.execute(executionContext),
-				message: NodeTranslationService.getMessage(MESSAGES.VALIDATING, this._projectName, getProjectDefaultAuthId(this._executionPath)),
+				message: NodeTranslationService.getMessage(
+					MESSAGES.VALIDATING,
+					this._projectName,
+					this._authId
+				)
 			});
 
 			return operationResult.status === SdkOperationResultUtils.STATUS.SUCCESS
