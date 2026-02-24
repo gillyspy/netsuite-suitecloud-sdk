@@ -143,6 +143,16 @@ module.exports = class CLI {
 						"defaultOption": false,
 						"disableInIntegrationMode": false,
 						"conflicts": ["config"]
+					},
+					"customflag": {
+						"name": "customflag",
+						"option": "customflag",
+						"description": "A custom boolean that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
+						"mandatory": false,
+						"type": "FLAG",
+						"usage": "",
+						"defaultOption": false,
+						"disableInIntegrationMode": false
 					}
 				}
 			);
