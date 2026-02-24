@@ -54,7 +54,6 @@ module.exports = class CLIConfigurationService {
 				false,
 			);
 		}
-
 		if (!cliConfigFile) {
 			const candidateDir = fileServiceInstance.getFirstAncestorByName(PROJECT_DIRS, executionPath, true);
 			if (candidateDir) this._executionPath = candidateDir;

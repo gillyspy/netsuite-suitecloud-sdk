@@ -153,6 +153,16 @@ module.exports = class CLI {
 						"usage": "",
 						"defaultOption": false,
 						"disableInIntegrationMode": false
+					},
+					"customoptions": {
+						"name": "customoptions",
+						"option": "customoptions",
+						"description": "Custom string values that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
+						"mandatory": false,
+						"type": "MULTIPLE",
+						"usage": "\"value1\" \"value2\"",
+						"defaultOption": false,
+						"disableInIntegrationMode": false
 					}
 				}
 			);

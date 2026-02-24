@@ -22,7 +22,8 @@ const INTERACTIVE_MODE = {
 const NEVER_PARAMS = {
 	'CONFIG': 'config',
 	'NOCONFIG': 'noconfig',
-	'CUSTOMFLAG': 'customflag'
+	'CUSTOMFLAG': 'customflag',
+	'CUSTOMOPTIONS': 'customoptions'
 };
 
 /** @type {import('./Command')} */
