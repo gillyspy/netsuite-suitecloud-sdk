@@ -167,7 +167,7 @@ module.exports = class CLI {
 					"debug": {
 						"name": "debug",
 						"option": "debug",
-						"description": "Directory to dump hook arguments as JSON files for debugging. Creates {command}.{hook}.json files",
+						"description": "Directory to dump debug data for debugging. Creates a unique {command}.{datetime}.json file per run",
 						"mandatory": false,
 						"type": "SINGLE",
 						"usage": "\"./debug-output\"",
