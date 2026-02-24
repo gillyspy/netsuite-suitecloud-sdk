@@ -16,3 +16,4 @@ packages/**/dist
 
 # packed files
 *.tgz
+.DS_Store
