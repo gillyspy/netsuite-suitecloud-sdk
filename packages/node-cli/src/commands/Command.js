@@ -24,7 +24,8 @@ const NEVER_PARAMS = {
 	'NOCONFIG': 'noconfig',
 	'CUSTOMFLAG': 'customflag',
 	'CUSTOMOPTIONS': 'customoptions',
-	'DEBUG': 'debug'
+	'DEBUG': 'debug',
+	'SKIPHOOKS': 'skiphooks'
 };
 
 /** @type {import('./Command')} */
@@ -71,7 +72,7 @@ class Command {
 
 		const preExec = await this._action.preExecute(execParams);
 
-		this._validateActionParameters(preExec);
+		this._validateActionParameters(preExec, Object.values(NEVER_PARAMS));
 
 		const exec = await this._action.execute(preExec);
 		const actionResult = await this._action.postExecute(exec);
@@ -91,12 +92,19 @@ class Command {
 		})
 	}
 
-	_validateActionParameters(params) {
+	_validateActionParameters(params, ignores=[]) {
 		const commandOptionsValidator = new CommandOptionsValidator();
-		const validationErrors = commandOptionsValidator.validate({
-			commandOptions: this._commandMetadata.options,
-			arguments: params,
-		});
+
+		// remove NEVER_PARAMS from this validation as they don't get passed down to the exec layer
+		const options = ignores.reduce((acc,ignore)=> {
+			 delete acc.commandOptions[ignore];
+			 return acc;
+		},{
+				commandOptions: this._commandMetadata.options,
+					arguments: params,
+			}
+		);
+		const validationErrors = commandOptionsValidator.validate(options);
 		if (validationErrors.length > 0) {
 			throwValidationException(validationErrors, this._runInInteractiveMode, this._commandMetadata);
 		}

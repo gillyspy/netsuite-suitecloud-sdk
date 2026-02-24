@@ -52,6 +52,7 @@ module.exports = class CommandActionExecutor {
 		let commandUserExtension;
 		const commandName = context.commandName;
 		const debugFilePath = this._getDebugFilePath(context.arguments.debug, commandName);
+		const skipHooks = context.arguments.skiphooks;
 		try {
 			const commandMetadata = this._commandsMetadataService.getCommandMetadataByName(commandName);
 			if (context.arguments.config) {
@@ -67,6 +68,7 @@ module.exports = class CommandActionExecutor {
 			commandUserExtension = this._cliConfigurationService.getCommandUserExtension(commandName);
 			const runInInteractiveMode = context.runInInteractiveMode;
 			const commandArguments = this._extractOptionValuesFromArguments(commandMetadata.options, context.arguments);
+
 
 			// need the
 			const projectFolder = this._cliConfigurationService.getProjectFolder(commandName, commandArguments?.project);
@@ -144,9 +146,12 @@ module.exports = class CommandActionExecutor {
 			process.env[ENV_VARS.SUITECLOUD_PROJECT_ROOT] = this._executionPath;
 			// this might modified but we need the user's hooks to take advantage of their current values
 			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
-			this._dumpDebugFile(debugFilePath, undefined, 'FIRST');
-			this._dumpDebugFile(debugFilePath, 'beforeExecuting', beforeExecutingOptions, runInInteractiveMode);
-			const beforeExecutingOutput = await commandUserExtension.beforeExecuting(beforeExecutingOptions);
+			const skipPre = skipHooks === 'pre' || skipHooks === 'all';
+			this._dumpDebugFile(debugFilePath, undefined, 'FIRST', runInInteractiveMode, skipPre);
+			this._dumpDebugFile(debugFilePath, 'beforeExecuting', beforeExecutingOptions, runInInteractiveMode, skipPre);
+			const beforeExecutingOutput = skipPre
+				? { arguments: beforeExecutingOptions.arguments }
+				: await commandUserExtension.beforeExecuting(beforeExecutingOptions);
 			const overriddenArguments = beforeExecutingOutput.arguments;
 
 			// do not allow this argument to be overwritten (i.e. change it back)
@@ -156,7 +161,7 @@ module.exports = class CommandActionExecutor {
 			// update the authid as well (not recommended but possible) -- should this be in the isSetupRequired check?
 			// EXPERIMENTAL: ALLOW UPDATE OF THE AUTHID AT THIS TIME
 			if (commandMetadata.isSetupRequired)
-				authId = beforeExecutingOutput?.arguments?.authid || authId;
+				authId = beforeExecutingOutput?.['arguments']?.authid || authId;
 
 			if (commandMetadata.isSetupRequired && !context.arguments[AUTHORIZATION_PROPERTIES_KEYS.SKIP_AUHTORIZATION_CHECK]) {
 				// check if reauthz is needed to show proper message before continuing with the execution
@@ -173,6 +178,7 @@ module.exports = class CommandActionExecutor {
 			// command execution
 			// src/commands/Command.js, run(inputParams) => execution flow for all commands
 			const actionResult = await command.run(overriddenArguments);
+			const skipPost = skipHooks === 'post' || skipHooks === 'all';
 
 			if (context.runInInteractiveMode) {
 				// generate non-interactive equivalent
@@ -182,22 +188,23 @@ module.exports = class CommandActionExecutor {
 
 			if (actionResult.isSuccess() && commandUserExtension.onCompleted) {
 				// run onCompleted(output) from suitecloud.config.js
-				this._dumpDebugFile(debugFilePath, 'onCompleted', actionResult, runInInteractiveMode);
-				commandUserExtension.onCompleted(actionResult);
+				this._dumpDebugFile(debugFilePath, 'onCompleted', actionResult, runInInteractiveMode, skipPost);
+				if (!skipPost) commandUserExtension.onCompleted(actionResult);
 			} else if (!actionResult.isSuccess() && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
 				const errorData = ActionResultUtils.getErrorMessagesString(actionResult);
-				this._dumpDebugFile(debugFilePath, 'onError', errorData, runInInteractiveMode);
-				commandUserExtension.onError(errorData);
+				this._dumpDebugFile(debugFilePath, 'onError', errorData, runInInteractiveMode, skipPost);
+				if (!skipPost) commandUserExtension.onError(errorData);
 			}
 			return actionResult;
 
 		} catch (error) {
 			let errorMessage = this._logGenericError(error);
+			const skipPostHooksCatch = skipHooks === 'post' || skipHooks === 'all';
 			if (commandUserExtension && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
-				this._dumpDebugFile(debugFilePath, 'onError', error, context.runInInteractiveMode);
-				commandUserExtension.onError(error);
+				this._dumpDebugFile(debugFilePath, 'onError', error, context.runInInteractiveMode, skipPostHooksCatch);
+				if (!skipPostHooksCatch) commandUserExtension.onError(error);
 			}
 			return ActionResult.Builder.withErrors(Array.isArray(errorMessage) ? errorMessage : [errorMessage]).build();
 		}
@@ -245,8 +252,19 @@ module.exports = class CommandActionExecutor {
 	_extractOptionValuesFromArguments(options, args) {
 		const optionValues = {};
 		for (const optionId in options) {
-			if (options.hasOwnProperty(optionId) && args.hasOwnProperty(optionId)) {
-				optionValues[optionId] = args[optionId];
+			const optionMeta = options[optionId];
+			// apply defaults first
+			if (options.hasOwnProperty(optionId)){
+				if(optionMeta?.mandatory) {
+					if (optionMeta?.type === "FLAG") {
+						optionValues[optionId] = Boolean(optionMeta.defaultOption)
+					} else if(!["undefined"].includes( typeof optionMeta?.defaultOption)){
+						optionValues[optionId] = optionMeta.defaultOption;
+					}
+				}
+			    if(args.hasOwnProperty(optionId)) {
+					optionValues[optionId] = args[optionId];
+				}
 			}
 		}
 
@@ -297,8 +315,7 @@ module.exports = class CommandActionExecutor {
 	_getDebugFilePath(debugDir, commandName) {
 		if (!debugDir) return null;
 		const sanitizedCommandName = commandName.replace(/:/g, '-');
-		const datetime = new Date().toISOString().replace(/[:.]/g, '-');
-		const filename = `${sanitizedCommandName}.${datetime}.json`;
+		const filename = `${sanitizedCommandName}.json`;
 		return path.join(debugDir, filename);
 	}
 
@@ -308,9 +325,10 @@ module.exports = class CommandActionExecutor {
 	 * @param hookName
 	 * @param {'FIRST'|'LAST'|*} data
 	 * @param {boolean} runInInteractiveMode
+	 * @param {boolean} skipped
 	 * @private
 	 */
-	_dumpDebugFile(debugFilePath, hookName, data, runInInteractiveMode = false) {
+	_dumpDebugFile(debugFilePath, hookName, data, runInInteractiveMode = false, skipped=false) {
 		if (!debugFilePath || !data ) return;
 		if (data === 'FIRST') {
 			fs.writeFileSync(debugFilePath, '[]');
@@ -323,9 +341,10 @@ module.exports = class CommandActionExecutor {
 			.forEach(key => { envVars[key] = process.env[key]; });
 		const entry = {
 			hook: hookName,
+			skipped,
 			timestamp: new Date().toISOString(),
 			env: envVars,
-			data: data
+			data: data,
 		};
 
 		// Print to console in interactive mode

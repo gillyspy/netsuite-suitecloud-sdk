@@ -148,7 +148,7 @@ module.exports = class CLI {
 						"name": "customflag",
 						"option": "customflag",
 						"description": "A custom boolean that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
-						"mandatory": false,
+						"mandatory": true,
 						"type": "FLAG",
 						"usage": "",
 						"defaultOption": false,
@@ -168,10 +168,20 @@ module.exports = class CLI {
 						"name": "debug",
 						"option": "debug",
 						"description": "Directory to dump debug data for debugging. Creates a unique {command}.{datetime}.json file per run",
-						"mandatory": false,
+						"mandatory": true,
 						"type": "SINGLE",
 						"usage": "\"./debug-output\"",
 						"defaultOption": false,
+						"disableInIntegrationMode": false
+					},
+					"skiphooks": {
+						"name": "skiphooks",
+						"option": "skiphooks",
+						"description": "Skip hook execution. Values: 'pre' (skip beforeExecuting), 'post' (skip onCompleted/onError), 'all' (skip all hooks)",
+						"mandatory": true,
+						"type": "SINGLE",
+						"usage": "\"pre|post|all|none\"",
+						"defaultOption": "none",
 						"disableInIntegrationMode": false
 					}
 				}
