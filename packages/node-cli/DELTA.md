@@ -11,7 +11,7 @@
 - `customoptions` option available on any command
 - `debug` option available on any command including in interactive
 
-<p align="left"><a href="#"><img width="250" src="resources/netsuite_logo_simplified.png"></a></p>
+<p align="left"><a href="#"><img width="250" src="resources/Netsuite-logo-ocean-150-bg.png"></a></p>
 
 - It can coexist with the regular version. You can install both at the same time. But why.
 - They will share account credentials and the underlying SDK. They will reference the same `~/.suitecloud-sdk` resource folder. 
@@ -161,7 +161,9 @@ If the config (or command line override) specifies a value for `defaultProjectFo
 
 many `sdf` commands can run without any config file. You may need to provide additional command line flags in lieu.
 
-There are some commands where a `manifest.xml` file or `deploy.xml` file is required in the discovered root. In some cases you can use `--force` which will create a temporary `manifest.xml` file and then remove it when done.
+There are some commands where a `manifest.xml` file or `deploy.xml` file is required in the discovered root, but the file isn't actually
+use. In this case you could use the hook to detect this and create a dummy file and then remove it onCompleted.
+TODO:  use `--forceManifest` which will create a temporary `manifest.xml` file and then remove it when done.
 
 Ranked from top priority to bottom priority
 
