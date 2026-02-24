@@ -197,7 +197,6 @@ module.exports = class CommandActionExecutor {
 			}
 			return ActionResult.Builder.withErrors(Array.isArray(errorMessage) ? errorMessage : [errorMessage]).build();
 		}
-		this._dumpDebugFile(debugFilePath, undefined, 'LAST');
 	}
 
 	async _refreshAuthorizationIfNeeded(defaultAuthId) {
@@ -307,15 +306,12 @@ module.exports = class CommandActionExecutor {
 	 * @private
 	 */
 	_dumpDebugFile(debugFilePath, hookName, data) {
-		if (!debugFilePath) return;
-		if( data === 'FIRST' ) {
-			fs.appendFileSync(debugFilePath, '[\n');
+		if (!debugFilePath || !data ) return;
+		if (data === 'FIRST') {
+			fs.writeFileSync(debugFilePath, '[]');
 			return;
 		}
-		if( data === 'LAST' ) {
-			fs.appendFileSync(debugFilePath, ']');
-			return;
-		}
+
 		const envVars = {};
 		Object.keys(process.env)
 			.filter(key => key.startsWith('SUITECLOUD_'))
@@ -326,6 +322,15 @@ module.exports = class CommandActionExecutor {
 			env: envVars,
 			data: data
 		};
-		fs.appendFileSync(debugFilePath, JSON.stringify(entry, null, 2) + '\n');
+
+		let entries = [];
+		try {
+			const contents = fs.readFileSync(debugFilePath, 'utf8');
+			entries = JSON.parse(contents);
+		} catch (e) {
+			// If file doesn't exist or can't be parsed, start with empty array
+		}
+		entries.push(entry);
+		fs.writeFileSync(debugFilePath, JSON.stringify(entries, null, 2));
 	}
 };
