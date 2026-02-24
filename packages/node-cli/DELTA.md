@@ -7,16 +7,18 @@
 - `authid` option available on many commands
 - `project` option available on many commands (to find resource files)
 - `config` option available on many command (to be exact about config file to use)
+- `customflag` option available on any command
+- `customoptions` option available on any command
 
 <p align="left"><a href="#"><img width="250" src="resources/netsuite_logo_simplified.png"></a></p>
 
-- It can coexist with the regular version. You can install both at the same time.
+- It can coexist with the regular version. You can install both at the same time. But why.
 - They will share account credentials and the underlying SDK. They will reference the same `~/.suitecloud-sdk` resource folder. 
-- They can use different config files and not conflict with each other within the same project.
-- By default, this uses `sdf.config.js`. This can be changed in the package json file in the installed directory.  `package.json#configFile` setting.
-- The reason this default is different is because older versions of suitecloud do not support "discovery" for a configuration file and thus
-In this version you can also specify a `config` argument on the command line where you can point to a specific file (which can have any name).
-If you need to change the name or want to use the legacy `suitecloud.config.js` file then consider creating a `sdf.config.js` file that requires that config you already have.  Or if you must then you can go to the global package.json and modify this line:
+- Example, They can use different config files and not conflict with each other within the same project.
+- By default, this uses `sdf.config.js`.
+  - This can be changed in the package json file in the installed directory.  `package.json#configFile` setting. The reason this default is different is because older versions of suitecloud do not support "discovery" for a configuration file and thus
+  - In this version you can also specify a `config` argument on the command line where you can point to a specific file (which can have any name).
+  If you need to change the name or want to use the legacy `suitecloud.config.js` file then consider creating a `sdf.config.js` file that requires that config you already have.  Or if you must then you can go to the global package.json and modify this line:
 
 ```json
 {
