@@ -141,7 +141,7 @@ module.exports = class CommandActionExecutor {
 			// this might modified but we need the user's hooks to take advantage of their current values
 			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
 			this._dumpDebugFile(debugFilePath, undefined, 'FIRST');
-			this._dumpDebugFile(debugFilePath, 'beforeExecuting', beforeExecutingOptions);
+			this._dumpDebugFile(debugFilePath, 'beforeExecuting', beforeExecutingOptions, runInInteractiveMode);
 			const beforeExecutingOutput = await commandUserExtension.beforeExecuting(beforeExecutingOptions);
 			const overriddenArguments = beforeExecutingOutput.arguments;
 
@@ -178,12 +178,12 @@ module.exports = class CommandActionExecutor {
 
 			if (actionResult.isSuccess() && commandUserExtension.onCompleted) {
 				// run onCompleted(output) from suitecloud.config.js
-				this._dumpDebugFile(debugFilePath, 'onCompleted', actionResult);
+				this._dumpDebugFile(debugFilePath, 'onCompleted', actionResult, runInInteractiveMode);
 				commandUserExtension.onCompleted(actionResult);
 			} else if (!actionResult.isSuccess() && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
 				const errorData = ActionResultUtils.getErrorMessagesString(actionResult);
-				this._dumpDebugFile(debugFilePath, 'onError', errorData);
+				this._dumpDebugFile(debugFilePath, 'onError', errorData, runInInteractiveMode);
 				commandUserExtension.onError(errorData);
 			}
 			return actionResult;
@@ -192,7 +192,7 @@ module.exports = class CommandActionExecutor {
 			let errorMessage = this._logGenericError(error);
 			if (commandUserExtension && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
-				this._dumpDebugFile(debugFilePath, 'onError', error);
+				this._dumpDebugFile(debugFilePath, 'onError', error, context.runInInteractiveMode);
 				commandUserExtension.onError(error);
 			}
 			return ActionResult.Builder.withErrors(Array.isArray(errorMessage) ? errorMessage : [errorMessage]).build();
@@ -303,9 +303,10 @@ module.exports = class CommandActionExecutor {
 	 * @param debugFilePath
 	 * @param hookName
 	 * @param {'FIRST'|'LAST'|*} data
+	 * @param {boolean} runInInteractiveMode
 	 * @private
 	 */
-	_dumpDebugFile(debugFilePath, hookName, data) {
+	_dumpDebugFile(debugFilePath, hookName, data, runInInteractiveMode = false) {
 		if (!debugFilePath || !data ) return;
 		if (data === 'FIRST') {
 			fs.writeFileSync(debugFilePath, '[]');
@@ -322,6 +323,12 @@ module.exports = class CommandActionExecutor {
 			env: envVars,
 			data: data
 		};
+
+		// Print to console in interactive mode
+		if (runInInteractiveMode) {
+			this._log.info(`\n--- DEBUG [${hookName}] ---`);
+			this._log.info(JSON.stringify(entry, null, 2));
+		}
 
 		let entries = [];
 		try {
