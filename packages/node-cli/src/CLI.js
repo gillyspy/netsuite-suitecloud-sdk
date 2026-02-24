@@ -107,7 +107,7 @@ module.exports = class CLI {
 	_validateInteractive() {
 		let additionalAllowed = 0;
 		process.argv.forEach((arg)=>{
-			if( /\b(authid|project|config|debug)\b/.test(arg) ) additionalAllowed += 2;
+			if( /\b(authid|project|config|debug|skiphooks)\b/.test(arg) ) additionalAllowed += 2;
 		});
 		if (process.argv.length > (4 + additionalAllowed) ) {
 			// There are more options apart from -i or --interactive
