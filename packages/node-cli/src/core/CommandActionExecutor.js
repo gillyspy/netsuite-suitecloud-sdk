@@ -86,8 +86,13 @@ module.exports = class CommandActionExecutor {
 					[authId] = AUTHORIZATION_FORCE_PROMPTS;
 				}
 			}
+			// console.log(commandMetadata);
+			const promptForInteractive = runInInteractiveMode &&
+				!commandMetadata.name.startsWith('account') &&
+				!authId
+
 			// in interactive mode we can prompt for the authid
-			if (AUTHORIZATION_FORCE_PROMPTS.includes(authId)) {
+			if (promptForInteractive || AUTHORIZATION_FORCE_PROMPTS.includes(authId)) {
 				const interactiveAuthIdHandler = new ManageAccountInputHandler({
 					projectFolder: projectPath,
 					commandMetadata,

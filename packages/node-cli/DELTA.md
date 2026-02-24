@@ -9,6 +9,7 @@
 - `config` option available on many command (to be exact about config file to use)
 - `customflag` option available on any command
 - `customoptions` option available on any command
+- `debug` option available on any command including in interactive
 
 <p align="left"><a href="#"><img width="250" src="resources/netsuite_logo_simplified.png"></a></p>
 
