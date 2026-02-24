@@ -83,16 +83,15 @@ module.exports = class CommandActionExecutor {
 					}
 
 				} else {
-					[authId] = AUTHORIZATION_FORCE_PROMPTS;
+					[authId] = [commandArguments?.authid, ...AUTHORIZATION_FORCE_PROMPTS].filter(Boolean);
 				}
 			}
-			// console.log(commandMetadata);
 			const promptForInteractive = runInInteractiveMode &&
 				!commandMetadata.name.startsWith('account') &&
 				!authId
 
 			// in interactive mode we can prompt for the authid
-			if (promptForInteractive || AUTHORIZATION_FORCE_PROMPTS.includes(authId)) {
+			if (promptForInteractive || AUTHORIZATION_FORCE_PROMPTS.includes(authId) ) {
 				const interactiveAuthIdHandler = new ManageAccountInputHandler({
 					projectFolder: projectPath,
 					commandMetadata,
