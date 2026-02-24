@@ -23,7 +23,8 @@ const NEVER_PARAMS = {
 	'CONFIG': 'config',
 	'NOCONFIG': 'noconfig',
 	'CUSTOMFLAG': 'customflag',
-	'CUSTOMOPTIONS': 'customoptions'
+	'CUSTOMOPTIONS': 'customoptions',
+	'DEBUG': 'debug'
 };
 
 /** @type {import('./Command')} */

@@ -163,6 +163,16 @@ module.exports = class CLI {
 						"usage": "\"value1\" \"value2\"",
 						"defaultOption": false,
 						"disableInIntegrationMode": false
+					},
+					"debug": {
+						"name": "debug",
+						"option": "debug",
+						"description": "Directory to dump hook arguments as JSON files for debugging. Creates {command}.{hook}.json files",
+						"mandatory": false,
+						"type": "SINGLE",
+						"usage": "\"./debug-output\"",
+						"defaultOption": false,
+						"disableInIntegrationMode": false
 					}
 				}
 			);

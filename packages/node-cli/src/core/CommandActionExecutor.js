@@ -5,6 +5,8 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const NodeTranslationService = require('./../services/NodeTranslationService');
 const { ERRORS, CLI, COMMAND_REFRESH_AUTHORIZATION } = require('../services/TranslationKeys');
 const { ActionResult } = require('../services/actionresult/ActionResult');
@@ -48,8 +50,9 @@ module.exports = class CommandActionExecutor {
 		assert(typeof context.runInInteractiveMode === 'boolean');
 
 		let commandUserExtension;
+		const commandName = context.commandName;
+		const debugFilePath = this._getDebugFilePath(context.arguments.debug, commandName);
 		try {
-			const commandName = context.commandName;
 			const commandMetadata = this._commandsMetadataService.getCommandMetadataByName(commandName);
 			if (context.arguments.config) {
 				this._cliConfigurationService.initialize(context.arguments.config, true);
@@ -137,7 +140,8 @@ module.exports = class CommandActionExecutor {
 			process.env[ENV_VARS.SUITECLOUD_PROJECT_ROOT] = this._executionPath;
 			// this might modified but we need the user's hooks to take advantage of their current values
 			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
-
+			this._dumpDebugFile(debugFilePath, undefined, 'FIRST');
+			this._dumpDebugFile(debugFilePath, 'beforeExecuting', beforeExecutingOptions);
 			const beforeExecutingOutput = await commandUserExtension.beforeExecuting(beforeExecutingOptions);
 			const overriddenArguments = beforeExecutingOutput.arguments;
 
@@ -174,10 +178,13 @@ module.exports = class CommandActionExecutor {
 
 			if (actionResult.isSuccess() && commandUserExtension.onCompleted) {
 				// run onCompleted(output) from suitecloud.config.js
+				this._dumpDebugFile(debugFilePath, 'onCompleted', actionResult);
 				commandUserExtension.onCompleted(actionResult);
 			} else if (!actionResult.isSuccess() && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
-				commandUserExtension.onError(ActionResultUtils.getErrorMessagesString(actionResult));
+				const errorData = ActionResultUtils.getErrorMessagesString(actionResult);
+				this._dumpDebugFile(debugFilePath, 'onError', errorData);
+				commandUserExtension.onError(errorData);
 			}
 			return actionResult;
 
@@ -185,10 +192,12 @@ module.exports = class CommandActionExecutor {
 			let errorMessage = this._logGenericError(error);
 			if (commandUserExtension && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
+				this._dumpDebugFile(debugFilePath, 'onError', error);
 				commandUserExtension.onError(error);
 			}
 			return ActionResult.Builder.withErrors(Array.isArray(errorMessage) ? errorMessage : [errorMessage]).build();
 		}
+		this._dumpDebugFile(debugFilePath, undefined, 'LAST');
 	}
 
 	async _refreshAuthorizationIfNeeded(defaultAuthId) {
@@ -280,5 +289,43 @@ module.exports = class CommandActionExecutor {
 					[filteredKey]: any[filteredKey],
 				};
 			}, args);
+	}
+
+	_getDebugFilePath(debugDir, commandName) {
+		if (!debugDir) return null;
+		const sanitizedCommandName = commandName.replace(/:/g, '-');
+		const datetime = new Date().toISOString().replace(/[:.]/g, '-');
+		const filename = `${sanitizedCommandName}.${datetime}.json`;
+		return path.join(debugDir, filename);
+	}
+
+	/**
+	 *
+	 * @param debugFilePath
+	 * @param hookName
+	 * @param {'FIRST'|'LAST'|*} data
+	 * @private
+	 */
+	_dumpDebugFile(debugFilePath, hookName, data) {
+		if (!debugFilePath) return;
+		if( data === 'FIRST' ) {
+			fs.appendFileSync(debugFilePath, '[\n');
+			return;
+		}
+		if( data === 'LAST' ) {
+			fs.appendFileSync(debugFilePath, ']');
+			return;
+		}
+		const envVars = {};
+		Object.keys(process.env)
+			.filter(key => key.startsWith('SUITECLOUD_'))
+			.forEach(key => { envVars[key] = process.env[key]; });
+		const entry = {
+			hook: hookName,
+			timestamp: new Date().toISOString(),
+			env: envVars,
+			data: data
+		};
+		fs.appendFileSync(debugFilePath, JSON.stringify(entry, null, 2) + '\n');
 	}
 };
