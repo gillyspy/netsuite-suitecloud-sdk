@@ -2,9 +2,9 @@
 
 # SuiteCloud CLI for Node.js
 <p>
-  <a href="https://www.npmjs.com/package/@oracle/suitecloud-cli">
-    <img src="https://img.shields.io/npm/dm/@oracle/suitecloud-cli.svg" alt="npm-cli"/>
-    <img src="https://img.shields.io/npm/v/@oracle/suitecloud-cli.svg" alt="npm-cli"/>
+  <a href="https://www.npmjs.com/package/@suitegeezus/suitecloud-cli">
+    <img src="https://img.shields.io/npm/dm/@suitegeezus/suitecloud-cli.svg" alt="npm-cli"/>
+    <img src="https://img.shields.io/npm/v/@suitegeezus/suitecloud-cli.svg" alt="npm-cli"/>
   </a>
 </p>
 
@@ -37,12 +37,12 @@ npm install -g --acceptSuiteCloudSDKLicense @suitegeezus/suitecloud-cli
 ```
 
 
-CLI for Node.js is available from within any directory by running `suitecloud`.
+CLI for Node.js is available from within any directory by running `sdf`.
 
 ## Usage
 CLI for Node.js uses the following syntax: 
 ```
-suitecloud <command> <option> <argument>
+sdf <command> <option> <argument>
 ```
 
 ### Commands
@@ -66,7 +66,7 @@ suitecloud <command> <option> <argument>
 
 To check the help for a specific command, run the following command:
 ```
-suitecloud {command} -h
+sdf {command} -h
 ```
 
 Read the detailed documentation for all the commands in [SuiteCloud CLI for Node.js Reference](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_155931263126.html).
@@ -79,12 +79,12 @@ Read the detailed documentation for all the commands in [SuiteCloud CLI for Node
 
 Create a new project in an empty folder by running the following command:
 ```
-suitecloud project:create -i
+sdf project:create -i
 ```
 
 After you create a project, configure a NetSuite account, by running the following command within the project folder:
 ```
-suitecloud account:setup
+sdf account:setup
 ```
 
 ## Release Notes & Documentation
