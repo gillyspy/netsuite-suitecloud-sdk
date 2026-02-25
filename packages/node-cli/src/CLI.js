@@ -131,6 +131,7 @@ module.exports = class CLI {
 						"usage": "\"./path/to/sdf.config.alt.js\"",
 						"defaultOption": false,
 						"disableInIntegrationMode": false,
+						"forceinclude": false,
 						"conflicts": ["noconfig"]
 					},
 					"noconfig": {
@@ -140,6 +141,7 @@ module.exports = class CLI {
 						"mandatory": false,
 						"type": "FLAG",
 						"usage": "",
+						"forceinclude": true,
 						"defaultOption": false,
 						"disableInIntegrationMode": false,
 						"conflicts": ["config"]
@@ -148,9 +150,10 @@ module.exports = class CLI {
 						"name": "customflag",
 						"option": "customflag",
 						"description": "A custom boolean that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
-						"mandatory": true,
+						"mandatory": false,
 						"type": "FLAG",
 						"usage": "",
+						"forceinclude": true,
 						"defaultOption": false,
 						"disableInIntegrationMode": false
 					},
@@ -161,24 +164,32 @@ module.exports = class CLI {
 						"mandatory": false,
 						"type": "MULTIPLE",
 						"usage": "\"value1\" \"value2\"",
-						"defaultOption": false,
+						"forceinclude": true,
+						"defaultOption": undefined,
 						"disableInIntegrationMode": false
 					},
 					"debug": {
 						"name": "debug",
 						"option": "debug",
-						"description": "Directory to dump debug data for debugging. Creates a unique {command}.{datetime}.json file per run",
-						"mandatory": true,
+						"description": "Directory to dump debug data for debugging. Creates a \"debug-{command}.json\" file in specified directory.\nUsage: \"--debug .\"",
+						"mandatory": false,
 						"type": "SINGLE",
-						"usage": "\"./debug-output\"",
+						"usage": "--debug \"./tmpdir",
+						"forceinclude": true,
 						"defaultOption": false,
 						"disableInIntegrationMode": false
 					},
 					"skiphooks": {
 						"name": "skiphooks",
 						"option": "skiphooks",
-						"description": "Skip hook execution. Values: 'pre' (skip beforeExecuting), 'post' (skip onCompleted/onError), 'all' (skip all hooks)",
-						"mandatory": true,
+						"description": "Skip hook execution. Usage:\n" + [
+							'"--skiphooks all" (skip all)',
+							'"--skiphooks pre" (skip beforeExecuting)',
+							'"--skiphooks post" (skip onCompleted/onError)',
+							'"--skiphooks none" (skip nothing -- default)'
+						].join('\n'),
+						"forceinclude": true,
+						"mandatory": false,
 						"type": "SINGLE",
 						"usage": "\"pre|post|all|none\"",
 						"defaultOption": "none",

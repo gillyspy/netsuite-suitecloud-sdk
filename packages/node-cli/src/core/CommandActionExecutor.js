@@ -253,22 +253,10 @@ module.exports = class CommandActionExecutor {
 		const optionValues = {};
 		for (const optionId in options) {
 			const optionMeta = options[optionId];
-			// apply defaults first
 			if (options.hasOwnProperty(optionId)){
-				if(optionMeta?.mandatory) {
-					switch(true){
-						case optionMeta?.type !== 'FLAG' && typeof optionMeta?.defaultOption === "boolean":
-							// don't set a value for boolean unless it is a FLAG type
-							break;
-						case (optionMeta?.type === "FLAG"):
-							optionValues[optionId] = Boolean(optionMeta.defaultOption)
-							break;
-						case !["undefined"].includes( typeof optionMeta?.defaultOption) && optionMeta?.type !== 'FLAG':
-								optionValues[optionId] = optionMeta.defaultOption;
-							break;
-						default:
-							break;
-					}
+				// apply defaults first when it is force include
+				if(optionMeta?.forceinclude) {
+					optionValues[optionId] = optionMeta.defaultOption
 				}
 			    if(args.hasOwnProperty(optionId)) {
 					optionValues[optionId] = args[optionId];
@@ -323,7 +311,7 @@ module.exports = class CommandActionExecutor {
 	_getDebugFilePath(debugDir, commandName) {
 		if (!debugDir) return null;
 		const sanitizedCommandName = commandName.replace(/:/g, '-');
-		const filename = `${sanitizedCommandName}.json`;
+		const filename = `debug.${sanitizedCommandName}.json`;
 		return path.join(debugDir, filename);
 	}
 
