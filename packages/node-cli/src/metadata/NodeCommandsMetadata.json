@@ -7,114 +7,137 @@
 		"isSetupRequired": false,
 		"forceInteractiveMode": false,
 		"options": {
+			"name":  {
+				"name": "name",
+				"description": "The name of your hook for your own purposes.",
+				"allowInteractive": true,
+				"type": "SINGLE",
+				"mandatory": true,
+				"disableInIntegrationMode": false
+			},
 			"option1": {
 				"name": "option1",
-				"description": "Arbitrary value for your custom hook to recognize",
+			"description": "Arbitrary value for your custom hook to recognize. Type is string",
+			"allowInteractive":true,
 				"type": "SINGLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"option2": {
 				"name": "option2",
-				"description": "Arbitrary for your custom hook to recognize",
+				"description": "Arbitrary for your custom hook to recognize. Type is string",
+				"allowInteractive":true,
 				"type": "SINGLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"option3": {
 				"name": "option3",
-				"description": "Arbitrary for your custom hook to recognize",
+				"description": "Arbitrary for your custom hook to recognize. Type is string",
+				"allowInteractive":true,
 				"type": "SINGLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"option4": {
 				"name": "option4",
-				"description": "Arbitrary for your custom hook to recognize",
+				"description": "Arbitrary for your custom hook to recognize. Type is string",
+				"allowInteractive":true,
 				"type": "SINGLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"option5": {
 				"name": "option5",
-				"description": "Arbitrary for your custom hook to recognize",
+				"description": "Arbitrary for your custom hook to recognize. Type is string",
+				"allowInteractive":true,
 				"type": "SINGLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"multi1": {
 				"name": "multi1",
-				"description": "Arbitrary array for your custom hook to recognize",
+				"description": "Arbitrary array for your custom hook to recognize. Type is string[]",
 				"usage": "--multi1 a b c",
-				"type": "SINGLE",
+				"type": "MULTIPLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"multi2": {
 				"name": "multi2",
-				"description": "Arbitrary array for your custom hook to recognize",
+				"description": "Arbitrary array for your custom hook to recognize. Type is string[]",
 				"usage": "--multi2 a b c",
-				"type": "SINGLE",
+				"type": "MULTIPLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"multi3": {
 				"name": "multi3",
-				"description": "Arbitrary array for your custom hook to recognize",
+				"description": "Arbitrary array for your custom hook to recognize. Type is string[]",
 				"usage": "--multi3 a b c",
-				"type": "SINGLE",
+				"type": "MULTIPLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"multi4": {
 				"name": "multi4",
-				"description": "Arbitrary array for your custom hook to recognize",
+				"description": "Arbitrary array for your custom hook to recognize. Type is string[]",
 				"usage": "--multi4 a b c",
-				"type": "SINGLE",
+				"type": "MULTIPLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"multi5": {
 				"name": "multi5",
-				"description": "Arbitrary array for your custom hook to recognize",
+				"description": "Arbitrary array for your custom hook to recognize. Type is string[]",
 				"usage": "--multi5 a b c",
-				"type": "SINGLE",
+				"type": "MULTIPLE",
 				"mandatory": false,
 				"disableInIntegrationMode": false
 			},
 			"flag1": {
 				"name": "flag1",
-				"description": "Arbitrary on/off flag for your custom hook to use",
+				"description": "Arbitrary on/off flag for your custom hook to use. Type is boolean",
+				"allowInteractive":true,
 				"type": "FLAG",
 				"mandatory": false,
+				"defaultOption": false,
 				"disableInIntegrationMode": false
 			},
 			"flag2": {
 				"name": "flag2",
-				"description": "Arbitrary on/off flag for your custom hook to use",
+				"description": "Arbitrary on/off flag for your custom hook to use. Type is boolean",
+				"allowInteractive":true,
 				"type": "FLAG",
 				"mandatory": false,
+				"defaultOption": false,
 				"disableInIntegrationMode": false
 			},
 			"flag3": {
 				"name": "flag3",
-				"description": "Arbitrary on/off flag for your custom hook to use",
+				"description": "Arbitrary on/off flag for your custom hook to use. Type is boolean",
+				"allowInteractive":true,
 				"type": "FLAG",
 				"mandatory": false,
+				"defaultOption": false,
 				"disableInIntegrationMode": false
 			},
 			"flag4": {
 				"name": "flag4",
-				"description": "Arbitrary on/off flag for your custom hook to use",
+				"description": "Arbitrary on/off flag for your custom hook to use. Type is boolean",
+				"allowInteractive":true,
 				"type": "FLAG",
 				"mandatory": false,
+				"defaultOption": false,
 				"disableInIntegrationMode": false
 			},
 			"flag5": {
 				"name": "flag5",
-				"description": "Arbitrary on/off flag for your custom hook to use",
+				"description": "Arbitrary on/off flag for your custom hook to use. Type is boolean",
+				"allowInteractive":true,
 				"type": "FLAG",
 				"mandatory": false,
+				"defaultOption": false,
 				"disableInIntegrationMode": false
 			}
 		}

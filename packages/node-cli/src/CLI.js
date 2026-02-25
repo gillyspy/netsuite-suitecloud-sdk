@@ -28,6 +28,87 @@ const HELP_COMMAND = 'help';
 const HELP_OPTION = '--help';
 const HELP_ALIAS = '-h';
 const VERSION_OPTION = '--version';
+const UBIQUITOUS_OPTIONS = {
+	"config": {
+		"name": "config",
+		"option": "config",
+		"description": "Specify a config file to use. Otherwise cli will discover closest config file",
+		"allowInteractive":true,
+		"mandatory": false,
+		"type": "SINGLE",
+		"usage": "\"./path/to/sdf.config.alt.js\"",
+		"defaultOption": false,
+		"disableInIntegrationMode": false,
+		"forceinclude": false,
+		"conflicts": ["noconfig"]
+	},
+	"noconfig": {
+		"name": "noconfig",
+		"option": "noconfig",
+		"description": "Do not use any config file",
+		"allowInteractive":true,
+		"mandatory": false,
+		"type": "FLAG",
+		"usage": "",
+		"forceinclude": true,
+		"defaultOption": false,
+		"disableInIntegrationMode": false,
+		"conflicts": ["config"]
+	},
+	"customflag": {
+		"name": "customflag",
+		"option": "customflag",
+		"description": "A custom boolean that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
+		"allowInteractive":true,
+		"mandatory": false,
+		"type": "FLAG",
+		"usage": "",
+		"forceinclude": true,
+		"defaultOption": false,
+		"disableInIntegrationMode": false
+	},
+	"customoptions": {
+		"name": "customoptions",
+		"option": "customoptions",
+		"description": "Custom string values that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
+		"allowInteractive":true,
+		"mandatory": false,
+		"type": "MULTIPLE",
+		"usage": "\"value1\" \"value2\"",
+		"forceinclude": true,
+		"defaultOption": undefined,
+		"disableInIntegrationMode": false
+	},
+	"debug": {
+		"name": "debug",
+		"option": "debug",
+		"description": "Directory to dump debug data for debugging. Creates a \"debug-{command}.json\" file in specified directory.\nUsage: \"--debug .\"",
+		"allowInteractive":true,
+		"mandatory": false,
+		"type": "SINGLE",
+		"usage": "--debug \"./tmpdir",
+		"forceinclude": true,
+		"defaultOption": false,
+		"disableInIntegrationMode": false
+	},
+	"skiphooks": {
+		"name": "skiphooks",
+		"option": "skiphooks",
+		"description": "Skip hook execution. Usage:\n" + [
+			'"--skiphooks all" (skip all)',
+			'"--skiphooks pre" (skip beforeExecuting)',
+			'"--skiphooks post" (skip onCompleted/onError)',
+			'"--skiphooks none" (skip nothing -- default)'
+		].join('\n'),
+		"allowInteractive":true,
+		"forceinclude": true,
+		"mandatory": false,
+		"type": "SINGLE",
+		"usage": "\"pre|post|all|none\"",
+		"defaultOption": "none",
+		"disableInIntegrationMode": false
+	}
+};
 
 module.exports = class CLI {
 	constructor(dependencies) {
@@ -76,7 +157,7 @@ module.exports = class CLI {
 				.option(
 					`${INTERACTIVE_ALIAS}, ${INTERACTIVE_OPTION}`,
 					NodeTranslationService.getMessage(INTERACTIVE_OPTION_DESCRIPTION),
-					this._validateInteractive
+					this._validateInteractive(commandMetadataList[thirdArgument].options)
 				)
 				.helpOption(`${HELP_ALIAS}, ${HELP_OPTION}`, NodeTranslationService.getMessage(COMMAND_OPTIONS.HELP))
 				.addHelpCommand(`${HELP_COMMAND} ${COMMAND_ALIAS}`, NodeTranslationService.getMessage(COMMAND_OPTIONS.HELP))
@@ -104,14 +185,26 @@ module.exports = class CLI {
 		return process.argv.includes(INTERACTIVE_ALIAS) || process.argv.includes(INTERACTIVE_OPTION);
 	}
 
-	_validateInteractive() {
+	_validateInteractive(additionalOptions) {
 		let additionalAllowed = 0;
+		const ubiquitousValuesThatAreInteractive = Object.values(UBIQUITOUS_OPTIONS)
+			.concat(Object.values(additionalOptions))
+			.filter((o)=>o.allowInteractive)
+			.map((o)=>({
+				name: o.name,
+				additionalAllowed: o.type === "SINGLE" ? 2 : 1
+			}))
 		process.argv.forEach((arg)=>{
-			if( /\b(authid|project|config|debug|skiphooks|folder)\b/.test(arg) ) additionalAllowed += 2;
+			const mactchingOption = ubiquitousValuesThatAreInteractive.find(
+				(o)=>(`--${o.name}` === arg)
+			);
+			additionalAllowed += mactchingOption?.additionalAllowed || 0;
 		});
-		if (process.argv.length > (4 + additionalAllowed) ) {
-			// There are more options apart from -i or --interactive
-			throw NodeTranslationService.getMessage(ERRORS.INTERACTIVE_MODE_MORE_OPTIONS);
+		return ()=> {
+			if (process.argv.length > (4 + additionalAllowed)) {
+				// There are more options apart from -i or --interactive
+				throw NodeTranslationService.getMessage(ERRORS.INTERACTIVE_MODE_MORE_OPTIONS);
+			}
 		}
 	}
 
@@ -121,81 +214,7 @@ module.exports = class CLI {
 
 			Object.assign(
 				commandMetadata.options,
-				{
-					"config": {
-						"name": "config",
-						"option": "config",
-						"description": "Specify a config file to use. Otherwise cli will discover closest config file",
-						"mandatory": false,
-						"type": "SINGLE",
-						"usage": "\"./path/to/sdf.config.alt.js\"",
-						"defaultOption": false,
-						"disableInIntegrationMode": false,
-						"forceinclude": false,
-						"conflicts": ["noconfig"]
-					},
-					"noconfig": {
-						"name": "noconfig",
-						"option": "noconfig",
-						"description": "Do not use any config file",
-						"mandatory": false,
-						"type": "FLAG",
-						"usage": "",
-						"forceinclude": true,
-						"defaultOption": false,
-						"disableInIntegrationMode": false,
-						"conflicts": ["config"]
-					},
-					"customflag": {
-						"name": "customflag",
-						"option": "customflag",
-						"description": "A custom boolean that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
-						"mandatory": false,
-						"type": "FLAG",
-						"usage": "",
-						"forceinclude": true,
-						"defaultOption": false,
-						"disableInIntegrationMode": false
-					},
-					"customoptions": {
-						"name": "customoptions",
-						"option": "customoptions",
-						"description": "Custom string values that will be passed into the hooks. Has no effect unless you implement the logic in a hook",
-						"mandatory": false,
-						"type": "MULTIPLE",
-						"usage": "\"value1\" \"value2\"",
-						"forceinclude": true,
-						"defaultOption": undefined,
-						"disableInIntegrationMode": false
-					},
-					"debug": {
-						"name": "debug",
-						"option": "debug",
-						"description": "Directory to dump debug data for debugging. Creates a \"debug-{command}.json\" file in specified directory.\nUsage: \"--debug .\"",
-						"mandatory": false,
-						"type": "SINGLE",
-						"usage": "--debug \"./tmpdir",
-						"forceinclude": true,
-						"defaultOption": false,
-						"disableInIntegrationMode": false
-					},
-					"skiphooks": {
-						"name": "skiphooks",
-						"option": "skiphooks",
-						"description": "Skip hook execution. Usage:\n" + [
-							'"--skiphooks all" (skip all)',
-							'"--skiphooks pre" (skip beforeExecuting)',
-							'"--skiphooks post" (skip onCompleted/onError)',
-							'"--skiphooks none" (skip nothing -- default)'
-						].join('\n'),
-						"forceinclude": true,
-						"mandatory": false,
-						"type": "SINGLE",
-						"usage": "\"pre|post|all|none\"",
-						"defaultOption": "none",
-						"disableInIntegrationMode": false
-					}
-				}
+				UBIQUITOUS_OPTIONS
 			);
 		});
 	}

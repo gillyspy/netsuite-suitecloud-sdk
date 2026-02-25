@@ -533,6 +533,7 @@
 				"option": "folder",
 				"description": "Specifies the File Cabinet path, for example, \"\/SuiteScripts\". All files within subfolders are included.",
 				"mandatory": true,
+				"allowInteractive": true,
 				"type": "SINGLE",
 				"usage": "\"\/SuiteScripts\"",
 				"defaultOption": true,
