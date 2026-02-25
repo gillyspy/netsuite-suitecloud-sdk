@@ -21,7 +21,7 @@ module.exports = class AccountSetupCiAction extends BaseAction {
 	}
 
 	preExecute(params) {
-		this._projectInfoService.checkWorkingDirectoryContainsValidProject(this._commandMetadata.name);
+		this._projectInfoService.checkWorkingDirectoryContainsValidProject(this._commandMetadata.name, false);
 
 		if (params[OPTIONS.ACCOUNT]) {
 			params[OPTIONS.ACCOUNT] = params[OPTIONS.ACCOUNT].toUpperCase();

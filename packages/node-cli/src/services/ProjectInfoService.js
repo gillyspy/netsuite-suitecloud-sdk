@@ -19,6 +19,7 @@ const NodeTranslationService = require('./NodeTranslationService');
 const xml2js = require('xml2js');
 const assert = require('assert');
 const { lineBreak } = require('../loggers/LoggerOsConstants');
+const NodeConsoleLogger = require('../loggers/NodeConsoleLogger');
 
 const MANIFEST_TAG_XML_PATH = '/manifest';
 const PROJECT_TYPE_ATTRIBUTE = 'projecttype';
@@ -199,11 +200,13 @@ module.exports = class ProjectInfoService {
 		return this.isAccountCustomizationProject() || this.isSuiteAppProject();
 	}
 
-	checkWorkingDirectoryContainsValidProject(commandName) {
+	checkWorkingDirectoryContainsValidProject(commandName, doThrow=true) {
 		if (!FileUtils.exists(path.join(this._projectFolder, FILES.MANIFEST_XML))) {
 			const errorMessage = NodeTranslationService.getMessage(ERRORS.NOT_PROJECT_FOLDER, FILES.MANIFEST_XML, this._projectFolder, commandName)
-				+ lineBreak + NodeTranslationService.getMessage(ERRORS.SEE_PROJECT_STRUCTURE, INFO.PROJECT_STRUCTURE);
-			throw new CLIException(errorMessage);
+			if( doThrow) throw new CLIException(
+				errorMessage + lineBreak + NodeTranslationService.getMessage(ERRORS.SEE_PROJECT_STRUCTURE, INFO.PROJECT_STRUCTURE)
+			);
+			NodeConsoleLogger.warning(errorMessage);
 		}
 	}
 };
