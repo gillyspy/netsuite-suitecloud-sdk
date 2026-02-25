@@ -67,7 +67,7 @@
 				"mandatory": false,
 				"type": "FLAG",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			},
 			"calledfromupdate": {
 				"name": "calledfromupdate",
@@ -76,7 +76,7 @@
 				"mandatory": false,
 				"type": "FLAG",
 				"defaultOption": false,
-				"disableInIntegrationMode": true
+				"disableInIntegrationMode": false
 			}
 		}
 	},
