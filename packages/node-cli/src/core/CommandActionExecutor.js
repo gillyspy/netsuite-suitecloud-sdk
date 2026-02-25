@@ -53,7 +53,8 @@ module.exports = class CommandActionExecutor {
 		let commandUserExtension;
 		const commandName = context.commandName;
 		const debugFilePath = this._getDebugFilePath(context.arguments.debug, commandName);
-		const skipHooks = context.arguments.skiphooks;
+		/** @type {'pre'|'post'|'quiet'|'none'|'all'} */
+		const runHooks = context.arguments.runhooks;
 		try {
 			const commandMetadata = this._commandsMetadataService.getCommandMetadataByName(commandName);
 			if (context.arguments.config) {
@@ -148,7 +149,7 @@ module.exports = class CommandActionExecutor {
 			process.env[ENV_VARS.SUITECLOUD_EXE] = this._binaryName;
 			// this might modified but we need the user's hooks to take advantage of their current values
 			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
-			const skipPre = skipHooks === 'pre' || skipHooks === 'all';
+			const skipPre = runHooks === 'post' || runHooks === 'none';
 			this._dumpDebugFile(debugFilePath, undefined, 'FIRST', runInInteractiveMode, skipPre);
 			this._dumpDebugFile(debugFilePath, 'beforeExecuting', beforeExecutingOptions, runInInteractiveMode, skipPre);
 			const beforeExecutingOutput = skipPre
@@ -180,7 +181,7 @@ module.exports = class CommandActionExecutor {
 			// command execution
 			// src/commands/Command.js, run(inputParams) => execution flow for all commands
 			const actionResult = await command.run(overriddenArguments);
-			const skipPost = skipHooks === 'post' || skipHooks === 'all';
+			const skipPost = runHooks === 'pre' || runHooks === 'none';
 
 			if (context.runInInteractiveMode) {
 				// generate non-interactive equivalent
@@ -202,7 +203,7 @@ module.exports = class CommandActionExecutor {
 
 		} catch (error) {
 			let errorMessage = this._logGenericError(error);
-			const skipPostHooksCatch = skipHooks === 'post' || skipHooks === 'all';
+			const skipPostHooksCatch = runHooks === 'pre' || runHooks === 'none';
 			if (commandUserExtension && commandUserExtension.onError) {
 				// run onError(error) from suitecloud.config.js
 				this._dumpDebugFile(debugFilePath, 'onError', error, context.runInInteractiveMode, skipPostHooksCatch);

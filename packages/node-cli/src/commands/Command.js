@@ -25,7 +25,7 @@ const NEVER_PARAMS = {
 	'CUSTOMFLAG': 'customflag',
 	'CUSTOMOPTIONS': 'customoptions',
 	'DEBUG': 'debug',
-	'SKIPHOOKS': 'skiphooks'
+	'RUNHOOKS': 'runhooks'
 };
 
 /** @type {import('./Command')} */

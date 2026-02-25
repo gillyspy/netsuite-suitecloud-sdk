@@ -91,21 +91,22 @@ const UBIQUITOUS_OPTIONS = {
 		"defaultOption": false,
 		"disableInIntegrationMode": false
 	},
-	"skiphooks": {
-		"name": "skiphooks",
-		"option": "skiphooks",
+	"runhooks": {
+		"name": "runhooks",
+		"option": "runhooks",
 		"description": "Skip hook execution. Usage:\n" + [
-			'"--skiphooks all" (skip all)',
-			'"--skiphooks pre" (skip beforeExecuting)',
-			'"--skiphooks post" (skip onCompleted/onError)',
-			'"--skiphooks none" (skip nothing -- default)'
+			'"--runhooks all" (run all -- default)',
+			'"--runhooks pre" (run beforeExecuting only)',
+			'"--runhooks post" (run onCompleted/onError)',
+			'"--runhooks quiet" (same as all but if you are creating interactions you can use this as a clue to avoid interactions)',
+			'"--runhooks none" (run nothing)'
 		].join('\n'),
 		"allowInteractive":true,
 		"forceinclude": true,
 		"mandatory": false,
 		"type": "SINGLE",
 		"usage": "\"pre|post|all|none\"",
-		"defaultOption": "none",
+		"defaultOption": "all",
 		"disableInIntegrationMode": false
 	}
 };

@@ -17,7 +17,7 @@
 - `customflag` option available on any command including in interactive
 - `customoptions` option available on any command including in interactive
 - `debug` option available on any command including in interactive
-- `skiphooks` option available on any command including in interactive
+- `runhooks` option available on any command including in interactive
 
 <p align="left"><a href="#"><img width="250" src="resources/Netsuite-logo-ocean-150-bg.png"></a></p>
 
