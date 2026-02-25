@@ -256,10 +256,18 @@ module.exports = class CommandActionExecutor {
 			// apply defaults first
 			if (options.hasOwnProperty(optionId)){
 				if(optionMeta?.mandatory) {
-					if (optionMeta?.type === "FLAG") {
-						optionValues[optionId] = Boolean(optionMeta.defaultOption)
-					} else if(!["undefined"].includes( typeof optionMeta?.defaultOption)){
-						optionValues[optionId] = optionMeta.defaultOption;
+					switch(true){
+						case optionMeta?.type !== 'FLAG' && typeof optionMeta?.defaultOption === "boolean":
+							// don't set a value for boolean unless it is a FLAG type
+							break;
+						case (optionMeta?.type === "FLAG"):
+							optionValues[optionId] = Boolean(optionMeta.defaultOption)
+							break;
+						case !["undefined"].includes( typeof optionMeta?.defaultOption) && optionMeta?.type !== 'FLAG':
+								optionValues[optionId] = optionMeta.defaultOption;
+							break;
+						default:
+							break;
 					}
 				}
 			    if(args.hasOwnProperty(optionId)) {

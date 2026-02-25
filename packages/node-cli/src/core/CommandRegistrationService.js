@@ -65,11 +65,12 @@ module.exports = class CommandRegistrationService {
 
 	_addInteractiveCommandOptions(commandSetup,options){
 		const filteredOptions = Object.entries(options).filter(([key,o])=>{
-			return ['authid','project','config','debug','skiphooks'].includes(o.name);
+			return ['authid','project','config','debug','skiphooks','folder'].includes(o.name);
 		});
 		filteredOptions.push(['interactive',{
 			"name": "interactive",
 			"option": "interactive",
+			"alias": "i",
 			"description": "Be interactive",
 			"mandatory": true,
 			"type": "FLAG",

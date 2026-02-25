@@ -35,20 +35,31 @@ module.exports = class ListFilesInputHandler extends BaseInputHandler {
 		if (accountFileCabinetFolders.length === 0) {
 			throw NodeTranslationService.getMessage(ERRORS.NO_FOLDERS_FOUND);
 		}
-		const fileCabinetFolders = accountFileCabinetFolders.map((folderPath) => {
-			return {
-				name: folderPath,
-				value: folderPath,
-			};
-		});
 
+		const fileCabinetFolders = new Set();
+		fileCabinetFolders.add(SUITE_SCRIPTS_FOLDER);
+		let defaultValue = SUITE_SCRIPTS_FOLDER;
+		accountFileCabinetFolders.forEach((folderPath) => {
+			// only return folder that match the filter
+			if( folderPath === params.folder ) defaultValue = folderPath;
+			if(
+				(typeof params.folder === 'string' && folderPath.includes(params.folder)) ||
+				typeof params.folder !== 'string'
+			){
+				return fileCabinetFolders.add({
+					name: folderPath,
+					value: folderPath,
+				});
+			}
+		});
+		if( fileCabinetFolders.has(defaultValue)) fileCabinetFolders.delete(defaultValue);
 		return prompt([
 			{
 				type: CommandUtils.INQUIRER_TYPES.LIST,
 				name: this._commandMetadata.options.folder.name,
 				message: NodeTranslationService.getMessage(SELECT_FOLDER),
-				default: SUITE_SCRIPTS_FOLDER,
-				choices: fileCabinetFolders,
+				default: defaultValue,
+				choices: [...fileCabinetFolders],
 			},
 		]);
 	}
