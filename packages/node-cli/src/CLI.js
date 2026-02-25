@@ -157,7 +157,7 @@ module.exports = class CLI {
 				.option(
 					`${INTERACTIVE_ALIAS}, ${INTERACTIVE_OPTION}`,
 					NodeTranslationService.getMessage(INTERACTIVE_OPTION_DESCRIPTION),
-					this._validateInteractive(commandMetadataList[thirdArgument].options)
+					this._validateInteractive(commandMetadataList[thirdArgument]?.options)
 				)
 				.helpOption(`${HELP_ALIAS}, ${HELP_OPTION}`, NodeTranslationService.getMessage(COMMAND_OPTIONS.HELP))
 				.addHelpCommand(`${HELP_COMMAND} ${COMMAND_ALIAS}`, NodeTranslationService.getMessage(COMMAND_OPTIONS.HELP))
@@ -187,19 +187,21 @@ module.exports = class CLI {
 
 	_validateInteractive(additionalOptions) {
 		let additionalAllowed = 0;
-		const ubiquitousValuesThatAreInteractive = Object.values(UBIQUITOUS_OPTIONS)
-			.concat(Object.values(additionalOptions))
-			.filter((o)=>o.allowInteractive)
-			.map((o)=>({
-				name: o.name,
-				additionalAllowed: o.type === "SINGLE" ? 2 : 1
-			}))
-		process.argv.forEach((arg)=>{
-			const mactchingOption = ubiquitousValuesThatAreInteractive.find(
-				(o)=>(`--${o.name}` === arg)
-			);
-			additionalAllowed += mactchingOption?.additionalAllowed || 0;
-		});
+		if( additionalOptions) {
+			const ubiquitousValuesThatAreInteractive = Object.values(UBIQUITOUS_OPTIONS)
+				.concat(Object.values(additionalOptions))
+				.filter((o) => o.allowInteractive)
+				.map((o) => ({
+					name: o.name,
+					additionalAllowed: o.type === "SINGLE" ? 2 : 1
+				}))
+			process.argv.forEach((arg) => {
+				const mactchingOption = ubiquitousValuesThatAreInteractive.find(
+					(o) => (`--${o.name}` === arg)
+				);
+				additionalAllowed += mactchingOption?.additionalAllowed || 0;
+			});
+		}
 		return ()=> {
 			if (process.argv.length > (4 + additionalAllowed)) {
 				// There are more options apart from -i or --interactive
