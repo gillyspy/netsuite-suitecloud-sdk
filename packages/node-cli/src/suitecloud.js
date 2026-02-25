@@ -13,9 +13,16 @@ const CommandOptionsValidator = require('./core/CommandOptionsValidator');
 const CLIConfigurationService = require('./core/extensibility/CLIConfigurationService');
 const sdkPath = require('./core/sdksetup/SdkProperties').getSdkPath();
 const NodeConsoleLogger = require('./loggers/NodeConsoleLogger');
+const PACKAGE_FILE = `../package.json`;
 
 const executionPath = process.cwd();
 const commandsMetadataServiceSingleton = new CommandsMetadataService();
+const getBinaryName = ()=>{
+	const configFile = require(PACKAGE_FILE);
+	return Object.entries(configFile.bin || {}).flatMap(
+		(k,v)=>(String(v).endsWith('suitecloud.js')? [k]: [])
+	).shift() || process.argv[1];
+}
 
 const cliInstance = new CLI({
 	commandsMetadataService: commandsMetadataServiceSingleton,
@@ -26,7 +33,8 @@ const cliInstance = new CLI({
 		cliConfigurationService: new CLIConfigurationService(),
 		commandsMetadataService: commandsMetadataServiceSingleton,
 		log: NodeConsoleLogger,
-		sdkPath: sdkPath
+		sdkPath: sdkPath,
+		binaryName: getBinaryName()
 	}),
 });
 

@@ -32,6 +32,7 @@ module.exports = class CommandActionExecutor {
 		this._commandsMetadataService = dependencies.commandsMetadataService;
 		this._log = dependencies.log;
 		this._sdkPath = dependencies.sdkPath;
+		this._binaryName = dependencies.binaryName;
 
 		if (!dependencies.executionEnvironmentContext) {
 			this._executionEnvironmentContext = new ExecutionEnvironmentContext();
@@ -144,6 +145,7 @@ module.exports = class CommandActionExecutor {
 			process.env[ENV_VARS.SUITECLOUD_PROJECT_FOLDER] = projectFolder;
 			process.env[ENV_VARS.SUITECLOUD_PROJECT_PATH] = projectPath;
 			process.env[ENV_VARS.SUITECLOUD_PROJECT_ROOT] = this._executionPath;
+			process.env[ENV_VARS.SUITECLOUD_EXE] = this._binaryName;
 			// this might modified but we need the user's hooks to take advantage of their current values
 			process.env[ENV_VARS.SUITECLOUD_AUTHID] = authId;
 			const skipPre = skipHooks === 'pre' || skipHooks === 'all';

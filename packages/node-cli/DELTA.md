@@ -2,18 +2,27 @@
 
 - binary name is `sdf` (not `suitecloud`)
 - package name is `@suitegeezus/suitecloud-cli`
-- `package.json#configFile` can be used to set expected names of config files to hunt for
-- environment variables for AUTHID, PROJECTFOLDER, PROJECTPATH
-- `authid` option available on many commands
-- `project` option available on many commands (to find resource files)
-- `config` option available on many command (to be exact about config file to use)
-- `customflag` option available on any command
-- `customoptions` option available on any command
+- hunts for a config file in the directory tree
+  - `package.json#configFile` can be used to set expected names of config files to hunt for
+- environment variables while running:
+  - SUITECLOUD_AUTHID
+  - SUITECLOUD_PROJECT_FOLDER
+  - SUITECLOUD_PROJECT_PATH
+  - SUITECLOUD_PROJECT_ROOT
+  - SUITECLOUD_EXE
+- `authid` option available on any command including in interactive
+- `project` option available on any commands (to find resource files) including in interactive
+- `config` option available on any command (to be exact about config file to use) including in interactive
+- `noconfig` option available on any command including in interactive
+- `customflag` option available on any command including in interactive
+- `customoptions` option available on any command including in interactive
 - `debug` option available on any command including in interactive
+- `skiphooks` option available on any command including in interactive
 
 <p align="left"><a href="#"><img width="250" src="resources/Netsuite-logo-ocean-150-bg.png"></a></p>
 
-- It can coexist with the regular version. You can install both at the same time. But why.
+- It can coexist with the regular version. You can install both at the same time.
+  - But why.
 - They will share account credentials and the underlying SDK. They will reference the same `~/.suitecloud-sdk` resource folder. 
 - Example, They can use different config files and not conflict with each other within the same project.
 - By default, this uses `sdf.config.js`.
@@ -103,9 +112,7 @@ Note: this example does not require a config file
 | [`account:setup`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_89132630266.html)            | Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. It requires browser-based login to NetSuite.                                                                        |
 | [`account:setup:ci`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/article_81134826821.html)         | Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. It does not require browser-based login to NetSuite. This command is helpful for automated environments such as CI. |
 | `custom:hello`                                                                                                       | A sanity command to check configuration. You can use hooks but you should leave it ias it is.                                                                                                                                    |
-| `custom:pass`                                                                                                        | A passthrough command that does nothing. You can build hooks for it                                                                                                                                                              |
-| `custom:job`                                                                                                         | Run pre-configured commands such as running admindocs queries.  This also supports hooks                                                                                                                                         |
-| `custom:config`                                                                                                      | Show location and contents of config file |
+| `custom:hook`                                                                                                        | A passthrough command that does nothing. You can build hooks for it                                                                                                                                                              |
 | [`file:create`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_162810635242.html)             | Creates SuiteScript files in the selected folder using the correct template with SuiteScript modules injected.                                                                                                                   |
 | [`file:import`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_156041963273.html)             | Imports files from an account to your account customization project.                                                                                                                                                             |
 | [`file:list`](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_156042966488.html)               | Lists the files in the File Cabinet of your account.                                                                                                                                                                             |
@@ -149,7 +156,7 @@ sdf custom:config --show
 
 #### Project Folder & Project Root
 
-The projectFolder is not the location of the `sdf.config.js`. It can be anywhere on your file system, but typically it is the same directory or a subDirectory of the project. It can be overridden in some commands using the `--project` flag
+The projectFolder is not necessarily the location of the `sdf.config.js`. It can be anywhere on your file system, but typically it is the same directory or a subDirectory of the project. It can be overridden in some commands using the `--project` flag
 
 If the config (or command line override) specifies a value for `defaultProjectFolder` then that value is appended to the project root to determine the `projectFolder`. That location is expected to contain things such as:
 
@@ -162,8 +169,7 @@ If the config (or command line override) specifies a value for `defaultProjectFo
 many `sdf` commands can run without any config file. You may need to provide additional command line flags in lieu.
 
 There are some commands where a `manifest.xml` file or `deploy.xml` file is required in the discovered root, but the file isn't actually
-use. In this case you could use the hook to detect this and create a dummy file and then remove it onCompleted.
-TODO:  use `--forceManifest` which will create a temporary `manifest.xml` file and then remove it when done.
+used. In this case you could use the hook to detect this and create a dummy file and then remove it onCompleted.
 
 Ranked from top priority to bottom priority
 

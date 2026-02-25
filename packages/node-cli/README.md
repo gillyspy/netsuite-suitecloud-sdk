@@ -19,26 +19,21 @@ The following software is required to work with SuiteCloud CLI for Node.js:
 Read the full list of prerequisites in [SuiteCloud CLI for Node.js Installation Prerequisites](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_1558708810.html).
 
 ## Supported Versions
-To ensure that you get the latest features and bug fixes, you should use the latest version of the SuiteCloud CLI for Node.js available in NPM. 
+This is a fork of `@oracle/suitecloud-cli`. It supports older command lines but with a new binary `sdf`. 
 
-The following table shows the CLI versions currently available in NPM.
-
-| CLI Versions Available in NPM | 
-|:-----------------------------:|
-| 3.1.2 |
-| 3.1.1 |
+It is enhanced for easier customizing via hooks. See [./DELTA.md] for more
 
 
 ## Installation
 Since CLI for Node.js is a development tool, use a global instance to install it by running the following command:
 
 ```
-npm install -g @oracle/suitecloud-cli
+npm install -g @suitegeezus/suitecloud-cli
 ```
 When installing SuiteCloud CLI for Node.js via script, for instance in a CI environment, you can skip showing the license presented during the normal installation process by adding the --acceptSuiteCloudSDKLicense flag to the install script as shown below. Note that by adding the mentioned flag to the script, you confirm that you have read and accepted the Oracle Free Use Terms and Conditions license. See the [License](#license) section for details.
 
 ```
-npm install -g --acceptSuiteCloudSDKLicense @oracle/suitecloud-cli
+npm install -g --acceptSuiteCloudSDKLicense @suitegeezus/suitecloud-cli
 ```
 
 
