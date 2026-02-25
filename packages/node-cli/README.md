@@ -21,7 +21,7 @@ Read the full list of prerequisites in [SuiteCloud CLI for Node.js Installation 
 ## Supported Versions
 This is a fork of `@oracle/suitecloud-cli`. It supports older command lines but with a new binary `sdf`. 
 
-It is enhanced for easier customizing via hooks. See [./DELTA.md] for more
+It is enhanced for easier customizing via hooks. See [DELTA.md](./DELTA.md) for more
 
 
 ## Installation
