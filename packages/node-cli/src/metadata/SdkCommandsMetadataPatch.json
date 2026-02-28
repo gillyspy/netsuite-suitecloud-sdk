@@ -19,7 +19,7 @@
 		}
 	},
 	"account:setup:ci": {
-		"description": "Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. No browser-based login required.\nTo change the default auth ID later, run: suitecloud account:setup:ci --select [myAuthId].",
+		"description": "Sets up an account to use with SuiteCloud SDK and configures the default auth ID for the SuiteCloud project. No browser-based login required.\nTo change the default auth ID later, run: account:setup:ci --select [myAuthId].",
 		"options": {
 			"domain": {
 				"name": "domain",

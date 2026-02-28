@@ -20,7 +20,8 @@ const commandsMetadataServiceSingleton = new CommandsMetadataService();
 const getBinaryName = ()=>{
 	const configFile = require(PACKAGE_FILE);
 	return Object.entries(configFile.bin || {}).flatMap(
-		(k,v)=>(String(v).endsWith('suitecloud.js')? [k]: [])
+		// the main export file is still called suitecloud.js
+		([k,v])=>(String(v).endsWith('suitecloud.js')? [k]: [])
 	).shift() || process.argv[1];
 }
 

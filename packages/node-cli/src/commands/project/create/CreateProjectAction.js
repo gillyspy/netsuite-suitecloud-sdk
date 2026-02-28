@@ -4,6 +4,8 @@
  */
 'use strict';
 
+const PACKAGE = require('../../../../package.json');
+const [sdfconfig] = Array.isArray( PACKAGE.configFile ) ? PACKAGE.configFile: ['sdf.config'];
 const CreateProjectActionResult = require('../../../services/actionresult/CreateProjectActionResult');
 const BaseAction = require('../../base/BaseAction');
 const TemplateKeys = require('../../../templates/TemplateKeys');
@@ -45,11 +47,11 @@ const UNIT_TEST_TEST_FOLDER = '__tests__';
 
 const CLI_CONFIG_TEMPLATE_KEY = 'cliconfig';
 const GITIGNORE_TEMPLATE_KEY = 'gitignore';
-const CLI_CONFIG_FILENAME = 'suitecloud.config';
+const CLI_CONFIG_FILENAME = sdfconfig;
 const GITIGNORE_FILENAME = '.gitignore';
 const CLI_CONFIG_EXTENSION = 'js';
 const UNIT_TEST_CLI_CONFIG_TEMPLATE_KEY = 'cliconfig';
-const UNIT_TEST_CLI_CONFIG_FILENAME = 'suitecloud.config';
+const UNIT_TEST_CLI_CONFIG_FILENAME = sdfconfig;
 const UNIT_TEST_CLI_CONFIG_EXTENSION = 'js';
 const UNIT_TEST_PACKAGE_TEMPLATE_KEY = 'packagejson';
 const UNIT_TEST_PACKAGE_FILENAME = 'package';
