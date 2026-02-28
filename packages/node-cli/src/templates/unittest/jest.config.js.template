@@ -1,7 +1,58 @@
 const SuiteCloudJestConfiguration = require("@oracle/suitecloud-unit-testing/jest-configuration/SuiteCloudJestConfiguration");
 const cliConfig = require("./suitecloud.config");
 
-module.exports = SuiteCloudJestConfiguration.build({
+const config = SuiteCloudJestConfiguration.build({
 	projectFolder: cliConfig.defaultProjectFolder,
 	projectType: {{projectType}},
 });
+const SuiteScriptsRegex = /^\/?\bSuiteScripts\b\/(.*)(.js)?$/;
+config.rootDir = __dirname;
+Object.assign(
+    config.moduleNameMapper,
+    {[SuiteScriptsRegex.source]: `<rootDir>/${cliConfig.defaultProjectFolder}/FileCabinet/SuiteScripts/$1.js`}
+);
+
+const logStub = (title, details) => {
+    // console.log({title, details});
+};
+config.globals = {
+    log: {
+        debug: logStub,
+        audit: logStub,
+        emergency: logStub,
+        error: logStub
+    },
+    // mock this via globals.util. e.g. jest.mock(global.util);
+    util: {
+        each: ()=>{},
+        extend: ()=>{},
+        deepExtend: ()=>{},
+        isObject: ()=>{},
+        isFunction: ()=>{},
+        isAsyncFunction: ()=>{},
+        isArray: ()=>{},
+        isBoolean: ()=>{},
+        isString: ()=>{},
+        isNumber: ()=>{},
+        isNumberOrString: ()=>{},
+        isDate: ()=>{},
+        isPlainDate: ()=>{},
+        isPlainDateTime: ()=>{},
+        isPlainTime: ()=>{},
+        isTemporal: ()=>{},
+        isRegExp: ()=>{},
+        isError: ()=>{},
+        isThenable: ()=>{},
+        trim: ()=>{},
+        isDuration: ()=>{},
+        isPlainYearMonth: ()=>{},
+        isInstant: ()=>{},
+        isBigInt: ()=>{},
+        isDecimal: ()=>{},
+        isMoney: ()=>{},
+        isPhoneNumber: ()=>{},
+        nanoTime: ()=>{}
+    }
+};
+
+module.exports = config;
